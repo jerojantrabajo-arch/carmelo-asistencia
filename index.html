@@ -6,98 +6,75 @@
 <title>Asistencia — El Carmelo de María</title>
 <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { font-family: Arial, sans-serif; background:#7B3F00; min-height:100vh; display:flex; flex-direction:column; }
-
-/* HEADER */
-.header { background:#5A2D00; padding:12px 16px; display:flex; align-items:center; gap:12px; }
-.header-logo { width:44px; height:44px; background:#D2691E; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
-.header-info h1 { color:#FFF8F0; font-size:15px; font-weight:bold; line-height:1.2; }
-.header-info p  { color:#F4D3B8; font-size:12px; }
-
-/* MAIN */
-.main { flex:1; display:flex; flex-direction:column; padding:12px; gap:10px; }
-
-/* CAMARA */
-.camara-card { background:#FFF8F0; border-radius:12px; overflow:hidden; position:relative; }
-.camara-titulo { background:#D2691E; color:white; font-size:13px; font-weight:bold; padding:8px 12px; display:flex; align-items:center; gap:8px; }
-.camara-body { position:relative; background:#000; }
-#video { width:100%; display:block; max-height:220px; object-fit:cover; }
-#canvas-qr { display:none; }
-.scan-overlay { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:160px; height:160px; border:3px solid #D2691E; border-radius:8px; box-shadow:0 0 0 2000px rgba(0,0,0,0.4); pointer-events:none; }
-.scan-line { position:absolute; top:0; left:0; width:100%; height:3px; background:#D2691E; animation:scan 2s linear infinite; }
-@keyframes scan { 0%{top:0} 100%{top:calc(100% - 3px)} }
-.camara-msg { text-align:center; padding:8px; font-size:12px; color:#7B3F00; background:#F4D3B8; }
-
-/* MODO MANUAL */
-.manual-card { background:#FFF8F0; border-radius:12px; overflow:hidden; }
-.manual-titulo { background:#C68642; color:white; font-size:13px; font-weight:bold; padding:8px 12px; }
-.manual-body { padding:10px; display:flex; gap:8px; }
-#input-id { flex:1; padding:10px; border:2px solid #C68642; border-radius:8px; font-size:16px; font-family:Arial; color:#3A1800; }
-#input-id:focus { outline:none; border-color:#7B3F00; }
-#btn-enviar-manual { background:#7B3F00; color:white; border:none; border-radius:8px; padding:10px 16px; font-size:14px; font-weight:bold; cursor:pointer; }
-#btn-enviar-manual:active { background:#5A2D00; }
-
-/* ESTADO */
-.estado-card { border-radius:12px; overflow:hidden; transition:all 0.3s; }
-.estado-card.esperando { background:#FFF8F0; }
-.estado-card.procesando { background:#FFF3CD; }
-.estado-card.exito-entrada { background:#D4EDDA; }
-.estado-card.exito-salida { background:#D0E3F5; }
-.estado-card.error { background:#FDECEA; }
-
-.estado-header { padding:10px 14px; display:flex; align-items:center; gap:10px; }
-.estado-icono { font-size:28px; line-height:1; }
-.estado-texto h2 { font-size:16px; font-weight:bold; }
-.estado-texto p  { font-size:13px; margin-top:2px; }
-
-.estado-card.esperando .estado-texto h2 { color:#7B3F00; }
-.estado-card.esperando .estado-texto p  { color:#C68642; }
-.estado-card.procesando .estado-texto h2 { color:#856404; }
-.estado-card.procesando .estado-texto p  { color:#856404; }
-.estado-card.exito-entrada .estado-texto h2 { color:#1E6B2E; }
-.estado-card.exito-entrada .estado-texto p  { color:#2E7D32; }
-.estado-card.exito-salida .estado-texto h2 { color:#0C447C; }
-.estado-card.exito-salida .estado-texto p  { color:#185FA5; }
-.estado-card.error .estado-texto h2 { color:#9B1C1C; }
-.estado-card.error .estado-texto p  { color:#A32D2D; }
-
-.alumno-info { background:rgba(255,255,255,0.6); margin:0 10px 10px; border-radius:8px; padding:8px 12px; font-size:13px; }
-.alumno-info strong { font-size:15px; display:block; margin-bottom:2px; }
-
-/* HISTORIAL */
-.historial-card { background:#FFF8F0; border-radius:12px; overflow:hidden; }
-.historial-titulo { background:#7B3F00; color:white; font-size:13px; font-weight:bold; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; }
-.historial-titulo button { background:transparent; border:1px solid rgba(255,255,255,0.4); color:white; border-radius:6px; padding:3px 8px; font-size:11px; cursor:pointer; }
-#lista-historial { max-height:150px; overflow-y:auto; }
-.historial-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid #F4D3B8; font-size:12px; }
-.historial-item:last-child { border-bottom:none; }
-.historial-badge { font-size:16px; }
-.historial-nombre { flex:1; color:#3A1800; font-weight:bold; }
-.historial-hora { color:#C68642; }
-.historial-tipo { font-size:11px; padding:2px 6px; border-radius:4px; }
-.tipo-entrada { background:#D4EDDA; color:#1E6B2E; }
-.tipo-salida   { background:#D0E3F5; color:#0C447C; }
-.historial-vacio { padding:16px; text-align:center; color:#C68642; font-size:13px; }
-
-/* CONTADOR */
-.contador-bar { background:#5A2D00; border-radius:8px; padding:8px 14px; display:flex; justify-content:space-around; }
-.contador-item { text-align:center; }
-.contador-num { color:#F4D3B8; font-size:20px; font-weight:bold; }
-.contador-lbl { color:#C68642; font-size:10px; }
-
-/* BTN CAMARA */
-.btn-camara-toggle { background:#D2691E; color:white; border:none; border-radius:8px; padding:8px 14px; font-size:13px; cursor:pointer; width:100%; margin-top:6px; }
-
-/* SPINNER */
-.spinner { display:inline-block; width:18px; height:18px; border:3px solid rgba(133,100,4,0.3); border-top-color:#856404; border-radius:50%; animation:spin 0.8s linear infinite; vertical-align:middle; }
-@keyframes spin { to{transform:rotate(360deg)} }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:Arial,sans-serif;background:#7B3F00;min-height:100vh;display:flex;flex-direction:column}
+.header{background:#5A2D00;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.header-logo{width:44px;height:44px;background:#D2691E;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.header-info h1{color:#FFF8F0;font-size:15px;font-weight:bold;line-height:1.2}
+.header-info p{color:#F4D3B8;font-size:12px}
+.main{flex:1;display:flex;flex-direction:column;padding:12px;gap:10px}
+.camara-card{background:#FFF8F0;border-radius:12px;overflow:hidden}
+.camara-titulo{background:#D2691E;color:white;font-size:13px;font-weight:bold;padding:8px 12px}
+.camara-body{position:relative;background:#000}
+#video{width:100%;display:block;max-height:220px;object-fit:cover}
+#canvas-qr{display:none}
+.scan-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;border:3px solid #D2691E;border-radius:8px;box-shadow:0 0 0 2000px rgba(0,0,0,0.4);pointer-events:none}
+.scan-line{position:absolute;top:0;left:0;width:100%;height:3px;background:#D2691E;animation:scan 2s linear infinite}
+@keyframes scan{0%{top:0}100%{top:calc(100% - 3px)}}
+.camara-msg{text-align:center;padding:8px;font-size:12px;color:#7B3F00;background:#F4D3B8}
+.manual-card{background:#FFF8F0;border-radius:12px;overflow:hidden}
+.manual-titulo{background:#C68642;color:white;font-size:13px;font-weight:bold;padding:8px 12px}
+.manual-body{padding:10px;display:flex;gap:8px}
+#input-id{flex:1;padding:10px;border:2px solid #C68642;border-radius:8px;font-size:16px;font-family:Arial;color:#3A1800}
+#input-id:focus{outline:none;border-color:#7B3F00}
+#btn-enviar-manual{background:#7B3F00;color:white;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:bold;cursor:pointer}
+.estado-card{border-radius:12px;overflow:hidden;transition:all 0.3s}
+.estado-card.esperando{background:#FFF8F0}
+.estado-card.procesando{background:#FFF3CD}
+.estado-card.exito-entrada{background:#D4EDDA}
+.estado-card.exito-salida{background:#D0E3F5}
+.estado-card.duplicado{background:#FFF3CD}
+.estado-card.error{background:#FDECEA}
+.estado-header{padding:10px 14px;display:flex;align-items:center;gap:10px}
+.estado-icono{font-size:28px;line-height:1}
+.estado-texto h2{font-size:16px;font-weight:bold}
+.estado-texto p{font-size:13px;margin-top:2px}
+.estado-card.esperando .estado-texto h2{color:#7B3F00}
+.estado-card.esperando .estado-texto p{color:#C68642}
+.estado-card.procesando .estado-texto h2{color:#856404}
+.estado-card.procesando .estado-texto p{color:#856404}
+.estado-card.exito-entrada .estado-texto h2{color:#1E6B2E}
+.estado-card.exito-entrada .estado-texto p{color:#2E7D32}
+.estado-card.exito-salida .estado-texto h2{color:#0C447C}
+.estado-card.exito-salida .estado-texto p{color:#185FA5}
+.estado-card.duplicado .estado-texto h2{color:#856404}
+.estado-card.duplicado .estado-texto p{color:#856404}
+.estado-card.error .estado-texto h2{color:#9B1C1C}
+.estado-card.error .estado-texto p{color:#A32D2D}
+.historial-card{background:#FFF8F0;border-radius:12px;overflow:hidden}
+.historial-titulo{background:#7B3F00;color:white;font-size:13px;font-weight:bold;padding:8px 12px;display:flex;justify-content:space-between;align-items:center}
+.historial-titulo button{background:transparent;border:1px solid rgba(255,255,255,0.4);color:white;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer}
+#lista-historial{max-height:150px;overflow-y:auto}
+.historial-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #F4D3B8;font-size:12px}
+.historial-item:last-child{border-bottom:none}
+.historial-nombre{flex:1;color:#3A1800;font-weight:bold}
+.historial-hora{color:#C68642}
+.historial-tipo{font-size:11px;padding:2px 6px;border-radius:4px}
+.tipo-entrada{background:#D4EDDA;color:#1E6B2E}
+.tipo-salida{background:#D0E3F5;color:#0C447C}
+.tipo-duplicado{background:#FFF3CD;color:#856404}
+.historial-vacio{padding:16px;text-align:center;color:#C68642;font-size:13px}
+.contador-bar{background:#5A2D00;border-radius:8px;padding:8px 14px;display:flex;justify-content:space-around}
+.contador-item{text-align:center}
+.contador-num{color:#F4D3B8;font-size:20px;font-weight:bold}
+.contador-lbl{color:#C68642;font-size:10px}
+.btn-camara-toggle{background:#D2691E;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;width:100%;margin-top:6px}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-logo">🏫</div>
+  <div class="header-logo">&#127««««</div>
   <div class="header-info">
     <h1>El Carmelo de María</h1>
     <p>Sistema de Asistencia v3.1 — Modo Kiosco</p>
@@ -106,7 +83,6 @@ body { font-family: Arial, sans-serif; background:#7B3F00; min-height:100vh; dis
 
 <div class="main">
 
-  <!-- CONTADOR -->
   <div class="contador-bar">
     <div class="contador-item">
       <div class="contador-num" id="cnt-entradas">0</div>
@@ -117,15 +93,14 @@ body { font-family: Arial, sans-serif; background:#7B3F00; min-height:100vh; dis
       <div class="contador-lbl">Salidas</div>
     </div>
     <div class="contador-item">
-      <div class="contador-num" id="cnt-total">0</div>
-      <div class="contador-lbl">Total hoy</div>
+      <div class="contador-num" id="cnt-duplicados">0</div>
+      <div class="contador-lbl">Ya registrados</div>
     </div>
   </div>
 
-  <!-- ESTADO ACTUAL -->
   <div class="estado-card esperando" id="estado-card">
     <div class="estado-header">
-      <div class="estado-icono" id="estado-icono">📷</div>
+      <div class="estado-icono" id="estado-icono">&#128247;</div>
       <div class="estado-texto">
         <h2 id="estado-titulo">Listo para escanear</h2>
         <p id="estado-subtitulo">Acerque el código QR del alumno</p>
@@ -133,11 +108,8 @@ body { font-family: Arial, sans-serif; background:#7B3F00; min-height:100vh; dis
     </div>
   </div>
 
-  <!-- CÁMARA -->
   <div class="camara-card" id="camara-card">
-    <div class="camara-titulo">
-      📷 Escáner de cámara
-    </div>
+    <div class="camara-titulo">&#128247; Escáner de cámara</div>
     <div class="camara-body">
       <video id="video" playsinline autoplay muted></video>
       <canvas id="canvas-qr"></canvas>
@@ -146,23 +118,22 @@ body { font-family: Arial, sans-serif; background:#7B3F00; min-height:100vh; dis
       </div>
     </div>
     <div class="camara-msg" id="camara-msg">Iniciando cámara...</div>
-    <button class="btn-camara-toggle" id="btn-camara" onclick="toggleCamara()">⏸ Pausar cámara</button>
+    <button class="btn-camara-toggle" id="btn-camara" onclick="toggleCamara()">&#9208; Pausar cámara</button>
   </div>
 
-  <!-- MODO MANUAL (lector externo o teclado) -->
   <div class="manual-card">
-    <div class="manual-titulo">⌨️ Ingreso manual / lector externo</div>
+    <div class="manual-titulo">&#9000; Ingreso manual / lector externo</div>
     <div class="manual-body">
-      <input type="text" id="input-id" placeholder="DNI del alumno" autocomplete="off"
-             inputmode="numeric" onkeydown="if(event.key==='Enter')procesarManual()">
+      <input type="text" id="input-id" placeholder="DNI del alumno"
+             autocomplete="off" inputmode="numeric"
+             onkeydown="if(event.key==='Enter')procesarManual()">
       <button id="btn-enviar-manual" onclick="procesarManual()">Enviar</button>
     </div>
   </div>
 
-  <!-- HISTORIAL -->
   <div class="historial-card">
     <div class="historial-titulo">
-      📋 Últimos registros
+      &#128203; Últimos registros
       <button onclick="limpiarHistorial()">Limpiar</button>
     </div>
     <div id="lista-historial">
@@ -173,46 +144,48 @@ body { font-family: Arial, sans-serif; background:#7B3F00; min-height:100vh; dis
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  CONFIGURACIÓN — CAMBIAR ESTAS URLS
-// ══════════════════════════════════════════════════════
-var FORM_ID   = "1FAIpQLSdziUIaNrpGb3aS4XE9O-JaiJQRZ6yUniuDxxM0vz5zISI70g";
-var ENTRY_ID  = "entry.582603348";
-var ENTRY_MOT = "entry.1889062583";
-var FORM_URL  = "https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse";
+// ══════════════════════════════════════════════════
+//  CONFIGURACION — ACTUALIZAR APPS_SCRIPT_URL
+// ══════════════════════════════════════════════════
+var FORM_ID         = "1FAIpQLSdziUIaNrpGb3aS4XE9O-JaiJQRZ6yUniuDxxM0vz5zISI70g";
+var ENTRY_ID        = "entry.582603348";
+var ENTRY_MOT       = "entry.1889062583";
+var FORM_URL        = "https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse";
+var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyd4ocOPFOVQOL1SdFz-cEht7e3nMYOTBdEzg5A6MS8MdX2Y13ke0sLgaraV5ZrftRv4A/exec";
 
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  ESTADO GLOBAL
-// ══════════════════════════════════════════════════════
-var procesando    = false;
-var ultimoId      = "";
-var ultimoTiempo  = 0;
-var camaraActiva  = false;
-var videoStream   = null;
-var scanInterval  = null;
-var historial     = [];
-var cntEntradas   = 0;
-var cntSalidas    = 0;
+// ══════════════════════════════════════════════════
+var procesando   = false;
+var ultimoId     = "";
+var ultimoTiempo = 0;
+var camaraActiva = false;
+var videoStream  = null;
+var scanInterval = null;
+var historial    = [];
+var cntEntradas  = 0;
+var cntSalidas   = 0;
+var cntDuplic    = 0;
 
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  INICIALIZAR
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
 window.onload = function() {
   iniciarCamara();
   document.getElementById("input-id").focus();
 };
 
-// ══════════════════════════════════════════════════════
-//  CÁMARA Y ESCÁNER QR
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+//  CAMARA
+// ══════════════════════════════════════════════════
 function iniciarCamara() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    document.getElementById("camara-msg").textContent = "Cámara no disponible — usar ingreso manual";
+    document.getElementById("camara-msg").textContent = "Cámara no disponible";
     document.getElementById("btn-camara").style.display = "none";
     return;
   }
   navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "environment", width:{ideal:640}, height:{ideal:480} }
+    video:{facingMode:"environment",width:{ideal:640},height:{ideal:480}}
   }).then(function(stream) {
     videoStream = stream;
     var video = document.getElementById("video");
@@ -220,9 +193,8 @@ function iniciarCamara() {
     video.play();
     camaraActiva = true;
     document.getElementById("camara-msg").textContent = "Encuadre el QR en el recuadro naranja";
-    document.getElementById("btn-camara").textContent = "⏸ Pausar cámara";
-    scanInterval = setInterval(escanearFrame, 300);
-  }).catch(function(err) {
+    scanInterval = setInterval(escanearFrame, 150);
+  }).catch(function() {
     document.getElementById("camara-msg").textContent = "Sin acceso a cámara — usar ingreso manual";
     document.getElementById("btn-camara").style.display = "none";
   });
@@ -230,15 +202,15 @@ function iniciarCamara() {
 
 function escanearFrame() {
   if (procesando) return;
-  var video  = document.getElementById("video");
+  var video = document.getElementById("video");
   var canvas = document.getElementById("canvas-qr");
   if (!video.readyState || video.readyState < 2) return;
   canvas.width  = video.videoWidth;
   canvas.height = video.videoHeight;
-  var ctx = canvas.getContext("2d");
+  var ctx = canvas.getContext("2d", {willReadFrequently:true});
   ctx.drawImage(video, 0, 0);
   var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  var code = jsQR(imageData.data, imageData.width, imageData.height, {inversionAttempts:"dontInvert"});
+  var code = jsQR(imageData.data, imageData.width, imageData.height, {inversionAttempts:"attemptBoth"});
   if (code && code.data) {
     var id = extraerIdDeURL(code.data);
     if (id) procesarId(id, "camara");
@@ -246,10 +218,8 @@ function escanearFrame() {
 }
 
 function extraerIdDeURL(url) {
-  // Extraer entry.582603348=XXXXX de la URL del QR
   var match = url.match(/entry\.582603348=([^&]+)/);
   if (match) return decodeURIComponent(match[1]).trim().toUpperCase();
-  // Si es solo un ID directo (lector externo)
   if (/^\d{6,12}$/.test(url.trim())) return url.trim().toUpperCase();
   return null;
 }
@@ -259,16 +229,16 @@ function toggleCamara() {
     clearInterval(scanInterval);
     if (videoStream) videoStream.getTracks().forEach(function(t){t.stop();});
     camaraActiva = false;
-    document.getElementById("btn-camara").textContent = "▶ Activar cámara";
+    document.getElementById("btn-camara").textContent = "Activar cámara";
     document.getElementById("camara-msg").textContent = "Cámara pausada";
   } else {
     iniciarCamara();
   }
 }
 
-// ══════════════════════════════════════════════════════
-//  PROCESAR INGRESO MANUAL
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+//  INGRESO MANUAL
+// ══════════════════════════════════════════════════
 function procesarManual() {
   var id = document.getElementById("input-id").value.trim().toUpperCase();
   if (!id) return;
@@ -276,23 +246,54 @@ function procesarManual() {
   procesarId(id, "manual");
 }
 
-// ══════════════════════════════════════════════════════
-//  LÓGICA PRINCIPAL DE PROCESAMIENTO
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+//  PROCESAMIENTO PRINCIPAL
+// ══════════════════════════════════════════════════
 function procesarId(id, fuente) {
   var ahora = Date.now();
-
-  // Anti-duplicado: mismo ID en < 5 segundos
   if (id === ultimoId && (ahora - ultimoTiempo) < 5000) return;
-
   if (procesando) return;
   procesando   = true;
   ultimoId     = id;
   ultimoTiempo = ahora;
 
-  mostrarEstado("procesando", "⏳", "Registrando...", "Enviando al sistema — espere");
+  mostrarEstado("procesando", "...", "Verificando...", "Consultando estado del alumno");
 
-  // Enviar al Google Form
+  // Consultar estado actual en Apps Script
+  fetch(APPS_SCRIPT_URL + "?accion=estado&id=" + encodeURIComponent(id))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+
+      // Ya tiene entrada Y salida hoy — bloquear
+      if (data.estado === "COMPLETO") {
+        cntDuplic++;
+        document.getElementById("cnt-duplicados").textContent = cntDuplic;
+        mostrarEstado("duplicado", "=",
+          "Ya registrado hoy",
+          (data.nombre || id) + " ya tiene entrada y salida");
+        agregarHistorial(id, data.nombre || id, "YA REGISTRADO");
+        setTimeout(function() {
+          resetearEstado();
+          procesando = false;
+          document.getElementById("input-id").focus();
+        }, 3000);
+        return;
+      }
+
+      var tipoSiguiente = (data.estado === "TIENE_ENTRADA") ? "SALIDA" : "ENTRADA";
+      mostrarEstado("procesando", "...",
+        tipoSiguiente + " — " + (data.nombre || id),
+        "Enviando al sistema...");
+
+      enviarFormulario(id, data, tipoSiguiente);
+    })
+    .catch(function() {
+      // Sin conexion a Apps Script — enviar directo al formulario
+      enviarFormulario(id, {nombre:id, grado:"", nivel:""}, "ENTRADA");
+    });
+}
+
+function enviarFormulario(id, data, tipo) {
   var params = ENTRY_ID + "=" + encodeURIComponent(id) +
                "&" + ENTRY_MOT + "=NORMAL";
 
@@ -302,62 +303,58 @@ function procesarId(id, fuente) {
     headers: {"Content-Type":"application/x-www-form-urlencoded"},
     body   : params
   }).then(function() {
-    // Google Forms siempre devuelve opaque con no-cors — asumir éxito
-    registroExitoso(id);
-  }).catch(function(err) {
-    mostrarEstado("error", "✗", "Error de conexión", "Verifique el internet e intente nuevamente");
-    setTimeout(resetearEstado, 3000);
-    procesando = false;
+    var hora = new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
+    var nombre = data.nombre || id;
+    var grado  = data.grado  || "";
+
+    if (tipo === "ENTRADA") {
+      cntEntradas++;
+      document.getElementById("cnt-entradas").textContent = cntEntradas;
+      mostrarEstado("exito-entrada", "v", "ENTRADA registrada", nombre + "  " + hora);
+    } else {
+      cntSalidas++;
+      document.getElementById("cnt-salidas").textContent = cntSalidas;
+      mostrarEstado("exito-salida", "<", "SALIDA registrada", nombre + "  " + hora);
+    }
+
+    agregarHistorial(id, nombre, tipo);
+
+    setTimeout(function() {
+      resetearEstado();
+      procesando = false;
+      document.getElementById("input-id").focus();
+    }, 2500);
+
+  }).catch(function() {
+    mostrarEstado("error", "x", "Error de conexión", "Verifique el internet");
+    setTimeout(function() {
+      resetearEstado();
+      procesando = false;
+    }, 3000);
   });
 }
 
-function registroExitoso(id) {
-  var hora  = new Date().toLocaleTimeString("es-PE", {hour:"2-digit",minute:"2-digit"});
-  var fecha = new Date().toLocaleDateString("es-PE");
-
-  // Determinar si es entrada o salida basado en historial del día
-  var registrosHoy = historial.filter(function(r){ return r.id === id && r.fecha === fecha; });
-  var tipo = (registrosHoy.length % 2 === 0) ? "ENTRADA" : "SALIDA";
-
-  if (tipo === "ENTRADA") {
-    cntEntradas++;
-    mostrarEstado("exito-entrada", "✓", "ENTRADA registrada", hora + " — " + id);
-  } else {
-    cntSalidas++;
-    mostrarEstado("exito-salida", "⇦", "SALIDA registrada", hora + " — " + id);
-  }
-
-  // Actualizar contadores
-  document.getElementById("cnt-entradas").textContent = cntEntradas;
-  document.getElementById("cnt-salidas").textContent  = cntSalidas;
-  document.getElementById("cnt-total").textContent    = cntEntradas + cntSalidas;
-
-  // Agregar al historial
-  historial.unshift({id:id, tipo:tipo, hora:hora, fecha:fecha});
-  if (historial.length > 20) historial.pop();
-  renderHistorial();
-
-  // Volver al estado inicial después de 2.5 segundos
-  setTimeout(function() {
-    resetearEstado();
-    procesando = false;
-    document.getElementById("input-id").focus();
-  }, 2500);
-}
-
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  UI
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
 function mostrarEstado(clase, icono, titulo, subtitulo) {
   var card = document.getElementById("estado-card");
   card.className = "estado-card " + clase;
-  document.getElementById("estado-icono").textContent   = icono;
-  document.getElementById("estado-titulo").textContent  = titulo;
+  document.getElementById("estado-icono").textContent    = icono;
+  document.getElementById("estado-titulo").textContent   = titulo;
   document.getElementById("estado-subtitulo").textContent = subtitulo;
 }
 
 function resetearEstado() {
-  mostrarEstado("esperando", "📷", "Listo para escanear", "Acerque el código QR del alumno");
+  mostrarEstado("esperando", "[ ]", "Listo para escanear", "Acerque el código QR del alumno");
+}
+
+function agregarHistorial(id, nombre, tipo) {
+  var hora  = new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
+  var fecha = new Date().toLocaleDateString("es-PE");
+  historial.unshift({id:id, nombre:nombre, tipo:tipo, hora:hora, fecha:fecha});
+  if (historial.length > 20) historial.pop();
+  renderHistorial();
 }
 
 function renderHistorial() {
@@ -367,24 +364,24 @@ function renderHistorial() {
     return;
   }
   lista.innerHTML = historial.map(function(r) {
-    var icono = r.tipo === "ENTRADA" ? "↗" : "↙";
-    var clase = r.tipo === "ENTRADA" ? "tipo-entrada" : "tipo-salida";
+    var clase = r.tipo === "ENTRADA" ? "tipo-entrada" :
+                r.tipo === "SALIDA"  ? "tipo-salida"  : "tipo-duplicado";
     return '<div class="historial-item">' +
-      '<span class="historial-badge">' + icono + '</span>' +
-      '<span class="historial-nombre">' + r.id + '</span>' +
-      '<span class="historial-hora">' + r.hora + '</span>' +
-      '<span class="historial-tipo ' + clase + '">' + r.tipo + '</span>' +
+      '<span class="historial-nombre">' + (r.nombre||r.id) + '</span>' +
+      '<span class="historial-hora">'   + r.hora  + '</span>' +
+      '<span class="historial-tipo '    + clase + '">' + r.tipo + '</span>' +
       '</div>';
   }).join("");
 }
 
 function limpiarHistorial() {
-  historial    = [];
-  cntEntradas  = 0;
-  cntSalidas   = 0;
-  document.getElementById("cnt-entradas").textContent = 0;
-  document.getElementById("cnt-salidas").textContent  = 0;
-  document.getElementById("cnt-total").textContent    = 0;
+  historial   = [];
+  cntEntradas = 0;
+  cntSalidas  = 0;
+  cntDuplic   = 0;
+  document.getElementById("cnt-entradas").textContent   = 0;
+  document.getElementById("cnt-salidas").textContent    = 0;
+  document.getElementById("cnt-duplicados").textContent = 0;
   renderHistorial();
 }
 </script>
