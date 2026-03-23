@@ -184,10 +184,23 @@ function getRegistro(id) {
 //  INIT
 // ══════════════════════════════════════
 window.onload = function() {
+  limpiarSiDiaAnterior();
   cargarRegistros();
   iniciarCamara();
   document.getElementById("input-id").focus();
 };
+
+function limpiarSiDiaAnterior() {
+  try {
+    var ultimoDia = localStorage.getItem("ultimo_dia");
+    var hoy = fechaHoy();
+    if (ultimoDia !== hoy) {
+      // Es un dia nuevo — limpiar todos los registros locales
+      localStorage.clear();
+      localStorage.setItem("ultimo_dia", hoy);
+    }
+  } catch(e) {}
+}
 
 // ══════════════════════════════════════
 //  CAMARA
