@@ -157,7 +157,17 @@ function guardarRegistros() {
     localStorage.setItem("registros_" + fechaHoy(), JSON.stringify(registros));
   } catch(e) {}
 }
-
+  
+function verificarTiempoMinimo(id) {
+  try {
+    var key  = "entrada_ts_" + id + "_" + fechaHoy();
+    var ts   = localStorage.getItem(key);
+    if (!ts) return 999;
+    var diff = (Date.now() - parseInt(ts)) / 60000;
+    return Math.floor(diff);
+  } catch(e) { return 999; }
+}
+  
 function fechaHoy() {
   return new Date().toLocaleDateString("es-PE");
 }
@@ -294,15 +304,36 @@ function procesarId(id) {
         return;
       }
       if (data.estado === "TIENE_ENTRADA") {
-        reg.e = Math.max(reg.e, 1);
-        guardarRegistros();
-        tipoEsperado = "SALIDA";
-      }
-      enviar(id, data.nombre || id, data.grado || "", tipoEsperado);
+    reg.e = Math.max(reg.e, 1);
+    guardarRegistros();
+    tipoEsperado = "SALIDA";
+  }
+  // Verificar tiempo minimo antes de registrar salida
+  if (tipoEsperado === "SALIDA") {
+    var minutos = verificarTiempoMinimo(id);
+    if (minutos < 30) {
+      mostrarEstado("duplicado", "=",
+        "Muy pronto para salida",
+        "Faltan " + (30 - minutos) + " min para poder registrar salida");
+      setTimeout(function(){ resetear(); procesando=false; document.getElementById("input-id").focus(); }, 3000);
+      return;
+    }
+  }
+  enviar(id, data.nombre || id, data.grado || "", tipoEsperado);
     })
     .catch(function() {
       // Sin conexion a AS — usar solo estado local
-      enviar(id, id, "", tipoEsperado);
+    if (tipoEsperado === "SALIDA") {
+      var minLocal = verificarTiempoMinimo(id);
+      if (minLocal < 30) {
+        mostrarEstado("duplicado", "=",
+          "Muy pronto para salida",
+          "Faltan " + (30 - minLocal) + " min para poder registrar salida");
+        setTimeout(function(){ resetear(); procesando=false; document.getElementById("input-id").focus(); }, 3000);
+        return;
+      }
+    }
+    enviar(id, id, "", tipoEsperado);
     });
 }
 
@@ -321,6 +352,10 @@ function enviar(id, nombre, grado, tipo) {
 
     if (tipo === "ENTRADA") {
       reg.e++;
+      // Guardar timestamp de la entrada para calcular tiempo minimo de salida
+      try {
+        localStorage.setItem("entrada_ts_" + id + "_" + fechaHoy(), Date.now().toString());
+      } catch(e) {}
       cE++; document.getElementById("c-e").textContent = cE;
       mostrarEstado("entrada", "->", "ENTRADA: " + nombre, hora);
     } else {
