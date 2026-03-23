@@ -19,7 +19,7 @@ body{font-family:Arial,sans-serif;background:#7B3F00;min-height:100vh;display:fl
 #video{width:100%;display:block;max-height:220px;object-fit:cover}
 #canvas-qr{display:none}
 .scan-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;border:3px solid #D2691E;border-radius:8px;box-shadow:0 0 0 2000px rgba(0,0,0,0.4);pointer-events:none}
-.scan-line{position:absolute;top:0;left:0;width:100%;height:3px;background:#D2691E;animation:scan 2s linear infinite}
+.scan-line{position:absolute;top:0;left:0;width:100%;height:3px;background:#D2691E;animation:scan 0.8s linear infinite}
 @keyframes scan{0%{top:0}100%{top:calc(100% - 3px)}}
 .camara-msg{text-align:center;padding:8px;font-size:12px;color:#7B3F00;background:#F4D3B8}
 .manual-card{background:#FFF8F0;border-radius:12px;overflow:hidden}
@@ -211,7 +211,7 @@ function iniciarCamara() {
     v.play();
     camaraActiva = true;
     document.getElementById("cam-msg").textContent = "Encuadre el QR en el recuadro naranja";
-    scanInterval = setInterval(escanearFrame, 200);
+    scanInterval = setInterval(escanearFrame, 80);
   }).catch(function() {
     document.getElementById("cam-msg").textContent = "Sin acceso a camara — usar ingreso manual";
     document.getElementById("btn-cam").style.display = "none";
@@ -223,10 +223,22 @@ function escanearFrame() {
   var v = document.getElementById("video");
   var c = document.getElementById("canvas-qr");
   if (!v.readyState || v.readyState < 2 || !v.videoWidth) return;
-  c.width = v.videoWidth; c.height = v.videoHeight;
+
+  var vw = v.videoWidth;
+  var vh = v.videoHeight;
+
+  // Procesar solo la region central (donde esta el recuadro naranja)
+  var tam  = Math.min(vw, vh) * 0.7;
+  var sx   = (vw - tam) / 2;
+  var sy   = (vh - tam) / 2;
+
+  c.width  = tam;
+  c.height = tam;
+
   var ctx = c.getContext("2d", {willReadFrequently:true});
-  ctx.drawImage(v, 0, 0);
-  var img  = ctx.getImageData(0, 0, c.width, c.height);
+  ctx.drawImage(v, sx, sy, tam, tam, 0, 0, tam, tam);
+
+  var img  = ctx.getImageData(0, 0, tam, tam);
   var code = jsQR(img.data, img.width, img.height, {inversionAttempts:"attemptBoth"});
   if (code && code.data) {
     var id = extraerID(code.data);
