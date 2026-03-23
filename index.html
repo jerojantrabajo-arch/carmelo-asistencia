@@ -166,6 +166,7 @@ var historial    = [];
 var cntEntradas  = 0;
 var cntSalidas   = 0;
 var cntDuplic    = 0;
+var registrosHoy = {}; // {ID: {entradas:N, salidas:N, fecha:"dd/mm/yyyy"}}
 
 // ══════════════════════════════════════════════════
 //  INICIALIZAR
@@ -257,6 +258,33 @@ function procesarId(id, fuente) {
   ultimoId     = id;
   ultimoTiempo = ahora;
 
+  // Verificar registro local del día
+  var fechaHoy = new Date().toLocaleDateString("es-PE");
+  if (!registrosHoy[id] || registrosHoy[id].fecha !== fechaHoy) {
+    registrosHoy[id] = {entradas:0, salidas:0, fecha:fechaHoy};
+  }
+  var regLocal = registrosHoy[id];
+
+  // Si ya tiene 1 entrada y 1 salida registradas localmente — bloquear
+  if (regLocal.entradas >= 1 && regLocal.salidas >= 1) {
+    cntDuplic++;
+    document.getElementById("cnt-duplicados").textContent = cntDuplic;
+    mostrarEstado("duplicado", "=", "Ya registrado hoy",
+      id + " ya tiene entrada y salida registradas");
+    agregarHistorial(id, id, "YA REGISTRADO");
+    setTimeout(function() {
+      resetearEstado();
+      procesando = false;
+      document.getElementById("input-id").focus();
+    }, 2500);
+    return;
+  }
+
+  // Si ya tiene 1 entrada registrada localmente — siguiente será salida
+  // Si intentan registrar entrada de nuevo — bloquear
+  if (regLocal.entradas >= 1 && regLocal.salidas === 0) {
+    // Permitir — será salida
+  }
   mostrarEstado("procesando", "...", "Verificando...", "Consultando estado del alumno");
 
   // Consultar estado actual en Apps Script
@@ -307,11 +335,19 @@ function enviarFormulario(id, data, tipo) {
     var nombre = data.nombre || id;
     var grado  = data.grado  || "";
 
+    // Actualizar registro local
+    var fechaHoy2 = new Date().toLocaleDateString("es-PE");
+    if (!registrosHoy[id] || registrosHoy[id].fecha !== fechaHoy2) {
+      registrosHoy[id] = {entradas:0, salidas:0, fecha:fechaHoy2};
+    }
+
     if (tipo === "ENTRADA") {
+      registrosHoy[id].entradas++;
       cntEntradas++;
       document.getElementById("cnt-entradas").textContent = cntEntradas;
       mostrarEstado("exito-entrada", "v", "ENTRADA registrada", nombre + "  " + hora);
     } else {
+      registrosHoy[id].salidas++;
       cntSalidas++;
       document.getElementById("cnt-salidas").textContent = cntSalidas;
       mostrarEstado("exito-salida", "<", "SALIDA registrada", nombre + "  " + hora);
