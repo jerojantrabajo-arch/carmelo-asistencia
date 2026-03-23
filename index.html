@@ -9,7 +9,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:Arial,sans-serif;background:#7B3F00;min-height:100vh;display:flex;flex-direction:column}
 .header{background:#5A2D00;padding:12px 16px;display:flex;align-items:center;gap:12px}
-.header-logo{width:44px;height:44px;background:#D2691E;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.header-logo{width:44px;height:44px;background:#D2691E;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .header-info h1{color:#FFF8F0;font-size:15px;font-weight:bold;line-height:1.2}
 .header-info p{color:#F4D3B8;font-size:12px}
 .main{flex:1;display:flex;flex-direction:column;padding:12px;gap:10px}
@@ -27,201 +27,207 @@ body{font-family:Arial,sans-serif;background:#7B3F00;min-height:100vh;display:fl
 .manual-body{padding:10px;display:flex;gap:8px}
 #input-id{flex:1;padding:10px;border:2px solid #C68642;border-radius:8px;font-size:16px;font-family:Arial;color:#3A1800}
 #input-id:focus{outline:none;border-color:#7B3F00}
-#btn-enviar-manual{background:#7B3F00;color:white;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:bold;cursor:pointer}
+#btn-enviar{background:#7B3F00;color:white;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:bold;cursor:pointer}
 .estado-card{border-radius:12px;overflow:hidden;transition:all 0.3s}
 .estado-card.esperando{background:#FFF8F0}
 .estado-card.procesando{background:#FFF3CD}
-.estado-card.exito-entrada{background:#D4EDDA}
-.estado-card.exito-salida{background:#D0E3F5}
+.estado-card.entrada{background:#D4EDDA}
+.estado-card.salida{background:#D0E3F5}
 .estado-card.duplicado{background:#FFF3CD}
 .estado-card.error{background:#FDECEA}
-.estado-header{padding:10px 14px;display:flex;align-items:center;gap:10px}
-.estado-icono{font-size:28px;line-height:1}
-.estado-texto h2{font-size:16px;font-weight:bold}
-.estado-texto p{font-size:13px;margin-top:2px}
+.estado-header{padding:12px 14px;display:flex;align-items:center;gap:12px}
+.estado-icono{font-size:32px;line-height:1;min-width:36px;text-align:center}
+.estado-texto h2{font-size:17px;font-weight:bold}
+.estado-texto p{font-size:13px;margin-top:3px}
 .estado-card.esperando .estado-texto h2{color:#7B3F00}
 .estado-card.esperando .estado-texto p{color:#C68642}
-.estado-card.procesando .estado-texto h2{color:#856404}
-.estado-card.procesando .estado-texto p{color:#856404}
-.estado-card.exito-entrada .estado-texto h2{color:#1E6B2E}
-.estado-card.exito-entrada .estado-texto p{color:#2E7D32}
-.estado-card.exito-salida .estado-texto h2{color:#0C447C}
-.estado-card.exito-salida .estado-texto p{color:#185FA5}
-.estado-card.duplicado .estado-texto h2{color:#856404}
-.estado-card.duplicado .estado-texto p{color:#856404}
-.estado-card.error .estado-texto h2{color:#9B1C1C}
-.estado-card.error .estado-texto p{color:#A32D2D}
+.estado-card.procesando .estado-texto h2,.estado-card.procesando .estado-texto p{color:#856404}
+.estado-card.entrada .estado-texto h2{color:#1E6B2E}
+.estado-card.entrada .estado-texto p{color:#2E7D32}
+.estado-card.salida .estado-texto h2{color:#0C447C}
+.estado-card.salida .estado-texto p{color:#185FA5}
+.estado-card.duplicado .estado-texto h2,.estado-card.duplicado .estado-texto p{color:#856404}
+.estado-card.error .estado-texto h2,.estado-card.error .estado-texto p{color:#9B1C1C}
 .historial-card{background:#FFF8F0;border-radius:12px;overflow:hidden}
 .historial-titulo{background:#7B3F00;color:white;font-size:13px;font-weight:bold;padding:8px 12px;display:flex;justify-content:space-between;align-items:center}
 .historial-titulo button{background:transparent;border:1px solid rgba(255,255,255,0.4);color:white;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer}
-#lista-historial{max-height:150px;overflow-y:auto}
-.historial-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #F4D3B8;font-size:12px}
-.historial-item:last-child{border-bottom:none}
-.historial-nombre{flex:1;color:#3A1800;font-weight:bold}
-.historial-hora{color:#C68642}
-.historial-tipo{font-size:11px;padding:2px 6px;border-radius:4px}
-.tipo-entrada{background:#D4EDDA;color:#1E6B2E}
-.tipo-salida{background:#D0E3F5;color:#0C447C}
-.tipo-duplicado{background:#FFF3CD;color:#856404}
-.historial-vacio{padding:16px;text-align:center;color:#C68642;font-size:13px}
+#lista-historial{max-height:160px;overflow-y:auto}
+.h-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid #F4D3B8;font-size:12px}
+.h-item:last-child{border-bottom:none}
+.h-nombre{flex:1;color:#3A1800;font-weight:bold;font-size:13px}
+.h-hora{color:#C68642;font-size:12px}
+.h-badge{font-size:11px;padding:2px 7px;border-radius:4px;font-weight:bold}
+.b-entrada{background:#D4EDDA;color:#1E6B2E}
+.b-salida{background:#D0E3F5;color:#0C447C}
+.b-duplic{background:#FFF3CD;color:#856404}
+.h-vacio{padding:16px;text-align:center;color:#C68642;font-size:13px}
 .contador-bar{background:#5A2D00;border-radius:8px;padding:8px 14px;display:flex;justify-content:space-around}
-.contador-item{text-align:center}
-.contador-num{color:#F4D3B8;font-size:20px;font-weight:bold}
-.contador-lbl{color:#C68642;font-size:10px}
-.btn-camara-toggle{background:#D2691E;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;width:100%;margin-top:6px}
+.c-item{text-align:center}
+.c-num{color:#F4D3B8;font-size:22px;font-weight:bold}
+.c-lbl{color:#C68642;font-size:10px}
+.btn-camara{background:#D2691E;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;width:100%;margin-top:6px}
 </style>
 </head>
 <body>
-
 <div class="header">
-  <div class="header-logo">&#127««««</div>
+  <div class="header-logo">ECM</div>
   <div class="header-info">
-    <h1>El Carmelo de María</h1>
+    <h1>El Carmelo de Maria</h1>
     <p>Sistema de Asistencia v3.1 — Modo Kiosco</p>
   </div>
 </div>
 
 <div class="main">
-
   <div class="contador-bar">
-    <div class="contador-item">
-      <div class="contador-num" id="cnt-entradas">0</div>
-      <div class="contador-lbl">Entradas</div>
-    </div>
-    <div class="contador-item">
-      <div class="contador-num" id="cnt-salidas">0</div>
-      <div class="contador-lbl">Salidas</div>
-    </div>
-    <div class="contador-item">
-      <div class="contador-num" id="cnt-duplicados">0</div>
-      <div class="contador-lbl">Ya registrados</div>
-    </div>
+    <div class="c-item"><div class="c-num" id="c-e">0</div><div class="c-lbl">Entradas</div></div>
+    <div class="c-item"><div class="c-num" id="c-s">0</div><div class="c-lbl">Salidas</div></div>
+    <div class="c-item"><div class="c-num" id="c-d">0</div><div class="c-lbl">Duplicados</div></div>
   </div>
 
   <div class="estado-card esperando" id="estado-card">
     <div class="estado-header">
-      <div class="estado-icono" id="estado-icono">&#128247;</div>
+      <div class="estado-icono" id="e-icono">[ ]</div>
       <div class="estado-texto">
-        <h2 id="estado-titulo">Listo para escanear</h2>
-        <p id="estado-subtitulo">Acerque el código QR del alumno</p>
+        <h2 id="e-titulo">Listo para escanear</h2>
+        <p id="e-sub">Acerque el codigo QR del alumno</p>
       </div>
     </div>
   </div>
 
-  <div class="camara-card" id="camara-card">
-    <div class="camara-titulo">&#128247; Escáner de cámara</div>
+  <div class="camara-card">
+    <div class="camara-titulo">Escaner de camara</div>
     <div class="camara-body">
       <video id="video" playsinline autoplay muted></video>
       <canvas id="canvas-qr"></canvas>
-      <div class="scan-overlay">
-        <div class="scan-line"></div>
-      </div>
+      <div class="scan-overlay"><div class="scan-line"></div></div>
     </div>
-    <div class="camara-msg" id="camara-msg">Iniciando cámara...</div>
-    <button class="btn-camara-toggle" id="btn-camara" onclick="toggleCamara()">&#9208; Pausar cámara</button>
+    <div class="camara-msg" id="cam-msg">Iniciando camara...</div>
+    <button class="btn-camara" onclick="toggleCamara()" id="btn-cam">Pausar camara</button>
   </div>
 
   <div class="manual-card">
-    <div class="manual-titulo">&#9000; Ingreso manual / lector externo</div>
+    <div class="manual-titulo">Ingreso manual / lector externo</div>
     <div class="manual-body">
       <input type="text" id="input-id" placeholder="DNI del alumno"
              autocomplete="off" inputmode="numeric"
              onkeydown="if(event.key==='Enter')procesarManual()">
-      <button id="btn-enviar-manual" onclick="procesarManual()">Enviar</button>
+      <button id="btn-enviar" onclick="procesarManual()">Enviar</button>
     </div>
   </div>
 
   <div class="historial-card">
     <div class="historial-titulo">
-      &#128203; Últimos registros
-      <button onclick="limpiarHistorial()">Limpiar</button>
+      Ultimos registros
+      <button onclick="limpiarTodo()">Limpiar</button>
     </div>
-    <div id="lista-historial">
-      <div class="historial-vacio">Sin registros aún</div>
-    </div>
+    <div id="lista-historial"><div class="h-vacio">Sin registros aun</div></div>
   </div>
-
 </div>
 
 <script>
-// ══════════════════════════════════════════════════
-//  CONFIGURACION — ACTUALIZAR APPS_SCRIPT_URL
-// ══════════════════════════════════════════════════
-var FORM_ID         = "1FAIpQLSdziUIaNrpGb3aS4XE9O-JaiJQRZ6yUniuDxxM0vz5zISI70g";
-var ENTRY_ID        = "entry.582603348";
-var ENTRY_MOT       = "entry.1889062583";
-var FORM_URL        = "https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse";
-var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyd4ocOPFOVQOL1SdFz-cEht7e3nMYOTBdEzg5A6MS8MdX2Y13ke0sLgaraV5ZrftRv4A/exec";
+// ══════════════════════════════════════
+//  CONFIGURACION
+// ══════════════════════════════════════
+var FORM_ID   = "1FAIpQLSdziUIaNrpGb3aS4XE9O-JaiJQRZ6yUniuDxxM0vz5zISI70g";
+var ENTRY_ID  = "entry.582603348";
+var ENTRY_MOT = "entry.1889062583";
+var FORM_URL  = "https://docs.google.com/forms/d/e/"+FORM_ID+"/formResponse";
+var AS_URL    = "https://script.google.com/macros/s/AKfycbyd4ocOPFOVQOL1SdFz-cEht7e3nMYOTBdEzg5A6MS8MdX2Y13ke0sLgaraV5ZrftRv4A/exec";
 
-// ══════════════════════════════════════════════════
-//  ESTADO GLOBAL
-// ══════════════════════════════════════════════════
-var procesando   = false;
-var ultimoId     = "";
-var ultimoTiempo = 0;
-var camaraActiva = false;
-var videoStream  = null;
-var scanInterval = null;
-var historial    = [];
-var cntEntradas  = 0;
-var cntSalidas   = 0;
-var cntDuplic    = 0;
-var registrosHoy = {}; // {ID: {entradas:N, salidas:N, fecha:"dd/mm/yyyy"}}
+// ══════════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════════
+var procesando = false;
+var bloqueados = {}; // id -> timestamp ultimo scan
+var registros  = {}; // id -> {e:0, s:0, fecha:""}
+var historial  = [];
+var cE=0, cS=0, cD=0;
 
-// ══════════════════════════════════════════════════
-//  INICIALIZAR
-// ══════════════════════════════════════════════════
+// Cargar registros del localStorage para persistir entre recargas
+function cargarRegistros() {
+  try {
+    var hoy = fechaHoy();
+    var data = localStorage.getItem("registros_" + hoy);
+    if (data) registros = JSON.parse(data);
+  } catch(e) {}
+}
+
+function guardarRegistros() {
+  try {
+    localStorage.setItem("registros_" + fechaHoy(), JSON.stringify(registros));
+  } catch(e) {}
+}
+
+function fechaHoy() {
+  return new Date().toLocaleDateString("es-PE");
+}
+
+function getRegistro(id) {
+  var hoy = fechaHoy();
+  if (!registros[id] || registros[id].fecha !== hoy) {
+    registros[id] = {e:0, s:0, fecha:hoy};
+  }
+  return registros[id];
+}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
 window.onload = function() {
+  cargarRegistros();
   iniciarCamara();
   document.getElementById("input-id").focus();
 };
 
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════
 //  CAMARA
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════
+var videoStream  = null;
+var camaraActiva = false;
+var scanInterval = null;
+
 function iniciarCamara() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    document.getElementById("camara-msg").textContent = "Cámara no disponible";
-    document.getElementById("btn-camara").style.display = "none";
+    document.getElementById("cam-msg").textContent = "Camara no disponible — usar ingreso manual";
+    document.getElementById("btn-cam").style.display = "none";
     return;
   }
   navigator.mediaDevices.getUserMedia({
-    video:{facingMode:"environment",width:{ideal:640},height:{ideal:480}}
-  }).then(function(stream) {
-    videoStream = stream;
-    var video = document.getElementById("video");
-    video.srcObject = stream;
-    video.play();
+    video:{facingMode:"environment", width:{ideal:1280}, height:{ideal:720}}
+  }).then(function(s) {
+    videoStream = s;
+    var v = document.getElementById("video");
+    v.srcObject = s;
+    v.play();
     camaraActiva = true;
-    document.getElementById("camara-msg").textContent = "Encuadre el QR en el recuadro naranja";
-    scanInterval = setInterval(escanearFrame, 150);
+    document.getElementById("cam-msg").textContent = "Encuadre el QR en el recuadro naranja";
+    scanInterval = setInterval(escanearFrame, 200);
   }).catch(function() {
-    document.getElementById("camara-msg").textContent = "Sin acceso a cámara — usar ingreso manual";
-    document.getElementById("btn-camara").style.display = "none";
+    document.getElementById("cam-msg").textContent = "Sin acceso a camara — usar ingreso manual";
+    document.getElementById("btn-cam").style.display = "none";
   });
 }
 
 function escanearFrame() {
   if (procesando) return;
-  var video = document.getElementById("video");
-  var canvas = document.getElementById("canvas-qr");
-  if (!video.readyState || video.readyState < 2) return;
-  canvas.width  = video.videoWidth;
-  canvas.height = video.videoHeight;
-  var ctx = canvas.getContext("2d", {willReadFrequently:true});
-  ctx.drawImage(video, 0, 0);
-  var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  var code = jsQR(imageData.data, imageData.width, imageData.height, {inversionAttempts:"attemptBoth"});
+  var v = document.getElementById("video");
+  var c = document.getElementById("canvas-qr");
+  if (!v.readyState || v.readyState < 2 || !v.videoWidth) return;
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  var ctx = c.getContext("2d", {willReadFrequently:true});
+  ctx.drawImage(v, 0, 0);
+  var img  = ctx.getImageData(0, 0, c.width, c.height);
+  var code = jsQR(img.data, img.width, img.height, {inversionAttempts:"attemptBoth"});
   if (code && code.data) {
-    var id = extraerIdDeURL(code.data);
-    if (id) procesarId(id, "camara");
+    var id = extraerID(code.data);
+    if (id) procesarId(id);
   }
 }
 
-function extraerIdDeURL(url) {
-  var match = url.match(/entry\.582603348=([^&]+)/);
-  if (match) return decodeURIComponent(match[1]).trim().toUpperCase();
-  if (/^\d{6,12}$/.test(url.trim())) return url.trim().toUpperCase();
+function extraerID(url) {
+  var m = url.match(/entry\.582603348=([^&]+)/);
+  if (m) return decodeURIComponent(m[1]).trim().toUpperCase();
+  if (/^\d{5,12}$/.test(url.trim())) return url.trim();
   return null;
 }
 
@@ -230,195 +236,156 @@ function toggleCamara() {
     clearInterval(scanInterval);
     if (videoStream) videoStream.getTracks().forEach(function(t){t.stop();});
     camaraActiva = false;
-    document.getElementById("btn-camara").textContent = "Activar cámara";
-    document.getElementById("camara-msg").textContent = "Cámara pausada";
+    document.getElementById("btn-cam").textContent = "Activar camara";
+    document.getElementById("cam-msg").textContent  = "Camara pausada";
   } else {
     iniciarCamara();
   }
 }
 
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════
 //  INGRESO MANUAL
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════
 function procesarManual() {
   var id = document.getElementById("input-id").value.trim().toUpperCase();
   if (!id) return;
   document.getElementById("input-id").value = "";
-  procesarId(id, "manual");
+  procesarId(id);
 }
 
-// ══════════════════════════════════════════════════
-//  PROCESAMIENTO PRINCIPAL
-// ══════════════════════════════════════════════════
-function procesarId(id, fuente) {
+// ══════════════════════════════════════
+//  LOGICA PRINCIPAL
+// ══════════════════════════════════════
+function procesarId(id) {
   var ahora = Date.now();
-  if (id === ultimoId && (ahora - ultimoTiempo) < 5000) return;
+
+  // Anti-duplicado por tiempo: mismo ID en menos de 8 segundos
+  if (bloqueados[id] && (ahora - bloqueados[id]) < 8000) return;
   if (procesando) return;
-  procesando   = true;
-  ultimoId     = id;
-  ultimoTiempo = ahora;
 
-  // Verificar registro local del día
-  var fechaHoy = new Date().toLocaleDateString("es-PE");
-  if (!registrosHoy[id] || registrosHoy[id].fecha !== fechaHoy) {
-    registrosHoy[id] = {entradas:0, salidas:0, fecha:fechaHoy};
-  }
-  var regLocal = registrosHoy[id];
+  procesando    = true;
+  bloqueados[id] = ahora;
 
-  // Si ya tiene 1 entrada y 1 salida registradas localmente — bloquear
-  if (regLocal.entradas >= 1 && regLocal.salidas >= 1) {
-    cntDuplic++;
-    document.getElementById("cnt-duplicados").textContent = cntDuplic;
-    mostrarEstado("duplicado", "=", "Ya registrado hoy",
-      id + " ya tiene entrada y salida registradas");
-    agregarHistorial(id, id, "YA REGISTRADO");
-    setTimeout(function() {
-      resetearEstado();
-      procesando = false;
-      document.getElementById("input-id").focus();
-    }, 2500);
+  var reg = getRegistro(id);
+
+  // CAPA 1: verificacion local inmediata
+  // Si ya tiene 1 entrada y 1 salida localmente — BLOQUEAR
+  if (reg.e >= 1 && reg.s >= 1) {
+    mostrarDuplicado(id);
     return;
   }
 
-  // Si ya tiene 1 entrada registrada localmente — siguiente será salida
-  // Si intentan registrar entrada de nuevo — bloquear
-  if (regLocal.entradas >= 1 && regLocal.salidas === 0) {
-    // Permitir — será salida
-  }
-  mostrarEstado("procesando", "...", "Verificando...", "Consultando estado del alumno");
+  // Determinar tipo esperado segun registro local
+  var tipoEsperado = (reg.e === 0) ? "ENTRADA" : "SALIDA";
 
-  // Consultar estado actual en Apps Script
-  fetch(APPS_SCRIPT_URL + "?accion=estado&id=" + encodeURIComponent(id))
+  mostrarEstado("procesando", "...", "Verificando " + id, "Consultando el sistema...");
+
+  // CAPA 2: verificar en Apps Script (si esta disponible)
+  var urlConsulta = AS_URL + "?accion=estado&id=" + encodeURIComponent(id);
+
+  fetch(urlConsulta, {signal: AbortSignal.timeout ? AbortSignal.timeout(4000) : undefined})
     .then(function(r) { return r.json(); })
     .then(function(data) {
-
-      // Ya tiene entrada Y salida hoy — bloquear
+      // Sincronizar estado local con el del servidor
       if (data.estado === "COMPLETO") {
-        cntDuplic++;
-        document.getElementById("cnt-duplicados").textContent = cntDuplic;
-        mostrarEstado("duplicado", "=",
-          "Ya registrado hoy",
-          (data.nombre || id) + " ya tiene entrada y salida");
-        agregarHistorial(id, data.nombre || id, "YA REGISTRADO");
-        setTimeout(function() {
-          resetearEstado();
-          procesando = false;
-          document.getElementById("input-id").focus();
-        }, 3000);
+        reg.e = 1; reg.s = 1;
+        guardarRegistros();
+        mostrarDuplicado(id, data.nombre);
         return;
       }
-
-      var tipoSiguiente = (data.estado === "TIENE_ENTRADA") ? "SALIDA" : "ENTRADA";
-      mostrarEstado("procesando", "...",
-        tipoSiguiente + " — " + (data.nombre || id),
-        "Enviando al sistema...");
-
-      enviarFormulario(id, data, tipoSiguiente);
+      if (data.estado === "TIENE_ENTRADA") {
+        reg.e = Math.max(reg.e, 1);
+        guardarRegistros();
+        tipoEsperado = "SALIDA";
+      }
+      enviar(id, data.nombre || id, data.grado || "", tipoEsperado);
     })
     .catch(function() {
-      // Sin conexion a Apps Script — enviar directo al formulario
-      enviarFormulario(id, {nombre:id, grado:"", nivel:""}, "ENTRADA");
+      // Sin conexion a AS — usar solo estado local
+      enviar(id, id, "", tipoEsperado);
     });
 }
 
-function enviarFormulario(id, data, tipo) {
-  var params = ENTRY_ID + "=" + encodeURIComponent(id) +
-               "&" + ENTRY_MOT + "=NORMAL";
+function enviar(id, nombre, grado, tipo) {
+  mostrarEstado("procesando", "...", tipo + ": " + nombre, "Registrando en el sistema...");
+
+  var body = ENTRY_ID + "=" + encodeURIComponent(id) + "&" + ENTRY_MOT + "=NORMAL";
 
   fetch(FORM_URL, {
-    method : "POST",
-    mode   : "no-cors",
-    headers: {"Content-Type":"application/x-www-form-urlencoded"},
-    body   : params
+    method:"POST", mode:"no-cors",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:body
   }).then(function() {
+    var reg  = getRegistro(id);
     var hora = new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
-    var nombre = data.nombre || id;
-    var grado  = data.grado  || "";
-
-    // Actualizar registro local
-    var fechaHoy2 = new Date().toLocaleDateString("es-PE");
-    if (!registrosHoy[id] || registrosHoy[id].fecha !== fechaHoy2) {
-      registrosHoy[id] = {entradas:0, salidas:0, fecha:fechaHoy2};
-    }
 
     if (tipo === "ENTRADA") {
-      registrosHoy[id].entradas++;
-      cntEntradas++;
-      document.getElementById("cnt-entradas").textContent = cntEntradas;
-      mostrarEstado("exito-entrada", "v", "ENTRADA registrada", nombre + "  " + hora);
+      reg.e++;
+      cE++; document.getElementById("c-e").textContent = cE;
+      mostrarEstado("entrada", "->", "ENTRADA: " + nombre, hora);
     } else {
-      registrosHoy[id].salidas++;
-      cntSalidas++;
-      document.getElementById("cnt-salidas").textContent = cntSalidas;
-      mostrarEstado("exito-salida", "<", "SALIDA registrada", nombre + "  " + hora);
+      reg.s++;
+      cS++; document.getElementById("c-s").textContent = cS;
+      mostrarEstado("salida", "<-", "SALIDA: " + nombre, hora);
     }
-
-    agregarHistorial(id, nombre, tipo);
+    guardarRegistros();
+    agregarHistorial(nombre||id, tipo, hora);
 
     setTimeout(function() {
-      resetearEstado();
+      resetear();
       procesando = false;
       document.getElementById("input-id").focus();
     }, 2500);
 
   }).catch(function() {
-    mostrarEstado("error", "x", "Error de conexión", "Verifique el internet");
-    setTimeout(function() {
-      resetearEstado();
-      procesando = false;
-    }, 3000);
+    mostrarEstado("error","!","Error de conexion","Verifique el internet e intente");
+    setTimeout(function(){ resetear(); procesando=false; }, 3000);
   });
 }
 
-// ══════════════════════════════════════════════════
+function mostrarDuplicado(id, nombre) {
+  cD++; document.getElementById("c-d").textContent = cD;
+  mostrarEstado("duplicado","=","Ya registrado hoy", (nombre||id)+" ya tiene entrada y salida");
+  agregarHistorial(nombre||id, "DUPLICADO", new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}));
+  setTimeout(function(){ resetear(); procesando=false; document.getElementById("input-id").focus(); }, 2500);
+}
+
+// ══════════════════════════════════════
 //  UI
-// ══════════════════════════════════════════════════
-function mostrarEstado(clase, icono, titulo, subtitulo) {
-  var card = document.getElementById("estado-card");
-  card.className = "estado-card " + clase;
-  document.getElementById("estado-icono").textContent    = icono;
-  document.getElementById("estado-titulo").textContent   = titulo;
-  document.getElementById("estado-subtitulo").textContent = subtitulo;
+// ══════════════════════════════════════
+function mostrarEstado(cls, icono, titulo, sub) {
+  document.getElementById("estado-card").className = "estado-card " + cls;
+  document.getElementById("e-icono").textContent   = icono;
+  document.getElementById("e-titulo").textContent  = titulo;
+  document.getElementById("e-sub").textContent     = sub;
 }
 
-function resetearEstado() {
-  mostrarEstado("esperando", "[ ]", "Listo para escanear", "Acerque el código QR del alumno");
+function resetear() {
+  mostrarEstado("esperando","[ ]","Listo para escanear","Acerque el codigo QR del alumno");
 }
 
-function agregarHistorial(id, nombre, tipo) {
-  var hora  = new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
-  var fecha = new Date().toLocaleDateString("es-PE");
-  historial.unshift({id:id, nombre:nombre, tipo:tipo, hora:hora, fecha:fecha});
-  if (historial.length > 20) historial.pop();
-  renderHistorial();
-}
-
-function renderHistorial() {
-  var lista = document.getElementById("lista-historial");
-  if (historial.length === 0) {
-    lista.innerHTML = '<div class="historial-vacio">Sin registros aún</div>';
-    return;
-  }
-  lista.innerHTML = historial.map(function(r) {
-    var clase = r.tipo === "ENTRADA" ? "tipo-entrada" :
-                r.tipo === "SALIDA"  ? "tipo-salida"  : "tipo-duplicado";
-    return '<div class="historial-item">' +
-      '<span class="historial-nombre">' + (r.nombre||r.id) + '</span>' +
-      '<span class="historial-hora">'   + r.hora  + '</span>' +
-      '<span class="historial-tipo '    + clase + '">' + r.tipo + '</span>' +
-      '</div>';
+function agregarHistorial(nombre, tipo, hora) {
+  historial.unshift({nombre:nombre, tipo:tipo, hora:hora});
+  if (historial.length > 30) historial.pop();
+  var cls = tipo==="ENTRADA"?"b-entrada":tipo==="SALIDA"?"b-salida":"b-duplic";
+  var html = historial.map(function(r){
+    var c = r.tipo==="ENTRADA"?"b-entrada":r.tipo==="SALIDA"?"b-salida":"b-duplic";
+    return '<div class="h-item">'+
+      '<span class="h-nombre">'+r.nombre+'</span>'+
+      '<span class="h-hora">'+r.hora+'</span>'+
+      '<span class="h-badge '+c+'">'+r.tipo+'</span></div>';
   }).join("");
+  document.getElementById("lista-historial").innerHTML = html;
 }
 
-function limpiarHistorial() {
-  historial   = [];
-  cntEntradas = 0;
-  cntSalidas  = 0;
-  cntDuplic   = 0;
-  document.getElementById("cnt-entradas").textContent   = 0;
-  document.getElementById("cnt-salidas").textContent    = 0;
-  document.getElementById("cnt-duplicados").textContent = 0;
-  renderHistorial();
+function limpiarTodo() {
+  historial=[]; cE=0; cS=0; cD=0;
+  registros={};
+  guardarRegistros();
+  document.getElementById("c-e").textContent=0;
+  document.getElementById("c-s").textContent=0;
+  document.getElementById("c-d").textContent=0;
+  document.getElementById("lista-historial").innerHTML='<div class="h-vacio">Sin registros aun</div>';
 }
 </script>
 </body>
