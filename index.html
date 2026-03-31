@@ -404,9 +404,17 @@ function escanearFrame() {
 }
 
 function extraerID(url) {
-  var m = url.match(/entry\.582603348=([^&]+)/);
-  if (m) return decodeURIComponent(m[1]).trim().toUpperCase();
-  if (/^\d{5,12}$/.test(url.trim())) return url.trim();
+  // Formato nuevo: https://jerojantrabajo.github.io/carmelo-asistencia/?id=XXXXX
+  var mNuevo = url.match(/[?&]id=([^&]+)/);
+  if (mNuevo) return decodeURIComponent(mNuevo[1]).trim().toUpperCase();
+
+  // Formato antiguo (compatibilidad): entry.582603348=XXXXX
+  var mAntiguo = url.match(/entry\.582603348=([^&]+)/);
+  if (mAntiguo) return decodeURIComponent(mAntiguo[1]).trim().toUpperCase();
+
+  // Solo numeros (lector externo)
+  if (/^\d{5,12}$/.test(url.trim())) return url.trim().toUpperCase();
+
   return null;
 }
 
