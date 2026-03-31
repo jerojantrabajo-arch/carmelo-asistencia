@@ -385,7 +385,7 @@ function escanearFrame() {
   var vh = v.videoHeight;
 
   // Procesar solo la region central (donde esta el recuadro naranja)
-  var tam  = Math.min(vw, vh) * 0.7;
+  var tam  = Math.min(vw, vh) * 0.9;
   var sx   = (vw - tam) / 2;
   var sy   = (vh - tam) / 2;
 
@@ -396,7 +396,7 @@ function escanearFrame() {
   ctx.drawImage(v, sx, sy, tam, tam, 0, 0, tam, tam);
 
   var img  = ctx.getImageData(0, 0, tam, tam);
-  var code = jsQR(img.data, img.width, img.height, {inversionAttempts:"attemptBoth"});
+  var code = jsQR(img.data, img.width, img.height, {inversionAttempts:"dontInvert"});
   if (code && code.data) {
     var id = extraerID(code.data);
     if (id) procesarId(id);
