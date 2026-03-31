@@ -360,7 +360,7 @@ function iniciarCamara() {
     v.play();
     camaraActiva = true;
     document.getElementById("cam-msg").textContent = "Encuadre el QR en el recuadro naranja";
-    scanInterval = setInterval(escanearFrame, 80);
+    scanInterval = setInterval(escanearFrame, 50);
         // Si la URL trae un ID procesarlo automaticamente
     var idURL = obtenerIdDeURL();
     if (idURL) {
