@@ -132,7 +132,7 @@ var FORM_ID   = "1FAIpQLSdziUIaNrpGb3aS4XE9O-JaiJQRZ6yUniuDxxM0vz5zISI70g";
 var ENTRY_ID  = "entry.582603348";
 var ENTRY_MOT = "entry.1889062583";
 var FORM_URL  = "https://docs.google.com/forms/d/e/"+FORM_ID+"/formResponse";
-var AS_URL    = "https://script.google.com/macros/s/AKfycbyBfPfJ7ZWErR18qk4i2DGX9ucihqLGElcFmaB5dAtFYuhpgLxOm1BmP5tF1bh44wGq4A/exec";
+var AS_URL    = "https://script.google.com/macros/s/AKfycbxD9xolZM9zx2fefhdhS2MqrizW7NOFrgZp0Li0V4M4fdXzVsOZz6TZOmSknTeQOjSGQQ/exec";
 
 // ══════════════════════════════════════
 //  ESTADO
@@ -517,42 +517,40 @@ function procesarId(id) {
 function enviar(id, nombre, grado, tipo) {
   mostrarEstado("procesando", "...", tipo + ": " + nombre, "Registrando en el sistema...");
 
-  var body = ENTRY_ID + "=" + encodeURIComponent(id) + "&" + ENTRY_MOT + "=NORMAL";
+  fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(id) + "&motivo=NORMAL")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.ok) {
+        mostrarEstado("error", "!", "Error al registrar", data.mensaje || "Intente nuevamente");
+        setTimeout(function(){ resetear(); procesando=false; }, 3000);
+        return;
+      }
 
-  fetch(FORM_URL, {
-    method:"POST", mode:"no-cors",
-    headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:body
-  }).then(function() {
-    var reg  = getRegistro(id);
-    var hora = new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
+      var reg  = getRegistro(id);
+      var hora = new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
 
-    if (tipo === "ENTRADA") {
-      reg.e++;
-      // Guardar timestamp de la entrada para calcular tiempo minimo de salida
-      try {
-        localStorage.setItem("entrada_ts_" + id + "_" + fechaHoy(), Date.now().toString());
-      } catch(e) {}
-      cE++; document.getElementById("c-e").textContent = cE;
-      mostrarEstado("entrada", "->", "ENTRADA: " + nombre, hora);
-    } else {
-      reg.s++;
-      cS++; document.getElementById("c-s").textContent = cS;
-      mostrarEstado("salida", "<-", "SALIDA: " + nombre, hora);
-    }
-    guardarRegistros();
-    agregarHistorial(nombre||id, tipo, hora);
+      if (tipo === "ENTRADA") {
+        reg.e++;
+        cE++; document.getElementById("c-e").textContent = cE;
+        mostrarEstado("entrada", "->", "ENTRADA: " + nombre, hora);
+      } else {
+        reg.s++;
+        cS++; document.getElementById("c-s").textContent = cS;
+        mostrarEstado("salida", "<-", "SALIDA: " + nombre, hora);
+      }
+      guardarRegistros();
+      agregarHistorial(nombre||id, tipo, hora);
 
-    setTimeout(function() {
-      resetear();
-      procesando = false;
-      document.getElementById("input-id").focus();
-    }, 2500);
-
-  }).catch(function() {
-    mostrarEstado("error","!","Error de conexion","Verifique el internet e intente");
-    setTimeout(function(){ resetear(); procesando=false; }, 3000);
-  });
+      setTimeout(function() {
+        resetear();
+        procesando = false;
+        document.getElementById("input-id").focus();
+      }, 2500);
+    })
+    .catch(function() {
+      mostrarEstado("error","!","Error de conexion","Verifique el internet");
+      setTimeout(function(){ resetear(); procesando=false; }, 3000);
+    });
 }
 
 function mostrarDuplicado(id, nombre) {
