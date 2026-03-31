@@ -139,6 +139,8 @@ var AS_URL    = "https://script.google.com/macros/s/AKfycbyBfPfJ7ZWErR18qk4i2DGX
 // ══════════════════════════════════════
 var pinVerificado = false;
 var PIN_SESION    = "pin_sesion_" + new Date().toLocaleDateString("es-PE");
+var pinVerificado = false;
+var PIN_SESION    = "pin_sesion_" + new Date().toLocaleDateString("es-PE");
 var procesando = false;
 var bloqueados = {}; // id -> timestamp ultimo scan
 var registros  = {}; // id -> {e:0, s:0, fecha:""}
@@ -190,6 +192,79 @@ window.onload = function() {
   cargarRegistros();
   verificarSesionPin();
 };
+
+function obtenerIdDeURL() {
+  var params = new URLSearchParams(window.location.search);
+  return params.get("id") ? params.get("id").trim().toUpperCase() : null;
+}
+
+function verificarSesionPin() {
+  try {
+    var sesion = localStorage.getItem(PIN_SESION);
+    if (sesion === "OK") {
+      pinVerificado = true;
+      iniciarCamara();
+      document.getElementById("input-id").focus();
+      return;
+    }
+  } catch(e) {}
+  mostrarPantallaPin();
+}
+
+function mostrarPantallaPin() {
+  document.body.innerHTML =
+    '<div style="background:#7B3F00;min-height:100vh;display:flex;align-items:center;' +
+    'justify-content:center;font-family:Arial">' +
+    '<div style="background:#FFF8F0;border-radius:16px;padding:32px;width:320px;' +
+    'text-align:center;border:3px solid #D2691E">' +
+    '<div style="font-size:48px;margin-bottom:16px">ECM</div>' +
+    '<h1 style="color:#7B3F00;font-size:20px;margin-bottom:8px">Sistema de Asistencia</h1>' +
+    '<p style="color:#C68642;font-size:14px;margin-bottom:24px">I.E. El Carmelo de María</p>' +
+    '<p style="color:#3A1800;font-size:15px;margin-bottom:16px;font-weight:bold">' +
+    'Ingrese el PIN del día</p>' +
+    '<input id="pin-input" type="password" inputmode="numeric" maxlength="4" ' +
+    'style="width:100%;padding:14px;font-size:28px;text-align:center;' +
+    'border:2px solid #C68642;border-radius:8px;letter-spacing:12px;' +
+    'margin-bottom:16px;font-family:Arial" placeholder="----" ' +
+    'onkeydown="if(event.key===\'Enter\')validarPin()">' +
+    '<button onclick="validarPin()" ' +
+    'style="width:100%;padding:14px;background:#7B3F00;color:white;border:none;' +
+    'border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;margin-bottom:12px">' +
+    'Ingresar</button>' +
+    '<div id="pin-error" style="color:#9B1C1C;font-size:14px;min-height:20px"></div>' +
+    '<p style="color:#C68642;font-size:12px;margin-top:16px">' +
+    'Solicite el PIN al responsable del sistema</p>' +
+    '</div></div>';
+  setTimeout(function() {
+    var inp = document.getElementById("pin-input");
+    if (inp) inp.focus();
+  }, 300);
+}
+
+function validarPin() {
+  var pinIngresado = document.getElementById("pin-input").value.trim();
+  if (!pinIngresado || pinIngresado.length < 4) {
+    document.getElementById("pin-error").textContent = "Ingrese los 4 dígitos del PIN";
+    return;
+  }
+  document.getElementById("pin-error").textContent = "Verificando...";
+  fetch(AS_URL + "?accion=pin&valor=" + encodeURIComponent(pinIngresado))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.valido) {
+        try { localStorage.setItem(PIN_SESION, "OK"); } catch(e) {}
+        pinVerificado = true;
+        location.reload();
+      } else {
+        document.getElementById("pin-error").textContent = "PIN incorrecto. Intente nuevamente.";
+        document.getElementById("pin-input").value = "";
+        document.getElementById("pin-input").focus();
+      }
+    })
+    .catch(function() {
+      document.getElementById("pin-error").textContent = "Sin conexion. Intente nuevamente.";
+    });
+}
 
 function verificarSesionPin() {
   try {
@@ -286,6 +361,14 @@ function iniciarCamara() {
     camaraActiva = true;
     document.getElementById("cam-msg").textContent = "Encuadre el QR en el recuadro naranja";
     scanInterval = setInterval(escanearFrame, 80);
+        // Si la URL trae un ID procesarlo automaticamente
+    var idURL = obtenerIdDeURL();
+    if (idURL) {
+      setTimeout(function() {
+        procesarId(idURL);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }, 500);
+    }
   }).catch(function() {
     document.getElementById("cam-msg").textContent = "Sin acceso a camara — usar ingreso manual";
     document.getElementById("btn-cam").style.display = "none";
