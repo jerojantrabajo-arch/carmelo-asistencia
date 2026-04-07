@@ -66,6 +66,8 @@ body{font-family:Arial,sans-serif;background:#7B3F00;min-height:100vh;display:fl
 .c-num{color:#F4D3B8;font-size:22px;font-weight:bold}
 .c-lbl{color:#C68642;font-size:10px}
 .btn-camara{background:#D2691E;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;width:100%;margin-top:6px}
+/* Botón de prueba de sonido */
+.btn-sonido{background:#145A32;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;margin-top:4px;width:100%}
 </style>
 </head>
 <body>
@@ -103,6 +105,7 @@ body{font-family:Arial,sans-serif;background:#7B3F00;min-height:100vh;display:fl
     </div>
     <div class="camara-msg" id="cam-msg">Iniciando camara...</div>
     <button class="btn-camara" onclick="toggleCamara()" id="btn-cam">Pausar camara</button>
+    <button class="btn-sonido" onclick="probarSonidos()">🔊 Probar sonidos (toque aqui primero)</button>
   </div>
 
   <div class="manual-card">
@@ -135,22 +138,90 @@ var FORM_URL  = "https://docs.google.com/forms/d/e/"+FORM_ID+"/formResponse";
 var AS_URL    = "https://script.google.com/macros/s/AKfycbzsmnfu9vUHuPxgpwP11dD7fWyM-GYZGSBuvCxmrkFvQ8XxxZl0VrZuG69dbNB-x3Q-Uw/exec";
 
 // ══════════════════════════════════════
+//  SISTEMA DE SONIDO — Web Audio API
+//  No requiere archivos externos.
+//  Funciona offline. Compatible con
+//  Chrome, Firefox, Safari, Edge.
+// ══════════════════════════════════════
+var audioCtx = null;
+
+// Inicializar contexto de audio (requiere gesto del usuario)
+function iniciarAudio() {
+  if (audioCtx) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch(e) {
+    console.warn("Web Audio API no disponible:", e);
+  }
+}
+
+// Genera un tono con forma de onda, frecuencia y duración dados
+function tocar(frecuencia, duracion, tipo, volumen) {
+  if (!audioCtx) return;
+  try {
+    var osc  = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type      = tipo || "sine";
+    osc.frequency.setValueAtTime(frecuencia, audioCtx.currentTime);
+    gain.gain.setValueAtTime(volumen || 0.4, audioCtx.currentTime);
+    // Fade-out suave al final para evitar "click" brusco
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duracion);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + duracion);
+  } catch(e) {}
+}
+
+// ── SONIDO ENTRADA: doble bip ascendente (alegre, confirmatorio) ──
+function sonidoEntrada() {
+  iniciarAudio();
+  tocar(880, 0.12, "sine", 0.45);                        // La5 — primer bip
+  setTimeout(function(){ tocar(1175, 0.18, "sine", 0.45); }, 130); // Re6 — segundo bip más alto
+}
+
+// ── SONIDO SALIDA: doble bip descendente (neutro, distinto) ──
+function sonidoSalida() {
+  iniciarAudio();
+  tocar(880, 0.12, "sine", 0.35);                        // La5 — primer bip
+  setTimeout(function(){ tocar(659, 0.20, "sine", 0.35); }, 130);  // Mi5 — segundo bip más bajo
+}
+
+// ── SONIDO ERROR / DUPLICADO: bip grave largo (atención) ──
+function sonidoError() {
+  iniciarAudio();
+  tocar(220, 0.40, "square", 0.25);   // La3 grave — tono de alerta suave
+}
+
+// ── SONIDO PROCESANDO: bip corto neutro ──
+function sonidoProcesando() {
+  iniciarAudio();
+  tocar(660, 0.08, "sine", 0.20);    // Mi5 — clic de confirmación de lectura
+}
+
+// ── Función de prueba: muestra los 3 sonidos en secuencia ──
+function probarSonidos() {
+  iniciarAudio();
+  sonidoProcesando();
+  setTimeout(sonidoEntrada,  400);
+  setTimeout(sonidoSalida,   900);
+  setTimeout(sonidoError,   1500);
+}
+
+// ══════════════════════════════════════
 //  ESTADO
 // ══════════════════════════════════════
 var pinVerificado = false;
 var PIN_SESION    = "pin_sesion_" + new Date().toLocaleDateString("es-PE");
-var pinVerificado = false;
-var PIN_SESION    = "pin_sesion_" + new Date().toLocaleDateString("es-PE");
 var procesando = false;
-var bloqueados = {}; // id -> timestamp ultimo scan
-var registros  = {}; // id -> {e:0, s:0, fecha:""}
+var bloqueados = {};
+var registros  = {};
 var historial  = [];
 var cE=0, cS=0, cD=0;
 
-// Cargar registros del localStorage para persistir entre recargas
 function cargarRegistros() {
   try {
-    var hoy = fechaHoy();
+    var hoy  = fechaHoy();
     var data = localStorage.getItem("registros_" + hoy);
     if (data) registros = JSON.parse(data);
   } catch(e) {}
@@ -161,7 +232,7 @@ function guardarRegistros() {
     localStorage.setItem("registros_" + fechaHoy(), JSON.stringify(registros));
   } catch(e) {}
 }
-  
+
 function verificarTiempoMinimo(id) {
   try {
     var key  = "entrada_ts_" + id + "_" + fechaHoy();
@@ -171,7 +242,7 @@ function verificarTiempoMinimo(id) {
     return Math.floor(diff);
   } catch(e) { return 999; }
 }
-  
+
 function fechaHoy() {
   return new Date().toLocaleDateString("es-PE");
 }
@@ -191,79 +262,14 @@ window.onload = function() {
   limpiarSiDiaAnterior();
   cargarRegistros();
   verificarSesionPin();
+  // Activar audio con cualquier toque en la página
+  document.addEventListener("touchstart", iniciarAudio, {once:true});
+  document.addEventListener("click",      iniciarAudio, {once:true});
 };
 
 function obtenerIdDeURL() {
   var params = new URLSearchParams(window.location.search);
   return params.get("id") ? params.get("id").trim().toUpperCase() : null;
-}
-
-function verificarSesionPin() {
-  try {
-    var sesion = localStorage.getItem(PIN_SESION);
-    if (sesion === "OK") {
-      pinVerificado = true;
-      iniciarCamara();
-      document.getElementById("input-id").focus();
-      return;
-    }
-  } catch(e) {}
-  mostrarPantallaPin();
-}
-
-function mostrarPantallaPin() {
-  document.body.innerHTML =
-    '<div style="background:#7B3F00;min-height:100vh;display:flex;align-items:center;' +
-    'justify-content:center;font-family:Arial">' +
-    '<div style="background:#FFF8F0;border-radius:16px;padding:32px;width:320px;' +
-    'text-align:center;border:3px solid #D2691E">' +
-    '<div style="font-size:48px;margin-bottom:16px">ECM</div>' +
-    '<h1 style="color:#7B3F00;font-size:20px;margin-bottom:8px">Sistema de Asistencia</h1>' +
-    '<p style="color:#C68642;font-size:14px;margin-bottom:24px">I.E. El Carmelo de María</p>' +
-    '<p style="color:#3A1800;font-size:15px;margin-bottom:16px;font-weight:bold">' +
-    'Ingrese el PIN del día</p>' +
-    '<input id="pin-input" type="password" inputmode="numeric" maxlength="4" ' +
-    'style="width:100%;padding:14px;font-size:28px;text-align:center;' +
-    'border:2px solid #C68642;border-radius:8px;letter-spacing:12px;' +
-    'margin-bottom:16px;font-family:Arial" placeholder="----" ' +
-    'onkeydown="if(event.key===\'Enter\')validarPin()">' +
-    '<button onclick="validarPin()" ' +
-    'style="width:100%;padding:14px;background:#7B3F00;color:white;border:none;' +
-    'border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;margin-bottom:12px">' +
-    'Ingresar</button>' +
-    '<div id="pin-error" style="color:#9B1C1C;font-size:14px;min-height:20px"></div>' +
-    '<p style="color:#C68642;font-size:12px;margin-top:16px">' +
-    'Solicite el PIN al responsable del sistema</p>' +
-    '</div></div>';
-  setTimeout(function() {
-    var inp = document.getElementById("pin-input");
-    if (inp) inp.focus();
-  }, 300);
-}
-
-function validarPin() {
-  var pinIngresado = document.getElementById("pin-input").value.trim();
-  if (!pinIngresado || pinIngresado.length < 4) {
-    document.getElementById("pin-error").textContent = "Ingrese los 4 dígitos del PIN";
-    return;
-  }
-  document.getElementById("pin-error").textContent = "Verificando...";
-  fetch(AS_URL + "?accion=pin&valor=" + encodeURIComponent(pinIngresado))
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.valido) {
-        try { localStorage.setItem(PIN_SESION, "OK"); } catch(e) {}
-        pinVerificado = true;
-        location.reload();
-      } else {
-        document.getElementById("pin-error").textContent = "PIN incorrecto. Intente nuevamente.";
-        document.getElementById("pin-input").value = "";
-        document.getElementById("pin-input").focus();
-      }
-    })
-    .catch(function() {
-      document.getElementById("pin-error").textContent = "Sin conexion. Intente nuevamente.";
-    });
 }
 
 function verificarSesionPin() {
@@ -299,29 +305,30 @@ function mostrarPantallaPin() {
 }
 
 function validarPin() {
+  iniciarAudio();
   var pinIngresado = document.getElementById("pin-input").value.trim();
   if (!pinIngresado || pinIngresado.length < 4) {
     document.getElementById("pin-error").textContent = "Ingrese los 4 dígitos del PIN";
     return;
   }
-
   document.getElementById("pin-error").textContent = "Verificando...";
-
   fetch(AS_URL + "?accion=pin&valor=" + encodeURIComponent(pinIngresado))
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.valido) {
+        sonidoEntrada();
         try { localStorage.setItem(PIN_SESION, "OK"); } catch(e) {}
         pinVerificado = true;
-        // Recargar la pagina para mostrar el kiosco
         location.reload();
       } else {
+        sonidoError();
         document.getElementById("pin-error").textContent = "PIN incorrecto. Intente nuevamente.";
         document.getElementById("pin-input").value = "";
         document.getElementById("pin-input").focus();
       }
     })
     .catch(function() {
+      sonidoError();
       document.getElementById("pin-error").textContent = "Sin conexion. Intente nuevamente.";
     });
 }
@@ -331,7 +338,6 @@ function limpiarSiDiaAnterior() {
     var ultimoDia = localStorage.getItem("ultimo_dia");
     var hoy = fechaHoy();
     if (ultimoDia !== hoy) {
-      // Es un dia nuevo — limpiar todos los registros locales
       localStorage.clear();
       localStorage.setItem("ultimo_dia", hoy);
     }
@@ -361,7 +367,6 @@ function iniciarCamara() {
     camaraActiva = true;
     document.getElementById("cam-msg").textContent = "Encuadre el QR en el recuadro naranja";
     scanInterval = setInterval(escanearFrame, 50);
-        // Si la URL trae un ID procesarlo automaticamente
     var idURL = obtenerIdDeURL();
     if (idURL) {
       setTimeout(function() {
@@ -381,40 +386,36 @@ function escanearFrame() {
   var c = document.getElementById("canvas-qr");
   if (!v.readyState || v.readyState < 2 || !v.videoWidth) return;
 
-  var vw = v.videoWidth;
-  var vh = v.videoHeight;
-
-  // Procesar solo la region central (donde esta el recuadro naranja)
-  var tam  = Math.min(vw, vh) * 0.9;
-  var sx   = (vw - tam) / 2;
-  var sy   = (vh - tam) / 2;
+  var vw  = v.videoWidth;
+  var vh  = v.videoHeight;
+  var tam = Math.min(vw, vh) * 0.9;
+  var sx  = (vw - tam) / 2;
+  var sy  = (vh - tam) / 2;
 
   c.width  = tam;
   c.height = tam;
 
-  var ctx = c.getContext("2d", {willReadFrequently:true});
+  var ctx  = c.getContext("2d", {willReadFrequently:true});
   ctx.drawImage(v, sx, sy, tam, tam, 0, 0, tam, tam);
 
   var img  = ctx.getImageData(0, 0, tam, tam);
   var code = jsQR(img.data, img.width, img.height, {inversionAttempts:"dontInvert"});
   if (code && code.data) {
     var id = extraerID(code.data);
-    if (id) procesarId(id);
+    if (id) {
+      // Bip de lectura inmediato al detectar el QR
+      sonidoProcesando();
+      procesarId(id);
+    }
   }
 }
 
 function extraerID(url) {
-  // Formato nuevo: https://jerojantrabajo.github.io/carmelo-asistencia/?id=XXXXX
   var mNuevo = url.match(/[?&]id=([^&]+)/);
   if (mNuevo) return decodeURIComponent(mNuevo[1]).trim().toUpperCase();
-
-  // Formato antiguo (compatibilidad): entry.582603348=XXXXX
   var mAntiguo = url.match(/entry\.582603348=([^&]+)/);
   if (mAntiguo) return decodeURIComponent(mAntiguo[1]).trim().toUpperCase();
-
-  // Solo numeros (lector externo)
   if (/^\d{5,12}$/.test(url.trim())) return url.trim().toUpperCase();
-
   return null;
 }
 
@@ -434,9 +435,11 @@ function toggleCamara() {
 //  INGRESO MANUAL
 // ══════════════════════════════════════
 function procesarManual() {
+  iniciarAudio();
   var id = document.getElementById("input-id").value.trim().toUpperCase();
   if (!id) return;
   document.getElementById("input-id").value = "";
+  sonidoProcesando();
   procesarId(id);
 }
 
@@ -445,35 +448,28 @@ function procesarManual() {
 // ══════════════════════════════════════
 function procesarId(id) {
   var ahora = Date.now();
-
-  // Anti-duplicado por tiempo: mismo ID en menos de 8 segundos
   if (bloqueados[id] && (ahora - bloqueados[id]) < 8000) return;
   if (procesando) return;
 
-  procesando    = true;
+  procesando     = true;
   bloqueados[id] = ahora;
 
   var reg = getRegistro(id);
 
-  // CAPA 1: verificacion local inmediata
-  // Si ya tiene 1 entrada y 1 salida localmente — BLOQUEAR
   if (reg.e >= 1 && reg.s >= 1) {
     mostrarDuplicado(id);
     return;
   }
 
-  // Determinar tipo esperado segun registro local
   var tipoEsperado = (reg.e === 0) ? "ENTRADA" : "SALIDA";
 
   mostrarEstado("procesando", "...", "Verificando " + id, "Consultando el sistema...");
 
-  // CAPA 2: verificar en Apps Script (si esta disponible)
   var urlConsulta = AS_URL + "?accion=estado&id=" + encodeURIComponent(id);
 
   fetch(urlConsulta, {signal: AbortSignal.timeout ? AbortSignal.timeout(4000) : undefined})
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      // Sincronizar estado local con el del servidor
       if (data.estado === "COMPLETO") {
         reg.e = 1; reg.s = 1;
         guardarRegistros();
@@ -481,36 +477,36 @@ function procesarId(id) {
         return;
       }
       if (data.estado === "TIENE_ENTRADA") {
-    reg.e = Math.max(reg.e, 1);
-    guardarRegistros();
-    tipoEsperado = "SALIDA";
-  }
-  // Verificar tiempo minimo antes de registrar salida
-  if (tipoEsperado === "SALIDA") {
-    var minutos = verificarTiempoMinimo(id);
-    if (minutos < 30) {
-      mostrarEstado("duplicado", "=",
-        "Muy pronto para salida",
-        "Faltan " + (30 - minutos) + " min para poder registrar salida");
-      setTimeout(function(){ resetear(); procesando=false; document.getElementById("input-id").focus(); }, 3000);
-      return;
-    }
-  }
-  enviar(id, data.nombre || id, data.grado || "", tipoEsperado);
+        reg.e = Math.max(reg.e, 1);
+        guardarRegistros();
+        tipoEsperado = "SALIDA";
+      }
+      if (tipoEsperado === "SALIDA") {
+        var minutos = verificarTiempoMinimo(id);
+        if (minutos < 30) {
+          sonidoError();  // alerta: muy pronto para salida
+          mostrarEstado("duplicado", "=",
+            "Muy pronto para salida",
+            "Faltan " + (30 - minutos) + " min para poder registrar salida");
+          setTimeout(function(){ resetear(); procesando=false; document.getElementById("input-id").focus(); }, 3000);
+          return;
+        }
+      }
+      enviar(id, data.nombre || id, data.grado || "", tipoEsperado);
     })
     .catch(function() {
-      // Sin conexion a AS — usar solo estado local
-    if (tipoEsperado === "SALIDA") {
-      var minLocal = verificarTiempoMinimo(id);
-      if (minLocal < 30) {
-        mostrarEstado("duplicado", "=",
-          "Muy pronto para salida",
-          "Faltan " + (30 - minLocal) + " min para poder registrar salida");
-        setTimeout(function(){ resetear(); procesando=false; document.getElementById("input-id").focus(); }, 3000);
-        return;
+      if (tipoEsperado === "SALIDA") {
+        var minLocal = verificarTiempoMinimo(id);
+        if (minLocal < 30) {
+          sonidoError();  // alerta: muy pronto para salida
+          mostrarEstado("duplicado", "=",
+            "Muy pronto para salida",
+            "Faltan " + (30 - minLocal) + " min para poder registrar salida");
+          setTimeout(function(){ resetear(); procesando=false; document.getElementById("input-id").focus(); }, 3000);
+          return;
+        }
       }
-    }
-    enviar(id, id, "", tipoEsperado);
+      enviar(id, id, "", tipoEsperado);
     });
 }
 
@@ -521,6 +517,7 @@ function enviar(id, nombre, grado, tipo) {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (!data.ok) {
+        sonidoError();  // error del servidor
         mostrarEstado("error", "!", "Error al registrar", data.mensaje || "Intente nuevamente");
         setTimeout(function(){ resetear(); procesando=false; }, 3000);
         return;
@@ -532,10 +529,16 @@ function enviar(id, nombre, grado, tipo) {
       if (tipo === "ENTRADA") {
         reg.e++;
         cE++; document.getElementById("c-e").textContent = cE;
+        sonidoEntrada();  // doble bip ascendente
         mostrarEstado("entrada", "->", "ENTRADA: " + nombre, hora);
+        // Guardar timestamp de entrada para control de tiempo mínimo
+        try {
+          localStorage.setItem("entrada_ts_" + id + "_" + fechaHoy(), Date.now().toString());
+        } catch(e) {}
       } else {
         reg.s++;
         cS++; document.getElementById("c-s").textContent = cS;
+        sonidoSalida();   // doble bip descendente
         mostrarEstado("salida", "<-", "SALIDA: " + nombre, hora);
       }
       guardarRegistros();
@@ -548,12 +551,14 @@ function enviar(id, nombre, grado, tipo) {
       }, 2500);
     })
     .catch(function() {
+      sonidoError();  // error de conexión
       mostrarEstado("error","!","Error de conexion","Verifique el internet");
       setTimeout(function(){ resetear(); procesando=false; }, 3000);
     });
 }
 
 function mostrarDuplicado(id, nombre) {
+  sonidoError();  // ya registrado
   cD++; document.getElementById("c-d").textContent = cD;
   mostrarEstado("duplicado","=","Ya registrado hoy", (nombre||id)+" ya tiene entrada y salida");
   agregarHistorial(nombre||id, "DUPLICADO", new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}));
@@ -577,7 +582,6 @@ function resetear() {
 function agregarHistorial(nombre, tipo, hora) {
   historial.unshift({nombre:nombre, tipo:tipo, hora:hora});
   if (historial.length > 30) historial.pop();
-  var cls = tipo==="ENTRADA"?"b-entrada":tipo==="SALIDA"?"b-salida":"b-duplic";
   var html = historial.map(function(r){
     var c = r.tipo==="ENTRADA"?"b-entrada":r.tipo==="SALIDA"?"b-salida":"b-duplic";
     return '<div class="h-item">'+
