@@ -459,19 +459,36 @@ function iniciarCamara() {
   });
 }
 
+// Variable de control — QR bloqueado tras escaneo exitoso
+var ultimoQrLeido     = '';
+var ultimoQrTimestamp = 0;
+var BLOQUEO_QR_MS     = 3000; // 3 segundos bloqueado el mismo QR
+
 function escanearFrame() {
-  // Anti-rebote: ignorar si no paso el tiempo minimo
+  // Anti-rebote: ignorar si no pasó el tiempo mínimo
   if (Date.now() - ultimoEscaneo < TIEMPO_LIBRE) return;
+
   var v = document.getElementById("video");
   var c = document.getElementById("canvas-qr");
   if (!v.readyState || v.readyState < 2 || !v.videoWidth) return;
+
   var vw=v.videoWidth, vh=v.videoHeight, tam=Math.min(vw,vh)*0.9;
   c.width=tam; c.height=tam;
   var ctx=c.getContext("2d",{willReadFrequently:true});
   ctx.drawImage(v,(vw-tam)/2,(vh-tam)/2,tam,tam,0,0,tam,tam);
   var img=ctx.getImageData(0,0,tam,tam);
   var code=jsQR(img.data,img.width,img.height,{inversionAttempts:"dontInvert"});
+
   if (code && code.data) {
+    var ahora = Date.now();
+    // Ignorar si es el mismo QR dentro del período de bloqueo
+    if (code.data === ultimoQrLeido && (ahora - ultimoQrTimestamp) < BLOQUEO_QR_MS) {
+      return; // ← sale sin procesar ni emitir sonido
+    }
+    // QR nuevo o fuera del bloqueo → registrar y bloquear
+    ultimoQrLeido     = code.data;
+    ultimoQrTimestamp = ahora;
+
     var id = extraerID(code.data);
     if (id) { sonidoProcesando(); procesarId(id); }
   }
