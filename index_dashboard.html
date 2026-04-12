@@ -1,1 +1,1226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dashboard — El Carmelo de María</title>
+<style>
+/* ═══════════════════════════════════════════
+   PALETA INSTITUCIONAL
+   ═══════════════════════════════════════════ */
+:root {
+  --marron:       #7B3F00;
+  --naranja:      #D2691E;
+  --crema:        #FFF8F0;
+  --naranja-clr:  #F4D3B8;
+  --marron-clr:   #C68642;
+  --verde:        #145A32;
+  --verde-clr:    #D4EDDA;
+  --rojo:         #B71C1C;
+  --rojo-clr:     #FDECEA;
+  --amarillo:     #F57F17;
+  --amarillo-clr: #FFF9C4;
+  --azul:         #1565C0;
+  --azul-clr:     #E3F2FD;
+  --blanco:       #FFFFFF;
+  --gris:         #F5F5F5;
+  --gris-txt:     #555555;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--crema);
+  color: #333;
+  min-height: 100vh;
+}
+
+/* ── PANTALLA PIN ── */
+#pantalla-pin {
+  min-height: 100vh;
+  background: var(--marron);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.pin-card {
+  background: var(--crema);
+  border-radius: 16px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+  border: 3px solid var(--naranja);
+}
+.pin-logo {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+.pin-card h1 {
+  color: var(--marron);
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+.pin-card p {
+  color: var(--marron-clr);
+  font-size: 12px;
+  margin-bottom: 24px;
+}
+.pin-card input {
+  width: 100%;
+  padding: 14px;
+  font-size: 28px;
+  text-align: center;
+  border: 2px solid var(--naranja-clr);
+  border-radius: 10px;
+  letter-spacing: 8px;
+  font-family: Arial, monospace;
+  background: var(--blanco);
+  color: var(--marron);
+  font-weight: bold;
+  margin-bottom: 14px;
+}
+.pin-card input:focus { outline: none; border-color: var(--marron); }
+.btn-pin {
+  width: 100%;
+  padding: 13px;
+  background: var(--marron);
+  color: var(--blanco);
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.btn-pin:hover { background: var(--naranja); }
+#pin-error {
+  color: var(--rojo);
+  font-size: 13px;
+  min-height: 20px;
+}
+
+/* ── DASHBOARD PRINCIPAL ── */
+#dashboard { display: none; flex-direction: column; min-height: 100vh; }
+
+/* HEADER */
+header {
+  background: var(--marron);
+  color: var(--blanco);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+header .logo { font-size: 28px; }
+header .ie-info { flex: 1; }
+header .ie-info h1 { font-size: 14px; font-weight: bold; line-height: 1.2; }
+header .ie-info p  { font-size: 11px; color: var(--naranja-clr); margin-top: 2px; }
+.header-right { text-align: right; }
+.reloj { font-size: 20px; font-weight: bold; color: var(--naranja-clr); }
+.fecha-txt { font-size: 11px; color: var(--naranja-clr); }
+.btn-salir {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: var(--blanco);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+/* TABS */
+.tabs {
+  background: var(--marron);
+  display: flex;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  overflow-x: auto;
+}
+.tab {
+  padding: 10px 16px;
+  color: var(--naranja-clr);
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+}
+.tab.activo {
+  color: var(--blanco);
+  border-bottom-color: var(--naranja);
+  background: rgba(255,255,255,0.05);
+}
+.tab:hover { color: var(--blanco); }
+
+/* CONTENIDO */
+main { flex: 1; padding: 14px; max-width: 1000px; margin: 0 auto; width: 100%; }
+
+.seccion { display: none; }
+.seccion.activa { display: block; }
+
+/* TARJETAS RESUMEN */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.card {
+  background: var(--blanco);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  border: 2px solid var(--naranja-clr);
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+}
+.card.verde::before  { background: var(--verde); }
+.card.naranja::before{ background: var(--naranja); }
+.card.rojo::before   { background: var(--rojo); }
+.card.azul::before   { background: var(--azul); }
+.card.marron::before { background: var(--marron); }
+
+.card-num  { font-size: 32px; font-weight: bold; line-height: 1; margin-bottom: 4px; }
+.card-lbl  { font-size: 11px; color: var(--gris-txt); }
+.card.verde  .card-num { color: var(--verde); }
+.card.naranja .card-num{ color: var(--naranja); }
+.card.rojo   .card-num { color: var(--rojo); }
+.card.azul   .card-num { color: var(--azul); }
+.card.marron .card-num { color: var(--marron); }
+
+/* BARRA DE PROGRESO */
+.progreso-wrap {
+  background: var(--blanco);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--naranja-clr);
+}
+.progreso-titulo {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--marron);
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+.barra-outer {
+  background: var(--gris);
+  border-radius: 20px;
+  height: 18px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.barra-inner {
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(90deg, var(--verde), #1E8449);
+  transition: width 0.8s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  font-size: 11px;
+  color: white;
+  font-weight: bold;
+}
+
+/* TABLA DE ALUMNOS */
+.tabla-wrap {
+  background: var(--blanco);
+  border-radius: 12px;
+  border: 1px solid var(--naranja-clr);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.tabla-header {
+  background: var(--marron);
+  color: var(--blanco);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tabla-filtros {
+  padding: 10px 12px;
+  background: var(--crema);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--naranja-clr);
+}
+.tabla-filtros select,
+.tabla-filtros input {
+  padding: 6px 10px;
+  border: 1px solid var(--naranja-clr);
+  border-radius: 6px;
+  font-size: 12px;
+  background: var(--blanco);
+  font-family: Arial;
+}
+.tabla-filtros input { flex: 1; min-width: 120px; }
+.tabla-scroll { overflow-x: auto; max-height: 420px; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+  background: var(--naranja);
+  color: var(--blanco);
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 11px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+td { padding: 7px 10px; border-bottom: 1px solid var(--naranja-clr); }
+tr:nth-child(even) td { background: var(--crema); }
+tr:hover td { background: var(--naranja-clr); }
+
+/* BADGES DE ESTADO */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: bold;
+}
+.badge-temprano  { background: var(--verde-clr);    color: var(--verde); }
+.badge-puntual   { background: var(--verde-clr);    color: var(--verde); }
+.badge-tarde     { background: var(--amarillo-clr); color: var(--amarillo); }
+.badge-ausente   { background: var(--rojo-clr);     color: var(--rojo); }
+.badge-justif    { background: var(--azul-clr);     color: var(--azul); }
+.badge-anticipado{ background: var(--azul-clr);     color: var(--azul); }
+
+/* BOTONES DE ACCIÓN */
+.btn-accion {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: Arial;
+}
+.btn-justif  { background: var(--azul-clr);  color: var(--azul); }
+.btn-ausente { background: var(--rojo-clr);  color: var(--rojo); }
+.btn-accion:hover { opacity: 0.8; }
+
+/* SECCIÓN JUSTIFICACIONES */
+.form-justif {
+  background: var(--blanco);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--naranja-clr);
+  margin-bottom: 14px;
+}
+.form-justif h3 {
+  color: var(--marron);
+  font-size: 14px;
+  margin-bottom: 14px;
+  border-bottom: 2px solid var(--naranja-clr);
+  padding-bottom: 8px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.form-row.full { grid-template-columns: 1fr; }
+.form-group label {
+  display: block;
+  font-size: 11px;
+  color: var(--gris-txt);
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--naranja-clr);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: Arial;
+  background: var(--blanco);
+}
+.form-group textarea { height: 70px; resize: none; }
+.alumno-encontrado {
+  background: var(--verde-clr);
+  border: 1px solid var(--verde);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--verde);
+  margin-bottom: 10px;
+  display: none;
+}
+.btn-guardar {
+  background: var(--verde);
+  color: var(--blanco);
+  border: none;
+  border-radius: 8px;
+  padding: 11px 20px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  font-family: Arial;
+}
+.btn-guardar:hover { background: #1a7a40; }
+.msg-form {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  text-align: center;
+  display: none;
+}
+.msg-ok  { background: var(--verde-clr);  color: var(--verde); }
+.msg-err { background: var(--rojo-clr);   color: var(--rojo); }
+
+/* LISTA JUSTIFICACIONES */
+.justif-item {
+  background: var(--azul-clr);
+  border-left: 4px solid var(--azul);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.justif-item strong { color: var(--azul); }
+.justif-item .justif-meta { color: var(--gris-txt); font-size: 11px; margin-top: 4px; }
+
+/* CARGANDO */
+.cargando {
+  text-align: center;
+  padding: 30px;
+  color: var(--marron-clr);
+  font-size: 13px;
+}
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--naranja-clr);
+  border-top-color: var(--naranja);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* BTN ACTUALIZAR */
+.btn-refresh {
+  background: var(--naranja);
+  color: var(--blanco);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: Arial;
+  font-weight: bold;
+}
+.btn-refresh:hover { background: var(--marron); }
+
+/* MODAL CONFIRMACIÓN */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.visible { display: flex; }
+.modal-card {
+  background: var(--blanco);
+  border-radius: 14px;
+  padding: 24px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  border: 3px solid var(--naranja);
+}
+.modal-card h3 { color: var(--marron); font-size: 16px; margin-bottom: 10px; }
+.modal-card p  { font-size: 13px; color: var(--gris-txt); margin-bottom: 20px; }
+.modal-btns { display: flex; gap: 10px; }
+.modal-btns button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: Arial;
+}
+.btn-confirmar { background: var(--rojo);   color: var(--blanco); }
+.btn-cancelar  { background: var(--gris);   color: #333; }
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .form-row   { grid-template-columns: 1fr; }
+  th, td { padding: 6px 8px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ PANTALLA PIN ══════════════ -->
+<div id="pantalla-pin">
+  <div class="pin-card">
+    <div class="pin-logo">🏫</div>
+    <h1>El Carmelo de María</h1>
+    <p>Dashboard de Asistencia — Acceso restringido</p>
+    <input type="password" id="pin-input" maxlength="6"
+      placeholder="••••" inputmode="numeric"
+      onkeydown="if(event.key==='Enter') verificarPin()">
+    <button class="btn-pin" onclick="verificarPin()">Ingresar</button>
+    <div id="pin-error"></div>
+  </div>
+</div>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div id="dashboard">
+
+  <header>
+    <div class="logo">🏫</div>
+    <div class="ie-info">
+      <h1>I.E. SFT N° 50949 "El Carmelo de María"</h1>
+      <p>Dashboard de Asistencia — Quillahuata, Cusco</p>
+    </div>
+    <div class="header-right">
+      <div class="reloj" id="reloj">--:--</div>
+      <div class="fecha-txt" id="fecha-hdr">--</div>
+      <button class="btn-salir" onclick="cerrarSesion()">Salir</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab activo" onclick="cambiarTab('resumen')">📊 Resumen</div>
+    <div class="tab" onclick="cambiarTab('alumnos')">👥 Alumnos</div>
+    <div class="tab" onclick="cambiarTab('ausentes')">🔴 Ausentes</div>
+    <div class="tab" onclick="cambiarTab('justificaciones')">📝 Justificaciones</div>
+  </div>
+
+  <main>
+
+    <!-- ── TAB RESUMEN ── -->
+    <div id="sec-resumen" class="seccion activa">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:13px;color:var(--marron);font-weight:bold">
+          Asistencia del día — <span id="fecha-resumen">--</span>
+        </div>
+        <button class="btn-refresh" onclick="cargarDatos()">↻ Actualizar</button>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card marron">
+          <div class="card-num" id="c-total">--</div>
+          <div class="card-lbl">Total alumnos</div>
+        </div>
+        <div class="card verde">
+          <div class="card-num" id="c-presentes">--</div>
+          <div class="card-lbl">Presentes</div>
+        </div>
+        <div class="card naranja">
+          <div class="card-num" id="c-tardanzas">--</div>
+          <div class="card-lbl">Tardanzas</div>
+        </div>
+        <div class="card rojo">
+          <div class="card-num" id="c-ausentes">--</div>
+          <div class="card-lbl">Ausentes</div>
+        </div>
+        <div class="card azul">
+          <div class="card-num" id="c-justif">--</div>
+          <div class="card-lbl">Justificados</div>
+        </div>
+        <div class="card verde">
+          <div class="card-num" id="c-pct">--%</div>
+          <div class="card-lbl">Asistencia</div>
+        </div>
+      </div>
+
+      <div class="progreso-wrap">
+        <div class="progreso-titulo">
+          <span>Porcentaje de asistencia</span>
+          <span id="pct-label">--%</span>
+        </div>
+        <div class="barra-outer">
+          <div class="barra-inner" id="barra-pct" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Resumen por nivel -->
+      <div id="resumen-niveles"></div>
+
+      <div style="text-align:center;font-size:11px;color:var(--gris-txt);margin-top:10px">
+        Última actualización: <span id="ultima-act">--</span>
+      </div>
+    </div>
+
+    <!-- ── TAB ALUMNOS ── -->
+    <div id="sec-alumnos" class="seccion">
+      <div class="tabla-wrap">
+        <div class="tabla-header">
+          <span>Registro del día</span>
+          <button class="btn-refresh" onclick="cargarDatos()">↻</button>
+        </div>
+        <div class="tabla-filtros">
+          <select id="filtro-nivel" onchange="filtrarTabla()">
+            <option value="">Todos los niveles</option>
+            <option value="Inicial">Inicial</option>
+            <option value="Primaria">Primaria</option>
+            <option value="Secundaria">Secundaria</option>
+          </select>
+          <select id="filtro-estado" onchange="filtrarTabla()">
+            <option value="">Todos los estados</option>
+            <option value="INGRESO ANTICIPADO">Temprano</option>
+            <option value="PUNTUAL">Puntual</option>
+            <option value="TARDE">Tarde</option>
+            <option value="AUSENTE">Ausente</option>
+          </select>
+          <input type="text" id="filtro-buscar"
+            placeholder="Buscar nombre o DNI..."
+            oninput="filtrarTabla()">
+        </div>
+        <div class="tabla-scroll">
+          <table id="tabla-alumnos">
+            <thead>
+              <tr>
+                <th>DNI</th>
+                <th>Nombre</th>
+                <th>Grado</th>
+                <th>Nivel</th>
+                <th>Hora</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-alumnos">
+              <tr><td colspan="7" class="cargando">
+                <div class="spinner"></div><br>Cargando datos...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB AUSENTES ── -->
+    <div id="sec-ausentes" class="seccion">
+      <div class="tabla-wrap">
+        <div class="tabla-header">
+          <span>Alumnos sin registro hoy</span>
+          <button class="btn-refresh" onclick="cargarDatos()">↻</button>
+        </div>
+        <div class="tabla-filtros">
+          <select id="filtro-nivel-aus" onchange="filtrarAusentes()">
+            <option value="">Todos los niveles</option>
+            <option value="Inicial">Inicial</option>
+            <option value="Primaria">Primaria</option>
+            <option value="Secundaria">Secundaria</option>
+          </select>
+          <input type="text" id="filtro-buscar-aus"
+            placeholder="Buscar nombre o DNI..."
+            oninput="filtrarAusentes()">
+        </div>
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>DNI</th>
+                <th>Nombre</th>
+                <th>Grado</th>
+                <th>Nivel</th>
+                <th>Apoderado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-ausentes">
+              <tr><td colspan="6" class="cargando">
+                <div class="spinner"></div><br>Cargando datos...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB JUSTIFICACIONES ── -->
+    <div id="sec-justificaciones" class="seccion">
+
+      <!-- Formulario nueva justificación -->
+      <div class="form-justif">
+        <h3>📝 Registrar Justificación</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>DNI del alumno *</label>
+            <input type="text" id="j-dni" maxlength="8"
+              placeholder="Ej: 74501234"
+              oninput="buscarAlumnoPorDni(this.value)">
+          </div>
+          <div class="form-group">
+            <label>Fecha de inasistencia *</label>
+            <input type="date" id="j-fecha">
+          </div>
+        </div>
+        <div id="j-alumno-info" class="alumno-encontrado"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select id="j-tipo">
+              <option value="FALTA_JUSTIFICADA">Falta Justificada</option>
+              <option value="TARDANZA_JUSTIFICADA">Tardanza Justificada</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Registrado por *</label>
+            <input type="text" id="j-registrador" placeholder="Nombre del auxiliar">
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Motivo *</label>
+            <textarea id="j-motivo"
+              placeholder="Ej: Cita médica, emergencia familiar..."></textarea>
+          </div>
+        </div>
+        <button class="btn-guardar" onclick="guardarJustificacion()">
+          Guardar Justificación
+        </button>
+        <div id="j-msg" class="msg-form"></div>
+      </div>
+
+      <!-- Lista de justificaciones del día -->
+      <div class="tabla-wrap">
+        <div class="tabla-header">
+          <span>Justificaciones registradas hoy</span>
+          <button class="btn-refresh" onclick="cargarJustificaciones()">↻</button>
+        </div>
+        <div id="lista-justif" style="padding:12px">
+          <div class="cargando">Cargando...</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════ MODAL CONFIRMACIÓN ══════════════ -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-card">
+    <h3 id="modal-titulo">Confirmar acción</h3>
+    <p id="modal-msg">¿Está seguro de realizar esta acción?</p>
+    <div class="modal-btns">
+      <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-confirmar" id="modal-confirmar">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  CONFIGURACIÓN
+// ═══════════════════════════════════════════════════
+var APPS_URL = 'https://script.google.com/macros/s/AKfycbzsmnfu9vUHuPxgpwP11dD7fWyM-GYZGSBuvCxmrkFvQ8XxxZl0VrZuG69dbNB-x3Q-Uw/exec';
+var PIN_DASHBOARD = 'dashboard_pin_' + new Date().toLocaleDateString('es-PE');
+
+// ═══════════════════════════════════════════════════
+//  DATOS EN MEMORIA
+// ═══════════════════════════════════════════════════
+var datosHoy      = [];  // registros de asistencia de hoy
+var datosAlumnos  = [];  // todos los alumnos
+var justifHoy     = [];  // justificaciones de hoy
+var tabActiva     = 'resumen';
+var modalCallback = null;
+
+// ═══════════════════════════════════════════════════
+//  INICIALIZACIÓN
+// ═══════════════════════════════════════════════════
+window.onload = function() {
+  // Verificar sesión activa
+  try {
+    if (localStorage.getItem(PIN_DASHBOARD) === 'OK') {
+      mostrarDashboard();
+      return;
+    }
+  } catch(e) {}
+  // Mostrar pantalla de PIN
+  document.getElementById('pin-input').focus();
+  setInterval(actualizarReloj, 1000);
+};
+
+// ═══════════════════════════════════════════════════
+//  PIN
+// ═══════════════════════════════════════════════════
+function verificarPin() {
+  var pin = document.getElementById('pin-input').value.trim();
+  if (!pin) return;
+  document.getElementById('pin-error').textContent = 'Verificando...';
+
+  fetch(APPS_URL + '?accion=pin&valor=' + encodeURIComponent(pin))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.valido) {
+        try { localStorage.setItem(PIN_DASHBOARD, 'OK'); } catch(e) {}
+        mostrarDashboard();
+      } else {
+        document.getElementById('pin-error').textContent = '❌ PIN incorrecto';
+        document.getElementById('pin-input').value = '';
+        document.getElementById('pin-input').focus();
+      }
+    })
+    .catch(function() {
+      document.getElementById('pin-error').textContent = '⚠️ Sin conexión';
+    });
+}
+
+function cerrarSesion() {
+  try { localStorage.removeItem(PIN_DASHBOARD); } catch(e) {}
+  location.reload();
+}
+
+function mostrarDashboard() {
+  document.getElementById('pantalla-pin').style.display = 'none';
+  document.getElementById('dashboard').style.display    = 'flex';
+  document.getElementById('j-fecha').valueAsDate = new Date();
+  cargarDatos();
+  setInterval(actualizarReloj, 1000);
+  // Auto-actualizar cada 2 minutos
+  setInterval(cargarDatos, 120000);
+}
+
+// ═══════════════════════════════════════════════════
+//  RELOJ Y FECHA
+// ═══════════════════════════════════════════════════
+function actualizarReloj() {
+  var ahora = new Date();
+  var hh = String(ahora.getHours()).padStart(2,'0');
+  var mm = String(ahora.getMinutes()).padStart(2,'0');
+  var ss = String(ahora.getSeconds()).padStart(2,'0');
+  var el = document.getElementById('reloj');
+  if (el) el.textContent = hh + ':' + mm + ':' + ss;
+
+  var dias   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var meses  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  var fEl = document.getElementById('fecha-hdr');
+  if (fEl) fEl.textContent =
+    dias[ahora.getDay()] + ' ' + ahora.getDate() + ' ' +
+    meses[ahora.getMonth()] + ' ' + ahora.getFullYear();
+}
+
+// ═══════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════
+function cambiarTab(tab) {
+  tabActiva = tab;
+  document.querySelectorAll('.tab').forEach(function(t, i) {
+    t.classList.remove('activo');
+  });
+  document.querySelectorAll('.tab').forEach(function(t) {
+    if (t.getAttribute('onclick').includes(tab)) t.classList.add('activo');
+  });
+  document.querySelectorAll('.seccion').forEach(function(s) {
+    s.classList.remove('activa');
+  });
+  document.getElementById('sec-' + tab).classList.add('activa');
+
+  if (tab === 'justificaciones') cargarJustificaciones();
+}
+
+// ═══════════════════════════════════════════════════
+//  CARGAR DATOS PRINCIPALES
+// ═══════════════════════════════════════════════════
+function cargarDatos() {
+  // Cargar alumnos y asistencia en paralelo
+  Promise.all([
+    fetch(APPS_URL + '?accion=alumnos').then(function(r) { return r.json(); }),
+    fetch(APPS_URL + '?accion=dashboard').then(function(r) { return r.json(); })
+  ])
+  .then(function(resultados) {
+    var resAlumnos   = resultados[0];
+    var resDashboard = resultados[1];
+
+    // Guardar alumnos
+    if (resAlumnos.alumnos) {
+      datosAlumnos = resAlumnos.alumnos;
+    }
+
+    // Guardar registros de hoy
+    if (resDashboard.registros) {
+      datosHoy = resDashboard.registros;
+    }
+
+    // Renderizar todo
+    renderizarResumen(resDashboard);
+    renderizarTablaAlumnos();
+    renderizarAusentes();
+
+    document.getElementById('ultima-act').textContent =
+      new Date().toLocaleTimeString('es-PE', {hour:'2-digit',minute:'2-digit'});
+  })
+  .catch(function(err) {
+    console.error('Error cargando datos:', err);
+    // Intentar cargar solo alumnos si dashboard falla
+    fetch(APPS_URL + '?accion=alumnos')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.alumnos) datosAlumnos = data.alumnos;
+        renderizarTablaAlumnos();
+        renderizarAusentes();
+      });
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDERIZAR RESUMEN
+// ═══════════════════════════════════════════════════
+function renderizarResumen(data) {
+  var total     = data.total     || datosAlumnos.length || 0;
+  var presentes = data.presentes || 0;
+  var tardanzas = data.tardanzas || 0;
+  var ausentes  = data.ausentes  || 0;
+  var justif    = data.justif    || 0;
+  var pct       = total > 0 ? Math.round(presentes / total * 100) : 0;
+
+  document.getElementById('c-total').textContent    = total;
+  document.getElementById('c-presentes').textContent = presentes;
+  document.getElementById('c-tardanzas').textContent = tardanzas;
+  document.getElementById('c-ausentes').textContent  = ausentes;
+  document.getElementById('c-justif').textContent    = justif;
+  document.getElementById('c-pct').textContent       = pct + '%';
+  document.getElementById('pct-label').textContent   = pct + '%';
+  document.getElementById('fecha-resumen').textContent =
+    new Date().toLocaleDateString('es-PE', {weekday:'long', day:'numeric', month:'long'});
+
+  var barra = document.getElementById('barra-pct');
+  barra.style.width = pct + '%';
+  barra.textContent = pct > 15 ? pct + '%' : '';
+
+  // Resumen por nivel
+  var html = '';
+  var niveles = data.porNivel || {};
+  ['Inicial','Primaria','Secundaria'].forEach(function(n) {
+    var d = niveles[n];
+    if (!d) return;
+    var p = d.total > 0 ? Math.round(d.presentes / d.total * 100) : 0;
+    html +=
+      '<div style="background:var(--blanco);border-radius:10px;padding:12px 14px;' +
+      'margin-bottom:10px;border:1px solid var(--naranja-clr)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+      '<span style="font-weight:bold;color:var(--marron);font-size:13px">' + n + '</span>' +
+      '<span style="font-size:12px;color:var(--gris-txt)">' + d.presentes + '/' + d.total + ' — ' + p + '%</span>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '<span style="font-size:11px;background:var(--verde-clr);color:var(--verde);padding:2px 8px;border-radius:8px">Temprano: ' + (d.temprano||0) + '</span>' +
+      '<span style="font-size:11px;background:var(--verde-clr);color:var(--verde);padding:2px 8px;border-radius:8px">Puntual: ' + (d.puntual||0) + '</span>' +
+      '<span style="font-size:11px;background:var(--amarillo-clr);color:var(--amarillo);padding:2px 8px;border-radius:8px">Tarde: ' + (d.tarde||0) + '</span>' +
+      '<span style="font-size:11px;background:var(--rojo-clr);color:var(--rojo);padding:2px 8px;border-radius:8px">Ausente: ' + (d.ausente||0) + '</span>' +
+      '</div></div>';
+  });
+  document.getElementById('resumen-niveles').innerHTML = html ||
+    '<div class="cargando">Sin datos de hoy aún</div>';
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDERIZAR TABLA DE ALUMNOS
+// ═══════════════════════════════════════════════════
+function renderizarTablaAlumnos() {
+  var tbody   = document.getElementById('tbody-alumnos');
+  var nivel   = document.getElementById('filtro-nivel').value;
+  var estado  = document.getElementById('filtro-estado').value;
+  var buscar  = document.getElementById('filtro-buscar').value.toLowerCase();
+
+  // Combinar alumnos con sus registros de hoy
+  var filas = datosAlumnos.map(function(a) {
+    var reg = datosHoy.find(function(r) {
+      return String(r.id).toUpperCase() === String(a.id).toUpperCase();
+    });
+    return {
+      id:     a.id,
+      nombre: a.nombre,
+      grado:  a.grado,
+      nivel:  a.nivel,
+      hora:   reg ? reg.hora : '--',
+      estado: reg ? reg.estado : 'AUSENTE',
+      chatId: a.chatId || ''
+    };
+  });
+
+  // Aplicar filtros
+  var filtradas = filas.filter(function(f) {
+    if (nivel  && f.nivel  !== nivel)  return false;
+    if (estado && f.estado !== estado) return false;
+    if (buscar && !f.nombre.toLowerCase().includes(buscar) &&
+        !String(f.id).includes(buscar)) return false;
+    return true;
+  });
+
+  if (filtradas.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--gris-txt)">Sin resultados</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtradas.map(function(f) {
+    var badgeClass = getBadgeClass(f.estado);
+    var accionBtn  = f.estado === 'AUSENTE' || f.estado === 'TARDE'
+      ? '<button class="btn-accion btn-justif" onclick="abrirFormJustif(\'' +
+        f.id + '\')">Justificar</button>'
+      : '';
+    return '<tr>' +
+      '<td>' + f.id + '</td>' +
+      '<td>' + f.nombre + '</td>' +
+      '<td>' + f.grado + '</td>' +
+      '<td>' + f.nivel + '</td>' +
+      '<td>' + f.hora + '</td>' +
+      '<td><span class="badge ' + badgeClass + '">' + f.estado + '</span></td>' +
+      '<td>' + accionBtn + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function filtrarTabla() { renderizarTablaAlumnos(); }
+
+function getBadgeClass(estado) {
+  var map = {
+    'INGRESO ANTICIPADO': 'badge-temprano',
+    'PUNTUAL':            'badge-puntual',
+    'TARDE':              'badge-tarde',
+    'AUSENTE':            'badge-ausente',
+    'JUSTIFICADO':        'badge-justif',
+    'SALIDA ANTICIPADA':  'badge-anticipado'
+  };
+  return map[estado] || 'badge-ausente';
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDERIZAR AUSENTES
+// ═══════════════════════════════════════════════════
+function renderizarAusentes() {
+  var tbody  = document.getElementById('tbody-ausentes');
+  var nivel  = document.getElementById('filtro-nivel-aus').value;
+  var buscar = document.getElementById('filtro-buscar-aus').value.toLowerCase();
+
+  // Alumnos sin registro de entrada hoy
+  var idsConEntrada = {};
+  datosHoy.forEach(function(r) {
+    idsConEntrada[String(r.id).toUpperCase()] = true;
+  });
+
+  var ausentes = datosAlumnos.filter(function(a) {
+    if (idsConEntrada[String(a.id).toUpperCase()]) return false;
+    if (nivel  && a.nivel !== nivel) return false;
+    if (buscar && !a.nombre.toLowerCase().includes(buscar) &&
+        !String(a.id).includes(buscar)) return false;
+    return true;
+  });
+
+  if (ausentes.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--verde)">✅ Todos los alumnos registraron entrada hoy</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = ausentes.map(function(a) {
+    var tieneChat = a.chatId && a.chatId !== '';
+    return '<tr>' +
+      '<td>' + a.id + '</td>' +
+      '<td>' + a.nombre + '</td>' +
+      '<td>' + a.grado + '</td>' +
+      '<td>' + a.nivel + '</td>' +
+      '<td>' + (tieneChat ? '✅ Con Telegram' : '—') + '</td>' +
+      '<td style="display:flex;gap:6px">' +
+      '<button class="btn-accion btn-justif" onclick="abrirFormJustif(\'' + a.id + '\')">Justificar</button>' +
+      '<button class="btn-accion btn-ausente" onclick="confirmarMarcarAusente(\'' + a.id + '\',\'' + a.nombre + '\')">Marcar ausente</button>' +
+      '</td></tr>';
+  }).join('');
+}
+
+function filtrarAusentes() { renderizarAusentes(); }
+
+// ═══════════════════════════════════════════════════
+//  MARCAR AUSENTE MANUALMENTE
+// ═══════════════════════════════════════════════════
+function confirmarMarcarAusente(id, nombre) {
+  document.getElementById('modal-titulo').textContent = 'Marcar como ausente';
+  document.getElementById('modal-msg').textContent =
+    '¿Confirma que ' + nombre + ' está ausente hoy? ' +
+    'Se notificará al apoderado por Telegram.';
+  document.getElementById('modal-confirmar').onclick = function() {
+    marcarAusenteManual(id, nombre);
+    cerrarModal();
+  };
+  document.getElementById('modal').classList.add('visible');
+}
+
+function marcarAusenteManual(id, nombre) {
+  fetch(APPS_URL + '?accion=marcarAusente&id=' + encodeURIComponent(id))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        mostrarToast('✅ ' + nombre + ' marcado como ausente');
+        cargarDatos();
+      } else {
+        mostrarToast('❌ Error: ' + (data.msg || 'No se pudo registrar'));
+      }
+    })
+    .catch(function() {
+      mostrarToast('❌ Sin conexión');
+    });
+}
+
+// ═══════════════════════════════════════════════════
+//  JUSTIFICACIONES
+// ═══════════════════════════════════════════════════
+function abrirFormJustif(dni) {
+  cambiarTab('justificaciones');
+  document.getElementById('j-dni').value = dni;
+  buscarAlumnoPorDni(dni);
+  document.getElementById('j-fecha').valueAsDate = new Date();
+  document.getElementById('j-motivo').focus();
+}
+
+function buscarAlumnoPorDni(dni) {
+  var info = document.getElementById('j-alumno-info');
+  if (!dni || dni.length < 7) { info.style.display = 'none'; return; }
+
+  var alumno = datosAlumnos.find(function(a) {
+    return String(a.id).toUpperCase() === dni.toUpperCase();
+  });
+
+  if (alumno) {
+    info.style.display = 'block';
+    info.textContent   = '✅ ' + alumno.nombre + ' — ' + alumno.grado + ' — ' + alumno.nivel;
+  } else {
+    info.style.display = 'block';
+    info.style.background = 'var(--rojo-clr)';
+    info.style.borderColor = 'var(--rojo)';
+    info.style.color = 'var(--rojo)';
+    info.textContent = '❌ DNI no encontrado';
+  }
+}
+
+function guardarJustificacion() {
+  var dni    = document.getElementById('j-dni').value.trim();
+  var fecha  = document.getElementById('j-fecha').value;
+  var tipo   = document.getElementById('j-tipo').value;
+  var motivo = document.getElementById('j-motivo').value.trim();
+  var reg    = document.getElementById('j-registrador').value.trim();
+  var msg    = document.getElementById('j-msg');
+
+  if (!dni || !fecha || !motivo || !reg) {
+    msg.className = 'msg-form msg-err';
+    msg.style.display = 'block';
+    msg.textContent = '⚠️ Complete todos los campos obligatorios';
+    return;
+  }
+
+  // Convertir fecha a DD/MM/YYYY
+  var partes = fecha.split('-');
+  var fechaFmt = partes[2] + '/' + partes[1] + '/' + partes[0];
+
+  msg.className = 'msg-form msg-ok';
+  msg.style.display = 'block';
+  msg.textContent = '⏳ Guardando...';
+
+  var url = APPS_URL +
+    '?accion=justificar' +
+    '&dni='          + encodeURIComponent(dni) +
+    '&fecha='        + encodeURIComponent(fechaFmt) +
+    '&tipo='         + encodeURIComponent(tipo) +
+    '&motivo='       + encodeURIComponent(motivo) +
+    '&registrador='  + encodeURIComponent(reg) ;
+
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        msg.textContent = '✅ Justificación registrada correctamente';
+        // Limpiar formulario
+        document.getElementById('j-dni').value    = '';
+        document.getElementById('j-motivo').value = '';
+        document.getElementById('j-alumno-info').style.display = 'none';
+        cargarJustificaciones();
+        cargarDatos();
+      } else {
+        msg.className = 'msg-form msg-err';
+        msg.textContent = '❌ Error: ' + (data.msg || 'No se pudo guardar');
+      }
+    })
+    .catch(function() {
+      msg.className = 'msg-form msg-err';
+      msg.textContent = '❌ Sin conexión con el servidor';
+    });
+}
+
+function cargarJustificaciones() {
+  var lista = document.getElementById('lista-justif');
+  lista.innerHTML = '<div class="cargando"><div class="spinner"></div><br>Cargando...</div>';
+
+  fetch(APPS_URL + '?accion=listarJustificaciones')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var items = data.justificaciones || [];
+      if (items.length === 0) {
+        lista.innerHTML = '<div class="cargando">Sin justificaciones registradas hoy</div>';
+        return;
+      }
+      lista.innerHTML = items.map(function(j) {
+        return '<div class="justif-item">' +
+          '<strong>' + j.nombre + '</strong> — ' + j.grado + '<br>' +
+          '<span style="color:var(--azul)">📅 ' + j.fecha + ' | ' + j.tipo.replace(/_/g,' ') + '</span><br>' +
+          '<span style="color:#333">📝 ' + j.motivo + '</span>' +
+          '<div class="justif-meta">Registrado por: ' + j.registrador + ' | ' + j.canal + '</div>' +
+          '</div>';
+      }).join('');
+    })
+    .catch(function() {
+      lista.innerHTML = '<div class="cargando">Error al cargar justificaciones</div>';
+    });
+}
+
+// ═══════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════
+function cerrarModal() {
+  document.getElementById('modal').classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════════════
+//  TOAST NOTIFICACIÓN
+// ═══════════════════════════════════════════════════
+function mostrarToast(msg) {
+  var toast = document.createElement('div');
+  toast.style.cssText =
+    'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);' +
+    'background:var(--marron);color:white;padding:10px 20px;border-radius:20px;' +
+    'font-size:13px;z-index:300;font-family:Arial;box-shadow:0 4px 12px rgba(0,0,0,0.3)';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(function() { document.body.removeChild(toast); }, 3000);
+}
+</script>
+</body>
+</html>
 
