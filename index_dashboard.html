@@ -854,44 +854,46 @@ function cambiarTab(tab) {
 //  CARGAR DATOS PRINCIPALES
 // ═══════════════════════════════════════════════════
 function cargarDatos() {
-  // Cargar alumnos y asistencia en paralelo
-  Promise.all([
-    fetch(APPS_URL + '?accion=alumnos').then(function(r) { return r.json(); }),
-    fetch(APPS_URL + '?accion=dashboard').then(function(r) { return r.json(); })
-  ])
-  .then(function(resultados) {
-    var resAlumnos   = resultados[0];
-    var resDashboard = resultados[1];
-
-    // Guardar alumnos
-    if (resAlumnos.alumnos) {
-      datosAlumnos = resAlumnos.alumnos;
+  var url = APPS_URL + '?accion=dashboard';
+  
+  fetch(url, {
+    method: 'GET',
+    redirect: 'follow'
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) {
+      console.error('Error:', data.error);
+      return;
     }
-
-    // Guardar registros de hoy
-    if (resDashboard.registros) {
-      datosHoy = resDashboard.registros;
-    }
-
-    // Renderizar todo
-    renderizarResumen(resDashboard);
+    renderizarResumen(data);
+    if (data.registros) datosHoy = data.registros;
     renderizarTablaAlumnos();
     renderizarAusentes();
-
     document.getElementById('ultima-act').textContent =
-      new Date().toLocaleTimeString('es-PE', {hour:'2-digit',minute:'2-digit'});
+      new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
   })
   .catch(function(err) {
-    console.error('Error cargando datos:', err);
-    // Intentar cargar solo alumnos si dashboard falla
-    fetch(APPS_URL + '?accion=alumnos')
+    console.error('Error fetch dashboard:', err);
+    // Cargar solo alumnos como fallback
+    fetch(APPS_URL + '?accion=alumnos', {redirect:'follow'})
       .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.alumnos) datosAlumnos = data.alumnos;
-        renderizarTablaAlumnos();
-        renderizarAusentes();
+      .then(function(d) {
+        if (d.alumnos) {
+          datosAlumnos = d.alumnos;
+          document.getElementById('c-total').textContent = d.alumnos.length;
+          renderizarTablaAlumnos();
+          renderizarAusentes();
+        }
       });
   });
+
+  // Cargar alumnos en paralelo
+  fetch(APPS_URL + '?accion=alumnos', {redirect:'follow'})
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.alumnos) datosAlumnos = d.alumnos;
+    });
 }
 
 // ═══════════════════════════════════════════════════
