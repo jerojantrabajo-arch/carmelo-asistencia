@@ -150,6 +150,11 @@ body{font-family:Arial,sans-serif;background:#7B3F00;min-height:100vh;display:fl
 //  CONFIGURACION
 // ══════════════════════════════════════
 var AS_URL = "https://script.google.com/macros/s/AKfycbyNNrmXIfsV_9X749aKMsAT1Lf1vgdfXDZJlM-akENKwA4TdMMY_f3HVfz-lvAeOeUpyw/exec";
+// Leer dispositivo de la URL (?dispositivo=1 o ?dispositivo=2)
+var DISPOSITIVO = (function() {
+  var params = new URLSearchParams(window.location.search);
+  return params.get('dispositivo') || '1';
+})();
 
 // ══════════════════════════════════════
 //  COLA DE ENVIO (fire and forget)
@@ -185,7 +190,7 @@ function procesarCola() {
 
   var item = colaEnvio[0];
 
-  fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(item.id) + "&motivo=NORMAL")
+  fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(item.id) + "&motivo=NORMAL&dispositivo=" + encodeURIComponent(DISPOSITIVO))
     .then(function(r) { return r.json(); })
     .then(function(data) {
       // Registro enviado OK — quitar de la cola
