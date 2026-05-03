@@ -619,11 +619,12 @@ function agregarHistorial(nombre, tipo, hora) {
 function limpiarTodo() {
   historial=[]; cE=0; cS=0; cD=0; registros={};
   guardarRegistros();
-  document.getElementById("c-e").textContent=0;
-  document.getElementById("c-s").textContent=0;
-  document.getElementById("c-d").textContent=0;
-  document.getElementById("lista-historial").innerHTML='<div class="h-vacio">Sin registros aun</div>';
-}
+  // Limpiar también registros individuales de timestamps
+  var hoy = new Date().toLocaleDateString("es-PE");
+  localStorage.removeItem("registros_" + hoy);
+  Object.keys(localStorage).forEach(function(k) {
+    if (k.indexOf("entrada_ts_") === 0) localStorage.removeItem(k);
+  });
 </script>
 </body>
 </html>
