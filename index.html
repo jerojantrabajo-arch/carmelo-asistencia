@@ -551,7 +551,10 @@ function procesarId(id) {
   var hora   = new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
 
   // ── DUPLICADO: ya tiene entrada y salida ─────────────────────────
-  if (reg.e >= 1 && reg.s >= 1) {
+  if (reg.e >= 1) {
+  setTimeout(resetear, 800);
+  return;
+  }
     sonidoError();
     cD++; document.getElementById("c-d").textContent = cD;
     mostrarEstado("duplicado","=","Ya registrado hoy", nombre + " ya tiene entrada y salida");
@@ -561,19 +564,15 @@ function procesarId(id) {
   }
 
   // ── DETERMINAR TIPO ───────────────────────────────────────────────
-  var tipo = (reg.e === 0) ? "ENTRADA" : "SALIDA";
+  // ── SIEMPRE ENTRADA — no se registran salidas ─────────────────────
+var tipo = "ENTRADA";
 
-  // ── CONTROL TIEMPO MINIMO SALIDA ──────────────────────────────────
-  if (tipo === "SALIDA") {
-    var min = verificarTiempoMinimo(id);
-    if (min < 30) {
-      sonidoError();
-      mostrarEstado("duplicado","=","Muy pronto para salida",
-        "Faltan " + (30-min) + " min — " + nombre);
-      setTimeout(resetear, 2000);
-      return;
-    }
-  }
+// ── DUPLICADO: ya tiene entrada hoy ──────────────────────────────
+if (reg.e >= 1) {
+  Logger && Logger.log && Logger.log("Duplicado ignorado: " + id);
+  setTimeout(resetear, 800);
+  return;
+}
 
   // ── REGISTRAR LOCALMENTE DE INMEDIATO ─────────────────────────────
   if (tipo === "ENTRADA") {
