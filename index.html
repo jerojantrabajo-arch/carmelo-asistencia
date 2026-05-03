@@ -551,10 +551,10 @@ function procesarId(id) {
   var hora   = new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
 
   // ── DUPLICADO: ya tiene entrada y salida ─────────────────────────
-  if (reg.e >= 1) {
+if (reg.e >= 1) {
   setTimeout(resetear, 800);
   return;
-  }
+}
     sonidoError();
     cD++; document.getElementById("c-d").textContent = cD;
     mostrarEstado("duplicado","=","Ya registrado hoy", nombre + " ya tiene entrada y salida");
