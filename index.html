@@ -515,7 +515,7 @@ function procesarId(id) {
     sonidoError();
     cD++; document.getElementById("c-d").textContent = cD;
     mostrarEstado("duplic", "=", "Ya registrado hoy", nombre);
-    agregarHistorial(nombre, "DUPLICADO", hora);
+    agregarHistorial(nombre, "YA REGISTRADO", hora);
     setTimeout(resetear, 1500);
     return;
   }
