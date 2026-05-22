@@ -385,7 +385,13 @@ function irSeccion(id) {
   document.querySelectorAll(".seccion").forEach(function(s){ s.classList.remove("activa"); });
   document.querySelectorAll(".nav-tab").forEach(function(t){ t.classList.remove("active"); });
   document.getElementById("sec-" + id).classList.add("activa");
-  event && event.target && event.target.classList.add("active");
+
+  // Activar tab correcto por ID
+  document.querySelectorAll(".nav-tab").forEach(function(t){
+    if (t.getAttribute("onclick") && t.getAttribute("onclick").indexOf("'" + id + "'") >= 0) {
+      t.classList.add("active");
+    }
+  });
 
   if (id === "detalle" && datosDet.length === 0) cargarDetalle();
 }
