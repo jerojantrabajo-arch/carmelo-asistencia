@@ -179,13 +179,13 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 
   <!-- Navegación -->
   <div class="nav-tabs">
-    <button class="nav-tab" onclick="irSeccion('kiosco')">📷 Kiosco</button>
-    <button class="nav-tab active" onclick="irSeccion('hoy')">📊 Hoy</button>
+    <button class="nav-tab" onclick="irSeccion('hoy')">📊 Hoy</button>
     <button class="nav-tab" onclick="irSeccion('detalle')">📋 Detalle</button>
     <button class="nav-tab" onclick="irSeccion('reportes')">📅 Reportes</button>
     <button class="nav-tab" onclick="irSeccion('tardanzas')">⏰ Tardanzas</button>
     <button class="nav-tab" onclick="irSeccion('diasSinEscaneo')">🚫 Sin escaneo</button>
-    <button class="nav-tab" onclick="irSeccion('registro')">✏️ Registro</button>    
+    <button class="nav-tab" onclick="irSeccion('registro')">✏️ Registro</button>
+    <button class="nav-tab active" onclick="irSeccion('kiosco')">📷 Kiosco</button>
   </div>
 
   <div class="p-content">
@@ -367,7 +367,7 @@ function validarPin() {
 function mostrarPortal() {
   document.getElementById("login").style.display  = "none";
   document.getElementById("portal").style.display = "flex";
-  irSeccion('kiosco');
+  irSeccion("kiosco");
   cargarHoy();
   cargarTardanzas();
   cargarDiasRegistrados();
@@ -732,4 +732,3 @@ function registrarManual(id, nombre) {
 </script>
 </body>
 </html>
-
