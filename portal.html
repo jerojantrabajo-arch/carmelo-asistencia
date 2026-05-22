@@ -716,26 +716,32 @@ function registrarManual(id, nombre) {
   if (!confirm("¿Registrar entrada de " + nombre + "?")) return;
   document.getElementById("reg-msg").textContent = "⏳ Registrando...";
   document.getElementById("reg-msg").style.background = "#FFF9C4";
+  document.getElementById("reg-msg").style.color = "#856404";
 
   fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(id) +
         "&motivo=NORMAL&dispositivo=Manual-Portal")
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if (d.ok) {
-        document.getElementById("reg-msg").textContent = "✅ " + nombre + " registrado";
+      console.log("Respuesta registro:", JSON.stringify(d));
+      if (d.ok === true) {
+        document.getElementById("reg-msg").textContent = "✅ " + nombre + " registrado correctamente";
         document.getElementById("reg-msg").style.background = "#D4EDDA";
         document.getElementById("reg-msg").style.color = "#1E6B2E";
         document.getElementById("reg-buscar").value = "";
         document.getElementById("reg-resultados").innerHTML = "";
+        // Actualizar datos de hoy
+        cargarHoy();
       } else {
         document.getElementById("reg-msg").textContent = "⚠️ " + (d.mensaje || "No se pudo registrar");
         document.getElementById("reg-msg").style.background = "#FFF9C4";
         document.getElementById("reg-msg").style.color = "#F57F17";
       }
     })
-    .catch(function(){
+    .catch(function(e){
+      console.log("Error:", e.message);
       document.getElementById("reg-msg").textContent = "❌ Error de conexión";
       document.getElementById("reg-msg").style.background = "#FDECEA";
+      document.getElementById("reg-msg").style.color = "#B71C1C";
     });
 }
 
