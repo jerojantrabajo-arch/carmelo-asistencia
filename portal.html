@@ -1,1 +1,1081 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Portal — El Carmelo de María</title>
+<style>
+:root {
+  --marron:     #7B3F00;
+  --marron-osc: #5A2D00;
+  --naranja:    #D2691E;
+  --crema:      #FFF8F0;
+  --naranja-clr:#F4D3B8;
+  --marron-clr: #C68642;
+  --verde:      #1E6B2E;
+  --verde-clr:  #D4EDDA;
+  --rojo:       #B71C1C;
+  --rojo-clr:   #FDECEA;
+  --azul:       #0C447C;
+  --azul-clr:   #D0E3F5;
+  --amarillo-clr:#FFF9C4;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 
+/* ── LOGIN ── */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:var(--crema);border-radius:16px;padding:32px 24px;width:100%;max-width:320px;text-align:center;border:3px solid var(--naranja)}
+.login-logo{font-size:52px;margin-bottom:10px}
+.login-card h1{color:var(--marron);font-size:17px;font-weight:bold;margin-bottom:4px}
+.login-card p{color:var(--marron-clr);font-size:12px;margin-bottom:20px}
+.login-card input{width:100%;padding:14px;font-size:28px;text-align:center;border:2px solid var(--naranja-clr);border-radius:10px;letter-spacing:10px;font-family:Arial,monospace;background:white;color:var(--marron);font-weight:bold;margin-bottom:12px}
+.login-card input:focus{outline:none;border-color:var(--marron)}
+.btn-login{width:100%;padding:13px;background:var(--marron);color:white;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;font-family:Arial}
+#login-error{color:var(--rojo);font-size:12px;margin-top:8px;min-height:18px}
+
+/* ── PORTAL ── */
+#portal{display:none;flex-direction:column;min-height:100vh;background:#F0E8E0}
+
+/* Header */
+.p-header{background:var(--marron-osc);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.p-header-left{display:flex;align-items:center;gap:10px}
+.p-logo{width:38px;height:38px;background:var(--naranja);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.p-header h1{color:var(--crema);font-size:13px;font-weight:bold}
+.p-header p{color:var(--naranja-clr);font-size:10px}
+.btn-logout{background:rgba(255,255,255,0.15);border:none;color:white;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer}
+
+/* Fecha bar */
+.fecha-bar{background:var(--naranja);color:white;padding:5px 14px;font-size:11px;font-weight:bold;display:flex;justify-content:space-between;align-items:center}
+
+/* Nav tabs */
+.nav-tabs{background:var(--marron);display:flex;overflow-x:auto;gap:2px;padding:6px 8px}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{background:rgba(255,255,255,0.1);color:var(--naranja-clr);border:none;border-radius:8px;padding:6px 12px;font-size:11px;cursor:pointer;white-space:nowrap;font-family:Arial;transition:all 0.2s}
+.nav-tab.active{background:var(--naranja);color:white;font-weight:bold}
+.nav-tab:hover{background:rgba(255,255,255,0.2)}
+
+/* Contenido */
+.p-content{flex:1;padding:10px;overflow-y:auto}
+.seccion{display:none}
+.seccion.activa{display:block}
+
+/* Cards resumen */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+.stat-card{border-radius:10px;padding:12px;text-align:center}
+.stat-card .num{font-size:26px;font-weight:bold}
+.stat-card .lbl{font-size:10px;color:#555;margin-top:2px}
+.c-verde{background:var(--verde-clr)} .c-verde .num{color:var(--verde)}
+.c-rojo{background:var(--rojo-clr)}   .c-rojo .num{color:var(--rojo)}
+.c-amarillo{background:var(--amarillo-clr)} .c-amarillo .num{color:#F57F17}
+.c-azul{background:var(--azul-clr)}   .c-azul .num{color:var(--azul)}
+.c-marron{background:var(--naranja-clr)} .c-marron .num{color:var(--marron)}
+
+/* Títulos sección */
+.sec-title{background:var(--marron);color:white;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:bold;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+
+/* Lista alumnos */
+.alum-lista{display:flex;flex-direction:column;gap:4px;max-height:340px;overflow-y:auto}
+.alum-item{border-radius:8px;padding:8px 10px;border-left:4px solid;display:flex;justify-content:space-between;align-items:center}
+.alum-item.verde{background:#F0FFF4;border-color:var(--verde)}
+.alum-item.rojo{background:#FFF5F5;border-color:var(--rojo)}
+.alum-item.amarillo{background:#FFFDE7;border-color:#F57F17}
+.alum-item.azul{background:#F0F7FF;border-color:var(--azul)}
+.alum-nombre{font-weight:bold;color:#3A1800;font-size:11px}
+.alum-det{font-size:10px;color:#888}
+.alum-hora{font-size:10px;color:var(--marron-clr);font-weight:bold}
+.vacio{text-align:center;color:var(--marron-clr);padding:20px;font-size:12px;background:white;border-radius:8px}
+
+/* Tabs internos */
+.mini-tabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
+.mini-tab{padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:none;font-family:Arial;background:var(--naranja-clr);color:var(--marron);font-weight:bold}
+.mini-tab.active{background:var(--marron);color:white}
+
+/* Tabla reportes */
+.tabla{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;font-size:11px}
+.tabla th{background:var(--marron);color:white;padding:7px;text-align:left}
+.tabla td{padding:6px 7px;border-bottom:1px solid #F4D3B8}
+.tabla tr:nth-child(even) td{background:var(--crema)}
+.badge{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold}
+.b-puntual{background:var(--verde-clr);color:var(--verde)}
+.b-tarde{background:var(--amarillo-clr);color:#F57F17}
+.b-ausente{background:var(--rojo-clr);color:var(--rojo)}
+.b-justif{background:var(--azul-clr);color:var(--azul)}
+.b-anticip{background:#E8F5E9;color:#2E7D32}
+
+/* Buscador */
+.buscador{width:100%;padding:8px;border:2px solid var(--naranja-clr);border-radius:8px;font-size:13px;margin-bottom:8px;font-family:Arial}
+.buscador:focus{outline:none;border-color:var(--marron)}
+
+/* Reporte días */
+.rep-dia{background:white;border-radius:8px;padding:10px;margin-bottom:8px;border-left:4px solid var(--naranja)}
+.rep-dia-fecha{font-weight:bold;color:var(--marron);font-size:12px}
+.rep-dia-stats{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+.rep-dia-stat{font-size:10px;padding:2px 6px;border-radius:4px}
+
+/* Kiosco embed */
+.kiosco-frame{width:100%;border:none;border-radius:10px;height:600px}
+
+/* Botones acción */
+.btn-accion{background:var(--marron);color:white;border:none;border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;font-family:Arial;font-weight:bold;margin-bottom:6px;width:100%}
+.btn-accion:active{background:var(--naranja)}
+.btn-naranja{background:var(--naranja)}
+
+/* Calendario */
+.cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.cal-nav button{background:var(--naranja);color:white;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:14px}
+.cal-nav span{color:var(--marron);font-weight:bold;font-size:13px}
+.cal-tabla{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden}
+.cal-tabla th{background:var(--marron);color:white;padding:5px;font-size:11px;text-align:center}
+.cal-tabla td{padding:7px 3px;text-align:center;font-size:12px;cursor:pointer;border:1px solid #F4D3B8}
+.cal-tabla td:hover{background:var(--naranja);color:white}
+.cal-tabla td.reg{background:var(--naranja);color:white;font-weight:bold}
+.cal-tabla td.sel{background:var(--marron);color:white;font-weight:bold}
+.cal-tabla td.vacio-c{cursor:default;background:transparent;border:none}
+.cal-tabla td.finde{opacity:0.35}
+
+/* Loading */
+.loading{text-align:center;padding:20px;color:var(--marron-clr);font-size:12px}
+
+/* Responsive */
+@media(max-width:400px){
+  .grid-4{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login">
+  <div class="login-card">
+    <div class="login-logo">🏫</div>
+    <h1>El Carmelo de María</h1>
+    <p>Portal de Asistencia — Acceso restringido</p>
+    <input type="password" id="pin-input" maxlength="4"
+      placeholder="••••" inputmode="numeric"
+      onkeydown="if(event.key==='Enter')validarPin()">
+    <button class="btn-login" onclick="validarPin()">Ingresar</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ══ PORTAL ══ -->
+<div id="portal">
+  <div class="p-header">
+    <div class="p-header-left">
+      <div class="p-logo">🏫</div>
+      <div>
+        <h1>El Carmelo de María</h1>
+        <p>Portal de Asistencia · Quillahuata</p>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
+  </div>
+  <div class="fecha-bar">
+    <span id="fecha-hoy">--/--/----</span>
+    <span id="hora-actual">--:--</span>
+  </div>
+
+  <!-- Navegación -->
+  <div class="nav-tabs">
+    <button class="nav-tab" onclick="irSeccion('hoy')">📊 Hoy</button>
+    <button class="nav-tab" onclick="irSeccion('detalle')">📋 Detalle</button>
+    <button class="nav-tab" onclick="irSeccion('reportes')">📅 Reportes</button>
+    <button class="nav-tab" onclick="irSeccion('tardanzas')">⏰ Tardanzas</button>
+    <button class="nav-tab" onclick="irSeccion('diasSinEscaneo')">🚫 Sin escaneo</button>
+    <button class="nav-tab" onclick="irSeccion('registro')">✏️ Registro</button>
+    <button class="nav-tab" onclick="irSeccion('mensual')">📅 Mensual</button>
+    <button class="nav-tab" onclick="irSeccion('semanal')">📊 Semanal</button>
+    <button class="nav-tab" onclick="irSeccion('faltas')">⚠️ Faltas</button>
+    <button class="nav-tab" onclick="irSeccion('alumno')">🔎 Alumno</button>
+    <button class="nav-tab" onclick="irSeccion('justif')">📝 Justif.</button>
+    <button class="nav-tab active" onclick="irSeccion('kiosco')">📷 Kiosco</button>
+  </div>
+
+  <div class="p-content">
+
+    <!-- ══ SECCIÓN: HOY ══ -->
+    <div class="seccion" id="sec-hoy">
+      <div id="hoy-loading" class="loading">⏳ Cargando datos de hoy...</div>
+      <div id="hoy-contenido" style="display:none">
+        <div class="grid-4">
+          <div class="stat-card c-verde"><div class="num" id="h-presentes">0</div><div class="lbl">Presentes</div></div>
+          <div class="stat-card c-rojo"><div class="num" id="h-ausentes">0</div><div class="lbl">Ausentes</div></div>
+          <div class="stat-card c-amarillo"><div class="num" id="h-tardanzas">0</div><div class="lbl">Tardanzas</div></div>
+          <div class="stat-card c-azul"><div class="num" id="h-justif">0</div><div class="lbl">Justif.</div></div>
+        </div>
+        <div class="stat-card c-marron" style="margin-bottom:10px">
+          <div class="num" id="h-pct">0%</div>
+          <div class="lbl">% Asistencia del día</div>
+        </div>
+        <div class="sec-title">❌ Ausentes de hoy</div>
+        <div class="alum-lista" id="lista-ausentes-hoy"></div>
+        <div style="margin-top:10px">
+          <button class="btn-accion" onclick="cargarHoy()">🔄 Actualizar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SECCIÓN: DETALLE ══ -->
+    <div class="seccion" id="sec-detalle">
+      <input class="buscador" id="buscador" placeholder="🔍 Buscar alumno..." oninput="filtrarDetalle()">
+      <div class="mini-tabs">
+        <button class="mini-tab active" onclick="filtrarEstado('TODOS')">Todos</button>
+        <button class="mini-tab" onclick="filtrarEstado('PRESENTE')">✅ Presentes</button>
+        <button class="mini-tab" onclick="filtrarEstado('AUSENTE')">❌ Ausentes</button>
+        <button class="mini-tab" onclick="filtrarEstado('TARDE')">⏰ Tarde</button>
+        <button class="mini-tab" onclick="filtrarEstado('JUSTIFICADO')">📝 Justif.</button>
+      </div>
+      <div id="detalle-loading" class="loading">⏳ Cargando...</div>
+      <div class="alum-lista" id="lista-detalle" style="max-height:500px"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: REPORTES ══ -->
+    <div class="seccion" id="sec-reportes">
+      <div class="sec-title">📅 Reportes por fecha</div>
+      <div class="grid-2" style="margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Desde:</label>
+          <input type="date" id="fecha-desde" class="buscador" style="margin-bottom:0">
+        </div>
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Hasta:</label>
+          <input type="date" id="fecha-hasta" class="buscador" style="margin-bottom:0">
+        </div>
+      </div>
+      <button class="btn-accion" onclick="cargarReportes()">🔍 Buscar reportes</button>
+      <div id="reportes-loading" class="loading" style="display:none">⏳ Cargando...</div>
+      <div id="lista-reportes"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: TARDANZAS ══ -->
+    <div class="seccion" id="sec-tardanzas">
+      <div class="sec-title">⏰ Historial de tardanzas del mes</div>
+      <div id="tardanzas-loading" class="loading">⏳ Cargando...</div>
+      <div id="lista-tardanzas"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: DÍAS SIN ESCANEO ══ -->
+    <div class="seccion" id="sec-diasSinEscaneo">
+      <div class="sec-title">🚫 Días sin escaneo</div>
+      <div class="cal-nav">
+        <button onclick="calCambiarMes(-1)">◀</button>
+        <span id="cal-mes-label">—</span>
+        <button onclick="calCambiarMes(1)">▶</button>
+      </div>
+      <table class="cal-tabla">
+        <thead><tr>
+          <th>Lu</th><th>Ma</th><th>Mi</th><th>Ju</th><th>Vi</th>
+          <th style="opacity:0.5">Sa</th><th style="opacity:0.5">Do</th>
+        </tr></thead>
+        <tbody id="cal-body"></tbody>
+      </table>
+      <div style="margin-top:10px">
+        <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha seleccionada:</label>
+        <input type="text" id="dse-fecha" class="buscador" placeholder="Seleccione en el calendario" readonly>
+        <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Motivo:</label>
+        <input type="text" id="dse-motivo" class="buscador" placeholder="Ej: Feriado, Semana de gestión...">
+        <button class="btn-accion" onclick="dseAgregar()">➕ Agregar día</button>
+        <div id="dse-msg" style="font-size:11px;text-align:center;padding:5px;min-height:16px"></div>
+      </div>
+      <div class="sec-title" style="margin-top:10px">Días registrados</div>
+      <div id="dse-lista"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: REGISTRO MANUAL ══ -->
+    <div class="seccion" id="sec-registro">
+      <div class="sec-title">✏️ Registro manual de asistencia</div>
+      <input class="buscador" id="reg-buscar" placeholder="🔍 Buscar alumno por nombre o DNI..."
+        oninput="buscarAlumnoReg()">
+      <div id="reg-resultados"></div>
+      <div id="reg-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;
+        border-radius:6px;margin-top:6px"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: KIOSCO ══ -->
+    <div class="seccion activa" id="sec-kiosco">
+      <div class="sec-title">📷 Kiosco QR</div>
+      <div class="grid-2" style="margin-bottom:8px">
+        <button class="btn-accion" onclick="abrirKiosco(1)">📱 Tablet 1</button>
+        <button class="btn-accion btn-naranja" onclick="abrirKiosco(2)">📱 Tablet 2</button>
+      </div>
+      <div style="background:white;border-radius:10px;padding:14px;font-size:12px;color:#555">
+        <p style="margin-bottom:8px">El kiosco QR se abre en una nueva pestaña.</p>
+        <p>URL Tablet 1:<br><code style="color:var(--marron);font-size:10px">...carmelo-asistencia/?dispositivo=1</code></p>
+        <p style="margin-top:8px">URL Tablet 2:<br><code style="color:var(--marron);font-size:10px">...carmelo-asistencia/?dispositivo=2</code></p>
+      </div>
+    </div>
+
+    <!-- ══ SECCIÓN: REPORTE MENSUAL ══ -->
+    <div class="seccion" id="sec-mensual">
+      <div class="sec-title">📅 Reporte mensual</div>
+      <div class="grid-2" style="margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Mes:</label>
+          <select id="men-mes" class="buscador" style="margin-bottom:0">
+            <option value="1">Enero</option><option value="2">Febrero</option>
+            <option value="3">Marzo</option><option value="4">Abril</option>
+            <option value="5" selected>Mayo</option><option value="6">Junio</option>
+            <option value="7">Julio</option><option value="8">Agosto</option>
+            <option value="9">Septiembre</option><option value="10">Octubre</option>
+            <option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Año:</label>
+          <select id="men-anio" class="buscador" style="margin-bottom:0">
+            <option value="2026" selected>2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-accion" onclick="cargarMensual()">📊 Ver reporte</button>
+      <div id="mensual-loading" class="loading" style="display:none">⏳ Cargando...</div>
+      <div id="mensual-resultado"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: REPORTE SEMANAL ══ -->
+    <div class="seccion" id="sec-semanal">
+      <div class="sec-title">📊 Reporte semanal</div>
+      <button class="btn-accion" onclick="cargarSemanal()">🔄 Ver semana actual</button>
+      <div id="semanal-loading" class="loading" style="display:none">⏳ Cargando...</div>
+      <div id="semanal-resultado"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: ALUMNOS CON FALTAS ══ -->
+    <div class="seccion" id="sec-faltas">
+      <div class="sec-title">⚠️ Alumnos con 3+ faltas</div>
+      <div class="grid-2" style="margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Mes:</label>
+          <select id="fal-mes" class="buscador" style="margin-bottom:0">
+            <option value="1">Enero</option><option value="2">Febrero</option>
+            <option value="3">Marzo</option><option value="4">Abril</option>
+            <option value="5" selected>Mayo</option><option value="6">Junio</option>
+            <option value="7">Julio</option><option value="8">Agosto</option>
+            <option value="9">Septiembre</option><option value="10">Octubre</option>
+            <option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Año:</label>
+          <select id="fal-anio" class="buscador" style="margin-bottom:0">
+            <option value="2026" selected>2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-accion" onclick="cargarFaltas()">⚠️ Ver alumnos con faltas</button>
+      <div id="faltas-loading" class="loading" style="display:none">⏳ Cargando...</div>
+      <div id="faltas-resultado"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: BUSCAR ALUMNO ══ -->
+    <div class="seccion" id="sec-alumno">
+      <div class="sec-title">🔎 Historial de alumno</div>
+      <input class="buscador" id="alum-buscar" placeholder="🔍 Buscar por nombre o DNI..." oninput="buscarAlumnoHist()">
+      <div id="alum-sugerencias"></div>
+      <div id="alum-historial"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: JUSTIFICACIONES ══ -->
+    <div class="seccion" id="sec-justif">
+      <div class="sec-title">📝 Registrar justificación</div>
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">DNI del alumno:</label>
+      <input type="text" id="just-dni" class="buscador" placeholder="Ej: 78138989" maxlength="12" inputmode="numeric">
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha de la falta:</label>
+      <input type="date" id="just-fecha" class="buscador">
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Tipo:</label>
+      <select id="just-tipo" class="buscador">
+        <option value="FALTA_JUSTIFICADA">Falta justificada</option>
+        <option value="TARDANZA_JUSTIFICADA">Tardanza justificada</option>
+      </select>
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Motivo:</label>
+      <input type="text" id="just-motivo" class="buscador" placeholder="Ej: Cita médica, emergencia familiar...">
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Registrado por:</label>
+      <input type="text" id="just-reg" class="buscador" placeholder="Nombre del auxiliar">
+      <button class="btn-accion" onclick="registrarJustif()">💾 Guardar justificación</button>
+      <div id="just-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;border-radius:6px;margin-top:6px"></div>
+      <div class="sec-title" style="margin-top:12px">Justificaciones del mes</div>
+      <button class="btn-accion btn-naranja" onclick="cargarJustificaciones()">🔄 Ver justificaciones</button>
+      <div id="just-lista" style="margin-top:8px"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var AS_URL = "https://script.google.com/macros/s/AKfycbyNNrmXIfsV_9X749aKMsAT1Lf1vgdfXDZJlM-akENKwA4TdMMY_f3HVfz-lvAeOeUpyw/exec";
+var PIN_KEY  = "portal_pin_" + new Date().toLocaleDateString("es-PE");
+var tabActual = "hoy";
+
+// Datos en memoria
+var datosHoy    = null;
+var datosDet    = [];
+var filtroEstado = "TODOS";
+var calMes      = new Date().getMonth();
+var calAnio     = new Date().getFullYear();
+var calRegistrados = [];
+var calSel      = "";
+var MESES       = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+// ── RELOJ ──────────────────────────────────────────────────────────
+function actualizarReloj() {
+  var ahora = new Date();
+  document.getElementById("fecha-hoy").textContent =
+    ahora.toLocaleDateString("es-PE", {weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+  document.getElementById("hora-actual").textContent =
+    ahora.toLocaleTimeString("es-PE", {hour:"2-digit",minute:"2-digit"});
+}
+setInterval(actualizarReloj, 1000);
+
+// ── LOGIN ──────────────────────────────────────────────────────────
+window.onload = function() {
+  actualizarReloj();
+  try {
+    if (localStorage.getItem(PIN_KEY) === "OK") { mostrarPortal(); return; }
+  } catch(e) {}
+  document.getElementById("pin-input").focus();
+};
+
+function validarPin() {
+  var pin = document.getElementById("pin-input").value.trim();
+  if (!pin || pin.length < 4) {
+    document.getElementById("login-error").textContent = "Ingrese los 4 dígitos";
+    return;
+  }
+  document.getElementById("login-error").textContent = "Verificando...";
+  fetch(AS_URL + "?accion=pin&valor=" + encodeURIComponent(pin))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.valido) {
+        try { localStorage.setItem(PIN_KEY, "OK"); } catch(e) {}
+        mostrarPortal();
+      } else {
+        document.getElementById("login-error").textContent = "PIN incorrecto";
+        document.getElementById("pin-input").value = "";
+        document.getElementById("pin-input").focus();
+      }
+    })
+    .catch(function(){
+      document.getElementById("login-error").textContent = "Sin conexión";
+    });
+}
+
+function mostrarPortal() {
+  document.getElementById("login").style.display  = "none";
+  document.getElementById("portal").style.display = "flex";
+  irSeccion("kiosco");
+  cargarHoy();
+  cargarTardanzas();
+  cargarDiasRegistrados();
+  setInterval(function(){ if(tabActual==="hoy") cargarHoy(); }, 120000);
+}
+
+function cerrarSesion() {
+  try { localStorage.removeItem(PIN_KEY); } catch(e) {}
+  location.reload();
+}
+
+// ── NAVEGACIÓN ────────────────────────────────────────────────────
+function irSeccion(id) {
+  tabActual = id;
+  document.querySelectorAll(".seccion").forEach(function(s){ s.classList.remove("activa"); });
+  document.querySelectorAll(".nav-tab").forEach(function(t){ t.classList.remove("active"); });
+  document.getElementById("sec-" + id).classList.add("activa");
+  event && event.target && event.target.classList.add("active");
+
+  if (id === "detalle" && datosDet.length === 0) cargarDetalle();
+}
+
+// ── SECCIÓN HOY ───────────────────────────────────────────────────
+function cargarHoy() {
+  document.getElementById("hoy-loading").style.display = "block";
+  document.getElementById("hoy-contenido").style.display = "none";
+  fetch(AS_URL + "?accion=dashboard")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      datosHoy = d;
+      renderHoy();
+    })
+    .catch(function(e){
+      document.getElementById("hoy-loading").textContent = "Error al cargar";
+    });
+}
+
+function renderHoy() {
+  if (!datosHoy) return;
+  document.getElementById("hoy-loading").style.display   = "none";
+  document.getElementById("hoy-contenido").style.display = "block";
+
+  var presentes = (datosHoy.presentes || 0);
+  var ausentes  = (datosHoy.ausentes  || 0);
+  var tardanzas = (datosHoy.tardanzas || 0);
+  var justif    = (datosHoy.justificados || 0);
+  var total     = presentes + ausentes;
+  var pct       = total > 0 ? Math.round(presentes / total * 100) : 0;
+
+  document.getElementById("h-presentes").textContent = presentes;
+  document.getElementById("h-ausentes").textContent  = ausentes;
+  document.getElementById("h-tardanzas").textContent = tardanzas;
+  document.getElementById("h-justif").textContent    = justif;
+  document.getElementById("h-pct").textContent       = pct + "%";
+
+  var lista = datosHoy.listaAusentes || [];
+  var html  = lista.length === 0
+    ? "<div class='vacio'>Sin ausentes registrados</div>"
+    : lista.map(function(a){
+        return "<div class='alum-item rojo'>" +
+          "<div><div class='alum-nombre'>❌ " + a.nombre + "</div>" +
+          "<div class='alum-det'>" + a.grado + "</div></div>" +
+          "</div>";
+      }).join("");
+  document.getElementById("lista-ausentes-hoy").innerHTML = html;
+}
+
+// ── SECCIÓN DETALLE ───────────────────────────────────────────────
+function cargarDetalle() {
+  document.getElementById("detalle-loading").style.display = "block";
+  document.getElementById("lista-detalle").innerHTML = "";
+  fetch(AS_URL + "?accion=dashboard")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      datosDet = d.todos || [];
+      document.getElementById("detalle-loading").style.display = "none";
+      renderDetalle();
+    })
+    .catch(function(){
+      document.getElementById("detalle-loading").textContent = "Error al cargar";
+    });
+}
+
+function filtrarEstado(estado) {
+  filtroEstado = estado;
+  document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
+  event && event.target && event.target.classList.add("active");
+  renderDetalle();
+}
+
+function filtrarDetalle() { renderDetalle(); }
+
+function renderDetalle() {
+  var busq = (document.getElementById("buscador").value || "").toUpperCase();
+  var lista = datosDet.filter(function(a){
+    var matchEstado = filtroEstado === "TODOS" ||
+      (filtroEstado === "PRESENTE" && (a.estado === "PUNTUAL" || a.estado === "INGRESO ANTICIPADO")) ||
+      a.estado === filtroEstado;
+    var matchNombre = a.nombre.toUpperCase().indexOf(busq) >= 0 || a.id.indexOf(busq) >= 0;
+    return matchEstado && matchNombre;
+  });
+
+  if (lista.length === 0) {
+    document.getElementById("lista-detalle").innerHTML = "<div class='vacio'>Sin resultados</div>";
+    return;
+  }
+  document.getElementById("lista-detalle").innerHTML = lista.map(function(a){
+    var cls   = a.estado === "AUSENTE" ? "rojo" :
+                a.estado === "TARDE"   ? "amarillo" :
+                a.estado === "JUSTIFICADO" ? "azul" : "verde";
+    var badge = a.estado === "AUSENTE"  ? "b-ausente" :
+                a.estado === "TARDE"    ? "b-tarde" :
+                a.estado === "JUSTIFICADO" ? "b-justif" :
+                a.estado === "INGRESO ANTICIPADO" ? "b-anticip" : "b-puntual";
+    return "<div class='alum-item " + cls + "'>" +
+      "<div><div class='alum-nombre'>" + a.nombre + "</div>" +
+      "<div class='alum-det'>" + a.grado + " · " + a.id + "</div></div>" +
+      "<div style='text-align:right'>" +
+      "<span class='badge " + badge + "'>" + a.estado + "</span>" +
+      "<div class='alum-hora'>" + (a.hora || "") + "</div></div>" +
+      "</div>";
+  }).join("");
+}
+
+// ── SECCIÓN REPORTES ──────────────────────────────────────────────
+function cargarReportes() {
+  var desde = document.getElementById("fecha-desde").value;
+  var hasta = document.getElementById("fecha-hasta").value;
+  if (!desde || !hasta) { alert("Seleccione rango de fechas"); return; }
+  document.getElementById("reportes-loading").style.display = "block";
+  document.getElementById("lista-reportes").innerHTML = "";
+
+  var desdeStr = desde.split("-").reverse().join("/");
+  var hastaStr = hasta.split("-").reverse().join("/");
+
+  fetch(AS_URL + "?accion=reportePorFechas&desde=" +
+        encodeURIComponent(desdeStr) + "&hasta=" + encodeURIComponent(hastaStr))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("reportes-loading").style.display = "none";
+      renderReportes(d.dias || []);
+    })
+    .catch(function(){
+      document.getElementById("reportes-loading").style.display = "none";
+      document.getElementById("lista-reportes").innerHTML = "<div class='vacio'>Error al cargar</div>";
+    });
+}
+
+function renderReportes(dias) {
+  if (dias.length === 0) {
+    document.getElementById("lista-reportes").innerHTML = "<div class='vacio'>Sin registros en ese período</div>";
+    return;
+  }
+  document.getElementById("lista-reportes").innerHTML = dias.map(function(d){
+    return "<div class='rep-dia'>" +
+      "<div class='rep-dia-fecha'>📅 " + d.fecha + " — " + d.diaNombre + "</div>" +
+      "<div class='rep-dia-stats'>" +
+      "<span class='rep-dia-stat b-puntual'>✅ " + d.presentes + " presentes</span>" +
+      "<span class='rep-dia-stat b-ausente'>❌ " + d.ausentes + " ausentes</span>" +
+      "<span class='rep-dia-stat b-tarde'>⏰ " + d.tardanzas + " tardanzas</span>" +
+      "<span class='rep-dia-stat b-justif'>📝 " + (d.justificados||0) + " justif.</span>" +
+      "</div></div>";
+  }).join("");
+}
+
+// ── SECCIÓN TARDANZAS ─────────────────────────────────────────────
+function cargarTardanzas() {
+  fetch(AS_URL + "?accion=historialTardanzas")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("tardanzas-loading").style.display = "none";
+      var lista = d.tardanzas || [];
+      if (lista.length === 0) {
+        document.getElementById("lista-tardanzas").innerHTML = "<div class='vacio'>Sin tardanzas este mes</div>";
+        return;
+      }
+      document.getElementById("lista-tardanzas").innerHTML =
+        "<table class='tabla'><thead><tr>" +
+        "<th>#</th><th>Alumno</th><th>Grado</th><th>Tardanzas</th>" +
+        "</tr></thead><tbody>" +
+        lista.map(function(a, i){
+          return "<tr><td>" + (i+1) + "</td><td>" + a.nombre +
+                 "</td><td>" + a.grado + "</td><td style='text-align:center'>" +
+                 "<span class='badge b-tarde'>" + a.count + "</span></td></tr>";
+        }).join("") +
+        "</tbody></table>";
+    })
+    .catch(function(){
+      document.getElementById("tardanzas-loading").textContent = "Error al cargar";
+    });
+}
+
+// ── SECCIÓN DÍAS SIN ESCANEO ──────────────────────────────────────
+function cargarDiasRegistrados() {
+  fetch(AS_URL + "?accion=diasSinEscaneo")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      calRegistrados = (d.dias || []).map(function(x){ return x.fecha; });
+      renderCalendario();
+      renderDseLista(d.dias || []);
+    })
+    .catch(function(){});
+}
+
+function calCambiarMes(d) {
+  calMes += d;
+  if (calMes > 11) { calMes = 0; calAnio++; }
+  if (calMes < 0)  { calMes = 11; calAnio--; }
+  renderCalendario();
+}
+
+function renderCalendario() {
+  document.getElementById("cal-mes-label").textContent = MESES[calMes] + " " + calAnio;
+  var primero   = new Date(calAnio, calMes, 1);
+  var totalDias = new Date(calAnio, calMes + 1, 0).getDate();
+  var ini       = (primero.getDay() + 6) % 7;
+  var html = "<tr>";
+  var col  = 0;
+  for (var v = 0; v < ini; v++) { html += "<td class='vacio-c'></td>"; col++; }
+  for (var d = 1; d <= totalDias; d++) {
+    var dow  = (new Date(calAnio, calMes, d).getDay() + 6) % 7;
+    var dd   = (d < 10 ? "0" : "") + d;
+    var mm   = (calMes + 1 < 10 ? "0" : "") + (calMes + 1);
+    var fStr = dd + "/" + mm + "/" + calAnio;
+    var cls  = calSel === fStr ? "sel" : calRegistrados.indexOf(fStr) >= 0 ? "reg" : dow >= 5 ? "finde" : "";
+    html += "<td class='" + cls + "' onclick='calSelFecha(\"" + fStr + "\")'>" + d + "</td>";
+    col++;
+    if (col % 7 === 0 && d < totalDias) { html += "</tr><tr>"; }
+  }
+  while (col % 7 !== 0) { html += "<td class='vacio-c'></td>"; col++; }
+  html += "</tr>";
+  document.getElementById("cal-body").innerHTML = html;
+}
+
+function calSelFecha(f) {
+  calSel = f;
+  document.getElementById("dse-fecha").value = f;
+  renderCalendario();
+}
+
+function dseAgregar() {
+  var f = document.getElementById("dse-fecha").value.trim();
+  var m = document.getElementById("dse-motivo").value.trim();
+  if (!f) { document.getElementById("dse-msg").textContent = "Seleccione una fecha"; return; }
+  if (!m) { document.getElementById("dse-msg").textContent = "Ingrese el motivo"; return; }
+  document.getElementById("dse-msg").textContent = "Guardando...";
+  fetch(AS_URL + "?accion=agregarDiaSinEscaneo&fecha=" +
+        encodeURIComponent(f) + "&motivo=" + encodeURIComponent(m))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("dse-msg").textContent = d.msg || "✅ Guardado";
+      document.getElementById("dse-motivo").value = "";
+      calSel = "";
+      document.getElementById("dse-fecha").value = "";
+      cargarDiasRegistrados();
+    })
+    .catch(function(){ document.getElementById("dse-msg").textContent = "Error al guardar"; });
+}
+
+function renderDseLista(lista) {
+  if (!lista || lista.length === 0) {
+    document.getElementById("dse-lista").innerHTML = "<div class='vacio'>Sin días registrados</div>";
+    return;
+  }
+  document.getElementById("dse-lista").innerHTML =
+    "<table class='tabla'><thead><tr><th>Fecha</th><th>Motivo</th><th></th></tr></thead><tbody>" +
+    lista.map(function(r, i){
+      return "<tr><td>" + r.fecha + "</td><td>" + r.motivo +
+             "</td><td><button onclick='dseEliminar(" + i + ")' " +
+             "style='background:#B71C1C;color:white;border:none;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px'>✕</button></td></tr>";
+    }).join("") +
+    "</tbody></table>";
+}
+
+function dseEliminar(idx) {
+  if (!confirm("¿Eliminar este día?")) return;
+  fetch(AS_URL + "?accion=eliminarDiaSinEscaneo&idx=" + idx)
+    .then(function(r){ return r.json(); })
+    .then(function(){ cargarDiasRegistrados(); })
+    .catch(function(){});
+}
+
+// ── SECCIÓN KIOSCO ────────────────────────────────────────────────
+function abrirKiosco(num) {
+  window.open("https://jerojantrabajo-arch.github.io/carmelo-asistencia/?dispositivo=" + num, "_blank");
+}
+
+// ── REGISTRO MANUAL ───────────────────────────────────────────────
+var listaAlumnos = [];
+
+function buscarAlumnoReg() {
+  var busq = document.getElementById("reg-buscar").value.trim().toUpperCase();
+  if (busq.length < 2) {
+    document.getElementById("reg-resultados").innerHTML = "";
+    return;
+  }
+  if (listaAlumnos.length === 0) {
+    fetch(AS_URL + "?accion=alumnos")
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        listaAlumnos = d.alumnos || [];
+        renderResultadosReg(busq);
+      });
+    return;
+  }
+  renderResultadosReg(busq);
+}
+
+function renderResultadosReg(busq) {
+  var resultados = listaAlumnos.filter(function(a){
+    return a.nombre.toUpperCase().indexOf(busq) >= 0 ||
+           a.id.indexOf(busq) >= 0;
+  }).slice(0, 8);
+
+  if (resultados.length === 0) {
+    document.getElementById("reg-resultados").innerHTML =
+      "<div class=\'vacio\'>Sin resultados</div>";
+    return;
+  }
+
+  document.getElementById("reg-resultados").innerHTML =
+    resultados.map(function(a){
+      return "<div class=\'alum-item verde\' style=\'margin-bottom:4px\'>" +
+        "<div>" +
+        "<div class=\'alum-nombre\'>" + a.nombre + "</div>" +
+        "<div class=\'alum-det\'>" + a.grado + " · DNI: " + a.id + "</div>" +
+        "</div>" +
+        "<button onclick=\'registrarManual(\"" + a.id + "\",\"" + a.nombre + "\")\'  " +
+        "style=\'background:#7B3F00;color:white;border:none;border-radius:6px;" +
+        "padding:6px 10px;font-size:11px;cursor:pointer;font-weight:bold\'>✅ Registrar</button>" +
+        "</div>";
+    }).join("");
+}
+
+function registrarManual(id, nombre) {
+  if (!confirm("¿Registrar entrada de " + nombre + "?")) return;
+  document.getElementById("reg-msg").textContent = "⏳ Registrando...";
+  document.getElementById("reg-msg").style.background = "#FFF9C4";
+
+  fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(id) +
+        "&motivo=NORMAL&dispositivo=Manual-Portal")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.ok) {
+        document.getElementById("reg-msg").textContent = "✅ " + nombre + " registrado";
+        document.getElementById("reg-msg").style.background = "#D4EDDA";
+        document.getElementById("reg-msg").style.color = "#1E6B2E";
+        document.getElementById("reg-buscar").value = "";
+        document.getElementById("reg-resultados").innerHTML = "";
+      } else {
+        document.getElementById("reg-msg").textContent = "⚠️ " + (d.mensaje || "No se pudo registrar");
+        document.getElementById("reg-msg").style.background = "#FFF9C4";
+        document.getElementById("reg-msg").style.color = "#F57F17";
+      }
+    })
+    .catch(function(){
+      document.getElementById("reg-msg").textContent = "❌ Error de conexión";
+      document.getElementById("reg-msg").style.background = "#FDECEA";
+    });
+}
+
+
+// ── REPORTE MENSUAL ───────────────────────────────────────────────
+function cargarMensual() {
+  var mes  = document.getElementById("men-mes").value;
+  var anio = document.getElementById("men-anio").value;
+  document.getElementById("mensual-loading").style.display = "block";
+  document.getElementById("mensual-resultado").innerHTML = "";
+
+  fetch(AS_URL + "?accion=reporteMensualPortal&mes=" + mes + "&anio=" + anio)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("mensual-loading").style.display = "none";
+      var MESES2 = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+      var html =
+        "<div style='background:white;border-radius:10px;padding:14px;margin-top:6px'>" +
+        "<div style='font-weight:bold;color:#7B3F00;font-size:14px;margin-bottom:10px'>" +
+        "📅 " + MESES2[parseInt(mes)] + " " + anio + "</div>" +
+        "<div class='grid-2' style='gap:6px;margin-bottom:8px'>" +
+        "<div class='stat-card c-marron'><div class='num'>" + (d.totalAlum||0) + "</div><div class='lbl'>Total alumnos</div></div>" +
+        "<div class='stat-card c-azul'><div class='num'>" + (d.diasHabiles||0) + "</div><div class='lbl'>Días hábiles</div></div>" +
+        "<div class='stat-card c-verde'><div class='num'>" + (d.presentes||0) + "</div><div class='lbl'>Asistencias</div></div>" +
+        "<div class='stat-card c-amarillo'><div class='num'>" + (d.tardanzas||0) + "</div><div class='lbl'>Tardanzas</div></div>" +
+        "<div class='stat-card c-rojo'><div class='num'>" + (d.ausentes||0) + "</div><div class='lbl'>Ausencias</div></div>" +
+        "<div class='stat-card c-marron'><div class='num'>" + (d.pct||0) + "%</div><div class='lbl'>% Asistencia</div></div>" +
+        "</div></div>";
+      document.getElementById("mensual-resultado").innerHTML = html;
+    })
+    .catch(function(){
+      document.getElementById("mensual-loading").style.display = "none";
+      document.getElementById("mensual-resultado").innerHTML = "<div class='vacio'>Error al cargar</div>";
+    });
+}
+
+// ── REPORTE SEMANAL ───────────────────────────────────────────────
+function cargarSemanal() {
+  document.getElementById("semanal-loading").style.display = "block";
+  document.getElementById("semanal-resultado").innerHTML = "";
+
+  fetch(AS_URL + "?accion=reporteSemanalPortal")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("semanal-loading").style.display = "none";
+      var html =
+        "<div style='background:white;border-radius:10px;padding:14px;margin-top:6px'>" +
+        "<div style='font-weight:bold;color:#7B3F00;font-size:13px;margin-bottom:8px'>" +
+        "📅 " + (d.lunesStr||"") + " al " + (d.viernesStr||"") + "</div>" +
+        "<div style='font-size:11px;color:#C68642;margin-bottom:10px'>" +
+        "Días hábiles: " + (d.diasHabiles||0) + "</div>" +
+        "<div class='grid-2' style='gap:6px'>" +
+        "<div class='stat-card c-verde'><div class='num'>" + (d.presentes||0) + "</div><div class='lbl'>Presentes</div></div>" +
+        "<div class='stat-card c-rojo'><div class='num'>" + (d.ausentes||0) + "</div><div class='lbl'>Ausentes</div></div>" +
+        "<div class='stat-card c-amarillo'><div class='num'>" + (d.tardanzas||0) + "</div><div class='lbl'>Tardanzas</div></div>" +
+        "<div class='stat-card c-azul'><div class='num'>" + (d.justificados||0) + "</div><div class='lbl'>Justif.</div></div>" +
+        "<div class='stat-card c-marron' style='grid-column:span 2'><div class='num'>" + (d.pct||0) + "%</div><div class='lbl'>% Asistencia</div></div>" +
+        "</div></div>";
+      document.getElementById("semanal-resultado").innerHTML = html;
+    })
+    .catch(function(){
+      document.getElementById("semanal-loading").style.display = "none";
+      document.getElementById("semanal-resultado").innerHTML = "<div class='vacio'>Error al cargar</div>";
+    });
+}
+
+// ── ALUMNOS CON FALTAS ────────────────────────────────────────────
+function cargarFaltas() {
+  var mes  = document.getElementById("fal-mes").value;
+  var anio = document.getElementById("fal-anio").value;
+  document.getElementById("faltas-loading").style.display = "block";
+  document.getElementById("faltas-resultado").innerHTML = "";
+
+  fetch(AS_URL + "?accion=alumnosFaltas&mes=" + mes + "&anio=" + anio)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("faltas-loading").style.display = "none";
+      var lista = d.alumnos || [];
+      if (lista.length === 0) {
+        document.getElementById("faltas-resultado").innerHTML =
+          "<div class='vacio'>Sin alumnos con 3+ faltas este mes</div>";
+        return;
+      }
+      document.getElementById("faltas-resultado").innerHTML =
+        "<table class='tabla'><thead><tr>" +
+        "<th>#</th><th>Alumno</th><th>Grado</th><th>Faltas</th>" +
+        "</tr></thead><tbody>" +
+        lista.map(function(a, i){
+          var cls = a.count >= 6 ? "b-ausente" : "b-tarde";
+          return "<tr><td>" + (i+1) + "</td><td>" + a.nombre +
+                 "</td><td>" + a.grado + "</td><td style='text-align:center'>" +
+                 "<span class='badge " + cls + "'>" + a.count + "</span></td></tr>";
+        }).join("") +
+        "</tbody></table>";
+    })
+    .catch(function(){
+      document.getElementById("faltas-loading").style.display = "none";
+      document.getElementById("faltas-resultado").innerHTML = "<div class='vacio'>Error al cargar</div>";
+    });
+}
+
+// ── HISTORIAL DE ALUMNO ───────────────────────────────────────────
+var alumnosCache2 = [];
+
+function buscarAlumnoHist() {
+  var busq = document.getElementById("alum-buscar").value.trim().toUpperCase();
+  if (busq.length < 2) {
+    document.getElementById("alum-sugerencias").innerHTML = "";
+    document.getElementById("alum-historial").innerHTML = "";
+    return;
+  }
+  if (listaAlumnos.length === 0) {
+    fetch(AS_URL + "?accion=alumnos")
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        listaAlumnos = d.alumnos || [];
+        renderSugerencias(busq);
+      });
+    return;
+  }
+  renderSugerencias(busq);
+}
+
+function renderSugerencias(busq) {
+  var res = listaAlumnos.filter(function(a){
+    return a.nombre.toUpperCase().indexOf(busq) >= 0 || a.id.indexOf(busq) >= 0;
+  }).slice(0, 6);
+
+  if (res.length === 0) {
+    document.getElementById("alum-sugerencias").innerHTML = "<div class='vacio'>Sin resultados</div>";
+    return;
+  }
+  document.getElementById("alum-sugerencias").innerHTML = res.map(function(a){
+    return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' onclick='verHistorialAlumno("" + a.id + "","" + a.nombre + "")'>" +
+      "<div><div class='alum-nombre'>👤 " + a.nombre + "</div>" +
+      "<div class='alum-det'>" + a.grado + " · " + a.id + "</div></div>" +
+      "<span style='font-size:11px;color:#7B3F00;font-weight:bold'>Ver →</span>" +
+      "</div>";
+  }).join("");
+}
+
+function verHistorialAlumno(id, nombre) {
+  document.getElementById("alum-sugerencias").innerHTML = "";
+  document.getElementById("alum-buscar").value = nombre;
+  document.getElementById("alum-historial").innerHTML = "<div class='loading'>⏳ Cargando historial...</div>";
+
+  fetch(AS_URL + "?accion=historialAlumno&id=" + encodeURIComponent(id))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var registros = d.registros || [];
+      if (registros.length === 0) {
+        document.getElementById("alum-historial").innerHTML = "<div class='vacio'>Sin registros</div>";
+        return;
+      }
+      var resumen = d.resumen || {};
+      var html =
+        "<div style='background:white;border-radius:10px;padding:12px;margin-top:6px'>" +
+        "<div style='font-weight:bold;color:#7B3F00;margin-bottom:8px'>" + nombre + "</div>" +
+        "<div class='grid-4' style='margin-bottom:10px'>" +
+        "<div class='stat-card c-verde'><div class='num' style='font-size:18px'>" + (resumen.presentes||0) + "</div><div class='lbl'>Presentes</div></div>" +
+        "<div class='stat-card c-rojo'><div class='num' style='font-size:18px'>" + (resumen.ausentes||0) + "</div><div class='lbl'>Ausentes</div></div>" +
+        "<div class='stat-card c-amarillo'><div class='num' style='font-size:18px'>" + (resumen.tardanzas||0) + "</div><div class='lbl'>Tardanzas</div></div>" +
+        "<div class='stat-card c-azul'><div class='num' style='font-size:18px'>" + (resumen.justificados||0) + "</div><div class='lbl'>Justif.</div></div>" +
+        "</div>" +
+        "<table class='tabla'><thead><tr><th>Fecha</th><th>Estado</th><th>Hora</th></tr></thead><tbody>" +
+        registros.slice(0,30).map(function(r){
+          var badge = r.estado === "AUSENTE" ? "b-ausente" :
+                      r.estado === "TARDE"   ? "b-tarde" :
+                      r.estado === "JUSTIFICADO" ? "b-justif" : "b-puntual";
+          return "<tr><td>" + r.fecha + "</td>" +
+                 "<td><span class='badge " + badge + "'>" + r.estado + "</span></td>" +
+                 "<td>" + (r.hora||"-") + "</td></tr>";
+        }).join("") +
+        "</tbody></table></div>";
+      document.getElementById("alum-historial").innerHTML = html;
+    })
+    .catch(function(){
+      document.getElementById("alum-historial").innerHTML = "<div class='vacio'>Error al cargar</div>";
+    });
+}
+
+// ── JUSTIFICACIONES ───────────────────────────────────────────────
+function registrarJustif() {
+  var dni    = document.getElementById("just-dni").value.trim().toUpperCase();
+  var fecha  = document.getElementById("just-fecha").value;
+  var tipo   = document.getElementById("just-tipo").value;
+  var motivo = document.getElementById("just-motivo").value.trim();
+  var reg    = document.getElementById("just-reg").value.trim();
+
+  if (!dni || !fecha || !motivo || !reg) {
+    setJustMsg("⚠️ Complete todos los campos", "#FFF9C4", "#F57F17");
+    return;
+  }
+
+  // Convertir fecha de YYYY-MM-DD a DD/MM/YYYY
+  var p = fecha.split("-");
+  var fechaStr = p[2] + "/" + p[1] + "/" + p[0];
+
+  setJustMsg("⏳ Guardando...", "#FFF9C4", "#856404");
+
+  fetch(AS_URL + "?accion=justificar&dni=" + encodeURIComponent(dni) +
+        "&fecha=" + encodeURIComponent(fechaStr) +
+        "&tipo="  + encodeURIComponent(tipo) +
+        "&motivo=" + encodeURIComponent(motivo) +
+        "&registrador=" + encodeURIComponent(reg))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      setJustMsg("✅ " + (d.msg || "Guardado correctamente"), "#D4EDDA", "#1E6B2E");
+      document.getElementById("just-dni").value    = "";
+      document.getElementById("just-motivo").value = "";
+      document.getElementById("just-reg").value    = "";
+    })
+    .catch(function(){
+      setJustMsg("❌ Error de conexión", "#FDECEA", "#B71C1C");
+    });
+}
+
+function setJustMsg(txt, bg, color) {
+  var el = document.getElementById("just-msg");
+  el.textContent = txt;
+  el.style.background = bg;
+  el.style.color = color;
+}
+
+function cargarJustificaciones() {
+  fetch(AS_URL + "?accion=listarJustificaciones")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var lista = d.justificaciones || [];
+      if (lista.length === 0) {
+        document.getElementById("just-lista").innerHTML = "<div class='vacio'>Sin justificaciones registradas</div>";
+        return;
+      }
+      document.getElementById("just-lista").innerHTML =
+        "<table class='tabla'><thead><tr>" +
+        "<th>Fecha</th><th>Alumno</th><th>Tipo</th><th>Motivo</th>" +
+        "</tr></thead><tbody>" +
+        lista.map(function(j){
+          return "<tr><td>" + j.fecha + "</td><td>" + j.dni +
+                 "</td><td><span class='badge b-justif'>" + j.tipo +
+                 "</span></td><td>" + j.motivo + "</td></tr>";
+        }).join("") +
+        "</tbody></table>";
+    })
+    .catch(function(){
+      document.getElementById("just-lista").innerHTML = "<div class='vacio'>Error al cargar</div>";
+    });
+}
+
+</script>
+</body>
+</html>
