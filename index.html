@@ -208,6 +208,7 @@ var PIN_KEY = "pin_ok_" + new Date().toLocaleDateString("es-PE");
 var colaEnvio    = [];
 var enviandoCola = false;
 
+  
 function agregarCola(id) {
   colaEnvio.push({ id: id, intentos: 0, ts: Date.now() });
   actualizarBarraCola();
@@ -560,21 +561,59 @@ function procesarId(id) {
     return;
   }
 
-  // ── REGISTRAR ENTRADA ─────────────────────────────────────────────
-  reg.e = 1;
-  reg.fecha = fechaHoy();
-  registrosHoy[id] = reg;
-  guardarRegistros();
+  // ── VERIFICAR FIN DE SEMANA ───────────────────────────────────
+  var hoyDow = new Date().getDay();
+  if (hoyDow === 0 || hoyDow === 6) {
+    sonidoError();
+    mostrarEstado("duplic", "🚫", "Hoy no hay clases",
+      "Sábado o domingo — sin registro de asistencia");
+    setTimeout(resetear, 2500);
+    return;
+  }
 
-  cE++; document.getElementById("c-e").textContent = cE;
-  document.getElementById("c-t").textContent = cE;
-  sonidoOK();
-  mostrarEstado("entrada", "✓", "ENTRADA: " + nombre, hora + (grado ? " — " + grado : ""));
-  agregarHistorial(nombre, "ENTRADA", hora);
-  setTimeout(resetear, 1200);
+  // ── VERIFICAR DÍA SIN ESCANEO ─────────────────────────────────
+  fetch(AS_URL + "?accion=config")
+    .then(function(r){ return r.json(); })
+    .then(function(cfg){
+      if (cfg.diaSinEscaneo) {
+        sonidoError();
+        mostrarEstado("duplic", "🚫", "Hoy no hay registro",
+          cfg.motivoSinEscaneo || "Día sin escaneo configurado");
+        setTimeout(resetear, 2500);
+        return;
+      }
 
-  // ── ENVIAR AL SERVIDOR EN SEGUNDO PLANO ───────────────────────────
-  agregarCola(id);
+      // ── REGISTRAR ENTRADA ───────────────────────────────────────
+      reg.e = 1;
+      reg.fecha = fechaHoy();
+      registrosHoy[id] = reg;
+      guardarRegistros();
+
+      cE++; document.getElementById("c-e").textContent = cE;
+      document.getElementById("c-t").textContent = cE;
+      sonidoOK();
+      mostrarEstado("entrada", "✓", "ENTRADA: " + nombre, hora + (grado ? " — " + grado : ""));
+      agregarHistorial(nombre, "ENTRADA", hora);
+      setTimeout(resetear, 1200);
+
+      // ── ENVIAR AL SERVIDOR EN SEGUNDO PLANO ────────────────────
+      agregarCola(id);
+    })
+    .catch(function(){
+      // Si no hay conexión para verificar, registrar igual
+      reg.e = 1;
+      reg.fecha = fechaHoy();
+      registrosHoy[id] = reg;
+      guardarRegistros();
+
+      cE++; document.getElementById("c-e").textContent = cE;
+      document.getElementById("c-t").textContent = cE;
+      sonidoOK();
+      mostrarEstado("entrada", "✓", "ENTRADA: " + nombre, hora + (grado ? " — " + grado : ""));
+      agregarHistorial(nombre, "ENTRADA", hora);
+      setTimeout(resetear, 1200);
+      agregarCola(id);
+    });
 }
 
 // ══════════════════════════════════════════════
