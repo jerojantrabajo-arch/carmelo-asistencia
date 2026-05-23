@@ -644,10 +644,12 @@ function cargarTardanzas() {
   fetch(AS_URL + "?accion=historialTardanzas")
     .then(function(r){ return r.json(); })
     .then(function(d){
-      document.getElementById("tardanzas-loading").style.display = "none";
+      var el = document.getElementById("tardanzas-loading");
+      if (el) el.style.display = "none";
       var lista = d.tardanzas || [];
       if (lista.length === 0) {
-        document.getElementById("lista-tardanzas").innerHTML = "<div class='vacio'>Sin tardanzas este mes</div>";
+        document.getElementById("lista-tardanzas").innerHTML =
+          "<div class='vacio'>Sin tardanzas este mes</div>";
         return;
       }
       document.getElementById("lista-tardanzas").innerHTML =
@@ -662,7 +664,8 @@ function cargarTardanzas() {
         "</tbody></table>";
     })
     .catch(function(){
-      document.getElementById("tardanzas-loading").textContent = "Error al cargar";
+      var el = document.getElementById("tardanzas-loading");
+      if (el) el.textContent = "Error al cargar";
     });
 }
 
