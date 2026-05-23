@@ -213,6 +213,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
         <div class="alum-lista" id="lista-ausentes-hoy"></div>
         <div style="margin-top:10px">
           <button class="btn-accion" onclick="cargarHoy()">🔄 Actualizar</button>
+          <button class="btn-accion btn-naranja" onclick="exportarPDFDia()">📄 Exportar PDF</button>
         </div>
       </div>
     </div>
@@ -247,13 +248,15 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion" onclick="cargarReportes()">🔍 Buscar reportes</button>
       <div id="reportes-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="lista-reportes"></div>
+      <button class="btn-accion btn-naranja" onclick="exportarPDFPorFechas(window._diasReportes||[])" style="margin-top:6px">📄 Exportar PDF</button>
     </div>
 
     <!-- ══ SECCIÓN: TARDANZAS ══ -->
     <div class="seccion" id="sec-tardanzas">
       <div class="sec-title">⏰ Historial de tardanzas del mes</div>
-      <div id="tardanzas-loading" class="loading" style="display:block">⏳ Cargando...</div>
+      <div id="tardanzas-loading" class="loading">⏳ Cargando...</div>
       <div id="lista-tardanzas"></div>
+      <button class="btn-accion btn-naranja" onclick="exportarPDFTardanzas()" style="margin-top:6px">📄 Exportar PDF con gráfico</button>
     </div>
 
     <!-- ══ SECCIÓN: DÍAS SIN ESCANEO ══ -->
@@ -333,6 +336,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion" onclick="cargarMensual()">📊 Ver reporte</button>
       <div id="mensual-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="mensual-resultado"></div>
+      <button class="btn-accion btn-naranja" onclick="exportarPDFMensual()" style="margin-top:6px">📄 Exportar PDF mensual con gráficos</button>
     </div>
 
     <!-- ══ SECCIÓN: REPORTE SEMANAL ══ -->
@@ -341,6 +345,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion" onclick="cargarSemanal()">🔄 Ver semana actual</button>
       <div id="semanal-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="semanal-resultado"></div>
+      <button class="btn-accion btn-naranja" onclick="exportarPDFSemanal()" style="margin-top:6px">📄 Exportar PDF</button>
     </div>
 
     <!-- ══ SECCIÓN: ALUMNOS CON FALTAS ══ -->
@@ -369,6 +374,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion" onclick="cargarFaltas()">⚠️ Ver alumnos con faltas</button>
       <div id="faltas-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="faltas-resultado"></div>
+      <button class="btn-accion btn-naranja" onclick="exportarPDFFaltas()" style="margin-top:6px">📄 Exportar PDF con gráfico</button>
     </div>
 
     <!-- ══ SECCIÓN: BUSCAR ALUMNO ══ -->
@@ -446,7 +452,6 @@ function validarPin() {
     document.getElementById("login-error").textContent = "Ingrese los 4 dígitos";
     return;
   }
-  
   document.getElementById("login-error").textContent = "Verificando...";
   fetch(AS_URL + "?accion=pin&valor=" + encodeURIComponent(pin))
     .then(function(r){ return r.json(); })
@@ -470,6 +475,8 @@ function mostrarPortal() {
   document.getElementById("portal").style.display = "flex";
   irSeccion("kiosco");
   cargarHoy();
+  cargarTardanzas();
+  cargarDiasRegistrados();
   setInterval(function(){ if(tabActual==="hoy") cargarHoy(); }, 120000);
 }
 
@@ -483,27 +490,10 @@ function irSeccion(id) {
   tabActual = id;
   document.querySelectorAll(".seccion").forEach(function(s){ s.classList.remove("activa"); });
   document.querySelectorAll(".nav-tab").forEach(function(t){ t.classList.remove("active"); });
+  document.getElementById("sec-" + id).classList.add("activa");
+  event && event.target && event.target.classList.add("active");
 
-  var sec = document.getElementById("sec-" + id);
-  if (sec) {
-    sec.classList.add("activa");
-  } else {
-    console.log("Sección no encontrada: sec-" + id);
-    return;
-  }
-
-  // Activar tab correcto
-  document.querySelectorAll(".nav-tab").forEach(function(t){
-    if (t.getAttribute("onclick") &&
-        t.getAttribute("onclick").indexOf("'" + id + "'") >= 0) {
-      t.classList.add("active");
-    }
-  });
-
-  // Cargar datos según sección
-  if (id === "detalle"   && datosDet.length === 0) cargarDetalle();
-  if (id === "tardanzas") cargarTardanzas();
-  if (id === "diasSinEscaneo") cargarDiasRegistrados();
+  if (id === "detalle" && datosDet.length === 0) cargarDetalle();
 }
 
 // ── SECCIÓN HOY ───────────────────────────────────────────────────
@@ -516,8 +506,8 @@ function cargarHoy() {
       datosHoy = d;
       renderHoy();
     })
-    .catch(function(){
-      document.getElementById("hoy-loading").textContent = "Error al cargar — verifique conexión";
+    .catch(function(e){
+      document.getElementById("hoy-loading").textContent = "Error al cargar";
     });
 }
 
@@ -529,9 +519,9 @@ function renderHoy() {
   var presentes = (datosHoy.presentes || 0);
   var ausentes  = (datosHoy.ausentes  || 0);
   var tardanzas = (datosHoy.tardanzas || 0);
-  var justif    = (datosHoy.justificados || datosHoy.justif || 0);
+  var justif    = (datosHoy.justificados || 0);
   var total     = presentes + ausentes;
-  var pct       = datosHoy.pct || (total > 0 ? Math.round(presentes / total * 100) : 0);
+  var pct       = total > 0 ? Math.round(presentes / total * 100) : 0;
 
   document.getElementById("h-presentes").textContent = presentes;
   document.getElementById("h-ausentes").textContent  = ausentes;
@@ -539,18 +529,13 @@ function renderHoy() {
   document.getElementById("h-justif").textContent    = justif;
   document.getElementById("h-pct").textContent       = pct + "%";
 
-  // Usar registros del dashboard y filtrar ausentes
-  var todos = datosHoy.registros || datosHoy.listaAusentes || [];
-  var lista = todos.filter ? todos.filter(function(r){
-    return String(r.estado).toUpperCase() === "AUSENTE";
-  }) : [];
-
-  var html = lista.length === 0
-    ? "<div class='vacio'>Sin ausentes registrados hoy</div>"
+  var lista = datosHoy.listaAusentes || [];
+  var html  = lista.length === 0
+    ? "<div class='vacio'>Sin ausentes registrados</div>"
     : lista.map(function(a){
         return "<div class='alum-item rojo'>" +
-          "<div><div class='alum-nombre'>❌ " + (a.nombre||a.name||"") + "</div>" +
-          "<div class='alum-det'>" + (a.grado||"") + "</div></div>" +
+          "<div><div class='alum-nombre'>❌ " + a.nombre + "</div>" +
+          "<div class='alum-det'>" + a.grado + "</div></div>" +
           "</div>";
       }).join("");
   document.getElementById("lista-ausentes-hoy").innerHTML = html;
@@ -629,6 +614,7 @@ function cargarReportes() {
     .then(function(r){ return r.json(); })
     .then(function(d){
       document.getElementById("reportes-loading").style.display = "none";
+      window._diasReportes = d.dias || [];
       renderReportes(d.dias || []);
     })
     .catch(function(){
@@ -659,12 +645,10 @@ function cargarTardanzas() {
   fetch(AS_URL + "?accion=historialTardanzas")
     .then(function(r){ return r.json(); })
     .then(function(d){
-      var el = document.getElementById("tardanzas-loading");
-      if (el) { el.style.display = "none"; el.style.visibility = "hidden"; }
+      document.getElementById("tardanzas-loading").style.display = "none";
       var lista = d.tardanzas || [];
       if (lista.length === 0) {
-        document.getElementById("lista-tardanzas").innerHTML =
-          "<div class='vacio'>Sin tardanzas este mes</div>";
+        document.getElementById("lista-tardanzas").innerHTML = "<div class='vacio'>Sin tardanzas este mes</div>";
         return;
       }
       document.getElementById("lista-tardanzas").innerHTML =
@@ -679,8 +663,7 @@ function cargarTardanzas() {
         "</tbody></table>";
     })
     .catch(function(){
-      var el = document.getElementById("tardanzas-loading");
-      if (el) el.textContent = "Error al cargar";
+      document.getElementById("tardanzas-loading").textContent = "Error al cargar";
     });
 }
 
@@ -895,6 +878,7 @@ function cargarSemanal() {
   fetch(AS_URL + "?accion=reporteSemanalPortal")
     .then(function(r){ return r.json(); })
     .then(function(d){
+      window._datosSemanal = d;
       document.getElementById("semanal-loading").style.display = "none";
       var html =
         "<div style='background:white;border-radius:10px;padding:14px;margin-top:6px'>" +
@@ -984,7 +968,7 @@ function renderSugerencias(busq) {
     return;
   }
   document.getElementById("alum-sugerencias").innerHTML = res.map(function(a){
-    return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' onclick='verHistorialAlumno(\"" + a.id + "\",\"" + a.nombre + "\")'>" +
+    return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' onclick='verHistorialAlumno("" + a.id + "","" + a.nombre + "")'>" +
       "<div><div class='alum-nombre'>👤 " + a.nombre + "</div>" +
       "<div class='alum-det'>" + a.grado + " · " + a.id + "</div></div>" +
       "<span style='font-size:11px;color:#7B3F00;font-weight:bold'>Ver →</span>" +
@@ -1025,7 +1009,12 @@ function verHistorialAlumno(id, nombre) {
                  "<td>" + (r.hora||"-") + "</td></tr>";
         }).join("") +
         "</tbody></table></div>";
-      document.getElementById("alum-historial").innerHTML = html;
+      document.getElementById("alum-historial").innerHTML = html +
+        "<button class=\'btn-accion btn-naranja\' style=\'margin-top:8px\' " +
+        "onclick=\'exportarPDFAlumno(\"" + id + "\",\"" + nombre + "\"," +
+        "window._regAlumno||[],window._resAlumno||{})\'>📄 Exportar PDF</button>";
+      window._regAlumno = registros;
+      window._resAlumno = resumen;
     })
     .catch(function(){
       document.getElementById("alum-historial").innerHTML = "<div class='vacio'>Error al cargar</div>";
@@ -1098,6 +1087,592 @@ function cargarJustificaciones() {
     .catch(function(){
       document.getElementById("just-lista").innerHTML = "<div class='vacio'>Error al cargar</div>";
     });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MÓDULO DE EXPORTACIÓN PDF — Portal El Carmelo de María
+// Usa jsPDF + Chart.js (cargados desde CDN)
+// ══════════════════════════════════════════════════════════════════
+
+var PDF_LOADED = false;
+
+function cargarLibreriasPDF(callback) {
+  if (PDF_LOADED) { callback(); return; }
+  
+  // Cargar jsPDF
+  var s1 = document.createElement("script");
+  s1.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+  s1.onload = function() {
+    // Cargar jsPDF-autotable
+    var s2 = document.createElement("script");
+    s2.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js";
+    s2.onload = function() {
+      // Cargar Chart.js
+      var s3 = document.createElement("script");
+      s3.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js";
+      s3.onload = function() {
+        PDF_LOADED = true;
+        callback();
+      };
+      document.head.appendChild(s3);
+    };
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────
+var MESES_PDF = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                 "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+var C_MARRON  = [123, 63,  0];
+var C_NARANJA = [210,105, 30];
+var C_CREMA   = [255,248,240];
+var C_VERDE   = [ 30,107, 46];
+var C_ROJO    = [183, 28, 28];
+var C_AZUL    = [ 12, 68,124];
+var C_AMARILLO= [245,127, 23];
+
+function pdfHeader(doc, titulo, subtitulo) {
+  // Fondo marrón header
+  doc.setFillColor(C_MARRON[0], C_MARRON[1], C_MARRON[2]);
+  doc.rect(0, 0, 210, 22, "F");
+  doc.setTextColor(255,248,240);
+  doc.setFontSize(13);
+  doc.setFont("helvetica","bold");
+  doc.text('I.E. SFT N° 50949 "El Carmelo de María"', 105, 9, {align:"center"});
+  doc.setFontSize(9);
+  doc.setFont("helvetica","normal");
+  doc.text("Quillahuata — San Sebastián — Cusco, Perú", 105, 15, {align:"center"});
+
+  // Banda naranja
+  doc.setFillColor(C_NARANJA[0], C_NARANJA[1], C_NARANJA[2]);
+  doc.rect(0, 22, 210, 10, "F");
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(11);
+  doc.setFont("helvetica","bold");
+  doc.text(titulo, 105, 29, {align:"center"});
+
+  // Subtítulo
+  doc.setTextColor(80,80,80);
+  doc.setFontSize(9);
+  doc.setFont("helvetica","normal");
+  doc.text(subtitulo, 105, 38, {align:"center"});
+
+  return 42; // y inicial del contenido
+}
+
+function pdfFooter(doc) {
+  var pages = doc.internal.getNumberOfPages();
+  for (var i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setFillColor(C_NARANJA[0], C_NARANJA[1], C_NARANJA[2]);
+    doc.rect(0, 287, 210, 10, "F");
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(7);
+    doc.setFont("helvetica","normal");
+    var fecha = new Date().toLocaleDateString("es-PE",{day:"2-digit",month:"long",year:"numeric"});
+    doc.text('Sistema Asistencia v3.3 — El Carmelo de María — Generado: ' + fecha, 105, 293, {align:"center"});
+    doc.text("Página " + i + " de " + pages, 200, 293, {align:"right"});
+  }
+}
+
+function renderGraficoBase64(tipo, labels, datasets, opciones) {
+  return new Promise(function(resolve) {
+    var canvas = document.createElement("canvas");
+    canvas.width  = opciones.w || 800;
+    canvas.height = opciones.h || 350;
+    canvas.style.display = "none";
+    document.body.appendChild(canvas);
+
+    var chart = new Chart(canvas.getContext("2d"), {
+      type: tipo,
+      data: { labels: labels, datasets: datasets },
+      options: {
+        responsive: false,
+        animation: false,
+        plugins: {
+          legend: { display: opciones.leyenda !== false,
+            labels: { font: { size: 10 } } }
+        },
+        scales: tipo !== "pie" && tipo !== "doughnut" ? {
+          y: { beginAtZero: true, ticks: { font: { size: 9 } } },
+          x: { ticks: { font: { size: 8 }, maxRotation: 45 } }
+        } : undefined
+      }
+    });
+
+    setTimeout(function() {
+      var img = canvas.toDataURL("image/png");
+      chart.destroy();
+      document.body.removeChild(canvas);
+      resolve(img);
+    }, 300);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 1. PDF REPORTE DEL DÍA (sin gráfico)
+// ══════════════════════════════════════════════════════════════════
+function exportarPDFDia() {
+  if (!datosHoy) { alert("Primero carga los datos de hoy"); return; }
+  cargarLibreriasPDF(function() {
+    var doc  = new jspdf.jsPDF("p","mm","a4");
+    var fecha = datosHoy.fecha || new Date().toLocaleDateString("es-PE");
+    var y = pdfHeader(doc, "REPORTE DIARIO DE ASISTENCIA", "Fecha: " + fecha);
+
+    // Resumen
+    doc.setFillColor(C_CREMA[0],C_CREMA[1],C_CREMA[2]);
+    doc.rect(14, y, 182, 28, "F");
+    doc.setDrawColor(C_NARANJA[0],C_NARANJA[1],C_NARANJA[2]);
+    doc.rect(14, y, 182, 28, "S");
+
+    var total    = (datosHoy.presentes||0) + (datosHoy.ausentes||0);
+    var pct      = datosHoy.pct || (total>0 ? Math.round((datosHoy.presentes||0)/total*100) : 0);
+    var cols     = ["Total","Presentes","Tardanzas","Ausentes","Justif.","% Asist."];
+    var vals     = [
+      datosHoy.total||total,
+      datosHoy.presentes||0,
+      datosHoy.tardanzas||0,
+      datosHoy.ausentes||0,
+      datosHoy.justif||datosHoy.justificados||0,
+      pct+"%"
+    ];
+    var colW = 182/6;
+    cols.forEach(function(c,i){
+      doc.setFontSize(8); doc.setTextColor(80,80,80); doc.setFont("helvetica","normal");
+      doc.text(c, 14 + i*colW + colW/2, y+8, {align:"center"});
+      doc.setFontSize(14); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
+      doc.setFont("helvetica","bold");
+      doc.text(String(vals[i]), 14 + i*colW + colW/2, y+20, {align:"center"});
+    });
+    y += 34;
+
+    // Tabla de registros
+    var registros = (datosHoy.registros||[]);
+    if (registros.length > 0) {
+      doc.autoTable({
+        startY: y,
+        head: [["#","DNI","Nombre","Grado","Hora","Estado"]],
+        body: registros.map(function(r,i){
+          return [i+1, r.dni||r.id||"", r.nombre||"", r.grado||"",
+                  r.hora||"", r.estado||""];
+        }),
+        styles: { fontSize: 7, cellPadding: 2 },
+        headStyles: { fillColor: C_MARRON, textColor: [255,255,255], fontStyle:"bold" },
+        alternateRowStyles: { fillColor: C_CREMA },
+        didParseCell: function(data) {
+          if (data.section === "body" && data.column.index === 5) {
+            var est = String(data.cell.raw).toUpperCase();
+            if (est === "AUSENTE")   data.cell.styles.textColor = C_ROJO;
+            else if (est === "TARDE") data.cell.styles.textColor = C_AMARILLO;
+            else                      data.cell.styles.textColor = C_VERDE;
+          }
+        }
+      });
+    } else {
+      doc.setFontSize(10); doc.setTextColor(150,150,150);
+      doc.text("Sin registros para hoy", 105, y+10, {align:"center"});
+    }
+
+    pdfFooter(doc);
+    doc.save("Reporte_Dia_" + fecha.replace(/\//g,"-") + ".pdf");
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 2. PDF REPORTE SEMANAL (sin gráfico)
+// ══════════════════════════════════════════════════════════════════
+function exportarPDFSemanal() {
+  var datos = window._datosSemanal;
+  if (!datos) { alert("Primero carga el reporte semanal"); return; }
+  cargarLibreriasPDF(function() {
+    var doc = new jspdf.jsPDF("p","mm","a4");
+    var titulo = "REPORTE SEMANAL DE ASISTENCIA";
+    var sub    = "Semana: " + (datos.lunesStr||"") + " al " + (datos.viernesStr||"");
+    var y = pdfHeader(doc, titulo, sub);
+
+    // Resumen
+    doc.autoTable({
+      startY: y,
+      head: [["Días hábiles","Presentes","Tardanzas","Justificados","Ausentes","% Asistencia"]],
+      body: [[
+        datos.diasHabiles||0, datos.presentes||0, datos.tardanzas||0,
+        datos.justificados||0, datos.ausentes||0, (datos.pct||0)+"%"
+      ]],
+      styles: { fontSize: 10, halign:"center", cellPadding: 4 },
+      headStyles: { fillColor: C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      bodyStyles: { fillColor: C_CREMA, textColor: C_MARRON, fontStyle:"bold", fontSize:12 }
+    });
+
+    pdfFooter(doc);
+    doc.save("Reporte_Semanal_" + (datos.lunesStr||"").replace(/\//g,"-") + ".pdf");
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 3. PDF REPORTE MENSUAL CON GRÁFICOS
+// ══════════════════════════════════════════════════════════════════
+function exportarPDFMensual() {
+  var mes  = document.getElementById("men-mes")  ? document.getElementById("men-mes").value  : "5";
+  var anio = document.getElementById("men-anio") ? document.getElementById("men-anio").value : "2026";
+  
+  mostrarMsgPDF("Generando PDF mensual...");
+
+  fetch(AS_URL + "?accion=reporteMensualDetallado&mes=" + mes + "&anio=" + anio)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      cargarLibreriasPDF(function() {
+        var dias = d.dias || [];
+        var labels = dias.map(function(x){ return x.fecha.substring(0,5); });
+
+        renderGraficoBase64("bar", labels, [
+          { label:"Anticipados", data: dias.map(function(x){ return x.anticipados||0; }),
+            backgroundColor:"rgba(46,125,50,0.7)" },
+          { label:"Puntuales",   data: dias.map(function(x){ return x.puntuales||0; }),
+            backgroundColor:"rgba(30,107,46,0.9)" },
+          { label:"Tardanzas",   data: dias.map(function(x){ return x.tardanzas||0; }),
+            backgroundColor:"rgba(245,127,23,0.8)" },
+          { label:"Ausentes",    data: dias.map(function(x){ return x.ausentes||0; }),
+            backgroundColor:"rgba(183,28,28,0.8)" }
+        ], { w:900, h:380, leyenda:true })
+        .then(function(imgBarras) {
+          // Gráfico torta totales
+          var totAnticip  = dias.reduce(function(s,x){ return s+(x.anticipados||0);},0);
+          var totPuntual  = dias.reduce(function(s,x){ return s+(x.puntuales||0);},0);
+          var totTarde    = dias.reduce(function(s,x){ return s+(x.tardanzas||0);},0);
+          var totAusente  = dias.reduce(function(s,x){ return s+(x.ausentes||0);},0);
+          var totJustif   = dias.reduce(function(s,x){ return s+(x.justificados||0);},0);
+
+          return renderGraficoBase64("doughnut",
+            ["Anticipados","Puntuales","Tardanzas","Ausentes","Justificados"],
+            [{ data:[totAnticip,totPuntual,totTarde,totAusente,totJustif],
+               backgroundColor:["#2E7D32","#1E6B2E","#F57F17","#B71C1C","#0C447C"] }],
+            { w:500, h:400, leyenda:true }
+          ).then(function(imgTorta) {
+            var doc = new jspdf.jsPDF("p","mm","a4");
+            var mesNombre = MESES_PDF[parseInt(mes)] + " " + anio;
+            var y = pdfHeader(doc, "REPORTE MENSUAL DE ASISTENCIA", mesNombre);
+
+            // Resumen numérico
+            doc.autoTable({
+              startY: y,
+              head: [["Anticipados","Puntuales","Tardanzas","Ausentes","Justificados"]],
+              body: [[totAnticip, totPuntual, totTarde, totAusente, totJustif]],
+              styles: { fontSize:11, halign:"center", cellPadding:4 },
+              headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+              bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:13 }
+            });
+            y = doc.lastAutoTable.finalY + 6;
+
+            // Gráfico de barras
+            doc.setFontSize(9); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
+            doc.setFont("helvetica","bold");
+            doc.text("Asistencia diaria — " + mesNombre, 14, y+4);
+            y += 6;
+            doc.addImage(imgBarras, "PNG", 14, y, 182, 75);
+            y += 80;
+
+            // Gráfico torta
+            doc.text("Distribución general del mes", 14, y+4);
+            y += 6;
+            doc.addImage(imgTorta, "PNG", 55, y, 100, 80);
+            y += 86;
+
+            // Tabla detalle por día
+            doc.addPage();
+            y = 15;
+            doc.setFontSize(10); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
+            doc.setFont("helvetica","bold");
+            doc.text("Detalle por día — " + mesNombre, 14, y);
+            y += 4;
+
+            doc.autoTable({
+              startY: y,
+              head: [["Fecha","Anticipados","Puntuales","Tardanzas","Ausentes","Justificados"]],
+              body: dias.map(function(d){
+                return [d.fecha, d.anticipados||0, d.puntuales||0,
+                        d.tardanzas||0, d.ausentes||0, d.justificados||0];
+              }),
+              styles: { fontSize:8, cellPadding:2, halign:"center" },
+              headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+              columnStyles: { 0: { halign:"left" } },
+              alternateRowStyles: { fillColor:C_CREMA }
+            });
+
+            pdfFooter(doc);
+            doc.save("Reporte_Mensual_" + mesNombre.replace(" ","_") + ".pdf");
+            ocultarMsgPDF();
+          });
+        });
+      });
+    })
+    .catch(function(){ ocultarMsgPDF(); alert("Error al generar PDF"); });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 4. PDF REPORTE DE FALTAS CON GRÁFICO
+// ══════════════════════════════════════════════════════════════════
+function exportarPDFFaltas() {
+  var mes  = document.getElementById("fal-mes")  ? document.getElementById("fal-mes").value  : "5";
+  var anio = document.getElementById("fal-anio") ? document.getElementById("fal-anio").value : "2026";
+  
+  mostrarMsgPDF("Generando PDF de faltas...");
+
+  fetch(AS_URL + "?accion=alumnosFaltas&mes=" + mes + "&anio=" + anio)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var lista = d.alumnos || [];
+      if (lista.length === 0) { ocultarMsgPDF(); alert("Sin alumnos con 3+ faltas"); return; }
+      
+      cargarLibreriasPDF(function() {
+        var top10   = lista.slice(0,15);
+        var labels  = top10.map(function(a){ return a.nombre.split(" ").slice(0,2).join(" "); });
+        var valores = top10.map(function(a){ return a.count; });
+
+        renderGraficoBase64("bar", labels, [
+          { label:"Faltas", data:valores,
+            backgroundColor: valores.map(function(v){
+              return v>=6 ? "rgba(183,28,28,0.8)" : "rgba(245,127,23,0.8)";
+            }),
+            borderRadius: 4
+          }
+        ], { w:800, h:380, leyenda:false })
+        .then(function(imgBarras) {
+          var doc = new jspdf.jsPDF("p","mm","a4");
+          var mesNombre = MESES_PDF[parseInt(mes)] + " " + anio;
+          var y = pdfHeader(doc, "REPORTE DE FALTAS ACUMULADAS", mesNombre);
+
+          // Resumen
+          doc.setFillColor(C_CREMA[0],C_CREMA[1],C_CREMA[2]);
+          doc.rect(14,y,182,14,"F");
+          doc.setFontSize(10); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
+          doc.setFont("helvetica","bold");
+          doc.text("Total alumnos con 3+ faltas: " + lista.length, 105, y+9, {align:"center"});
+          y += 18;
+
+          // Gráfico
+          doc.setFontSize(9); doc.setFont("helvetica","bold");
+          doc.text("Top " + top10.length + " alumnos con más faltas", 14, y);
+          y += 4;
+          doc.addImage(imgBarras, "PNG", 14, y, 182, 80);
+          y += 86;
+
+          // Tabla completa
+          doc.autoTable({
+            startY: y,
+            head: [["#","Alumno","Grado","Faltas","Nivel"]],
+            body: lista.map(function(a,i){
+              return [i+1, a.nombre, a.grado, a.count,
+                      a.count>=6 ? "⚠️ CRÍTICO" : "Atención"];
+            }),
+            styles: { fontSize:8, cellPadding:2 },
+            headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+            alternateRowStyles: { fillColor:C_CREMA },
+            didParseCell: function(data) {
+              if (data.section==="body" && data.column.index===4) {
+                data.cell.styles.textColor =
+                  String(data.cell.raw).indexOf("CRÍTICO")>=0 ? C_ROJO : C_AMARILLO;
+                data.cell.styles.fontStyle = "bold";
+              }
+              if (data.section==="body" && data.column.index===3) {
+                data.cell.styles.textColor =
+                  data.cell.raw>=6 ? C_ROJO : C_AMARILLO;
+                data.cell.styles.fontStyle = "bold";
+              }
+            }
+          });
+
+          pdfFooter(doc);
+          doc.save("Reporte_Faltas_" + mesNombre.replace(" ","_") + ".pdf");
+          ocultarMsgPDF();
+        });
+      });
+    })
+    .catch(function(){ ocultarMsgPDF(); alert("Error al generar PDF"); });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 5. PDF REPORTE DE TARDANZAS CON GRÁFICO
+// ══════════════════════════════════════════════════════════════════
+function exportarPDFTardanzas() {
+  mostrarMsgPDF("Generando PDF de tardanzas...");
+  fetch(AS_URL + "?accion=historialTardanzas")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var lista = d.tardanzas || [];
+      if (lista.length === 0) { ocultarMsgPDF(); alert("Sin tardanzas este mes"); return; }
+
+      cargarLibreriasPDF(function() {
+        var top10   = lista.slice(0,12);
+        var labels  = top10.map(function(a){ return a.nombre.split(" ").slice(0,2).join(" "); });
+        var valores = top10.map(function(a){ return a.count; });
+        var mes     = new Date().getMonth()+1;
+        var anio    = new Date().getFullYear();
+        var mesNombre = MESES_PDF[mes] + " " + anio;
+
+        renderGraficoBase64("bar", labels, [
+          { label:"Tardanzas", data:valores,
+            backgroundColor:"rgba(245,127,23,0.8)", borderRadius:4 }
+        ], { w:800, h:350, leyenda:false })
+        .then(function(img) {
+          var doc = new jspdf.jsPDF("p","mm","a4");
+          var y = pdfHeader(doc, "REPORTE DE TARDANZAS", mesNombre);
+
+          doc.setFillColor(C_CREMA[0],C_CREMA[1],C_CREMA[2]);
+          doc.rect(14,y,182,14,"F");
+          doc.setFontSize(10); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
+          doc.setFont("helvetica","bold");
+          doc.text("Total alumnos con tardanzas: " + lista.length, 105, y+9, {align:"center"});
+          y += 18;
+
+          doc.setFontSize(9); doc.setFont("helvetica","bold");
+          doc.text("Ranking de tardanzas — " + mesNombre, 14, y);
+          y += 4;
+          doc.addImage(img, "PNG", 14, y, 182, 75);
+          y += 80;
+
+          doc.autoTable({
+            startY: y,
+            head: [["#","Alumno","Grado","Tardanzas"]],
+            body: lista.map(function(a,i){
+              return [i+1, a.nombre, a.grado, a.count];
+            }),
+            styles: { fontSize:8, cellPadding:2 },
+            headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+            alternateRowStyles: { fillColor:C_CREMA },
+            didParseCell: function(data) {
+              if (data.section==="body" && data.column.index===3) {
+                data.cell.styles.textColor = C_AMARILLO;
+                data.cell.styles.fontStyle = "bold";
+              }
+            }
+          });
+
+          pdfFooter(doc);
+          doc.save("Reporte_Tardanzas_" + mesNombre.replace(" ","_") + ".pdf");
+          ocultarMsgPDF();
+        });
+      });
+    })
+    .catch(function(){ ocultarMsgPDF(); alert("Error al generar PDF"); });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 6. PDF HISTORIAL DE ALUMNO (sin gráfico)
+// ══════════════════════════════════════════════════════════════════
+function exportarPDFAlumno(id, nombre, registros, resumen) {
+  if (!registros || registros.length === 0) { alert("Sin registros para exportar"); return; }
+  cargarLibreriasPDF(function() {
+    var doc = new jspdf.jsPDF("p","mm","a4");
+    var y = pdfHeader(doc, "HISTORIAL DE ASISTENCIA", nombre);
+
+    // Resumen
+    var cols = ["Presentes","Tardanzas","Ausentes","Justificados"];
+    var vals = [resumen.presentes||0, resumen.tardanzas||0,
+                resumen.ausentes||0, resumen.justificados||0];
+    doc.autoTable({
+      startY: y,
+      head: [cols],
+      body: [vals],
+      styles: { fontSize:12, halign:"center", cellPadding:5 },
+      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:14 }
+    });
+    y = doc.lastAutoTable.finalY + 6;
+
+    doc.autoTable({
+      startY: y,
+      head: [["#","Fecha","Estado","Hora"]],
+      body: registros.map(function(r,i){
+        return [i+1, r.fecha, r.estado, r.hora||"-"];
+      }),
+      styles: { fontSize:8, cellPadding:2 },
+      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      alternateRowStyles: { fillColor:C_CREMA },
+      didParseCell: function(data) {
+        if (data.section==="body" && data.column.index===2) {
+          var est = String(data.cell.raw).toUpperCase();
+          if      (est==="AUSENTE")   data.cell.styles.textColor = C_ROJO;
+          else if (est==="TARDE")     data.cell.styles.textColor = C_AMARILLO;
+          else if (est==="JUSTIFICADO") data.cell.styles.textColor = C_AZUL;
+          else                        data.cell.styles.textColor = C_VERDE;
+          data.cell.styles.fontStyle = "bold";
+        }
+      }
+    });
+
+    pdfFooter(doc);
+    doc.save("Historial_" + nombre.replace(/ /g,"_") + ".pdf");
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 7. PDF REPORTE POR FECHAS (sin gráfico)
+// ══════════════════════════════════════════════════════════════════
+function exportarPDFPorFechas(dias) {
+  if (!dias || dias.length === 0) { alert("Sin datos para exportar"); return; }
+  cargarLibreriasPDF(function() {
+    var doc = new jspdf.jsPDF("p","mm","a4");
+    var desde = dias[dias.length-1].fecha;
+    var hasta = dias[0].fecha;
+    var y = pdfHeader(doc, "REPORTE POR FECHAS",
+      "Período: " + desde + " al " + hasta);
+
+    // Totales
+    var totP=0,totA=0,totT=0,totJ=0;
+    dias.forEach(function(d){
+      totP+=d.presentes||0; totA+=d.ausentes||0;
+      totT+=d.tardanzas||0; totJ+=d.justificados||0;
+    });
+
+    doc.autoTable({
+      startY: y,
+      head: [["Días","Presentes","Tardanzas","Ausentes","Justificados"]],
+      body: [[dias.length, totP, totT, totA, totJ]],
+      styles: { fontSize:11, halign:"center", cellPadding:4 },
+      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:12 }
+    });
+    y = doc.lastAutoTable.finalY + 6;
+
+    doc.autoTable({
+      startY: y,
+      head: [["Fecha","Día","Presentes","Tardanzas","Ausentes","Justif."]],
+      body: dias.map(function(d){
+        return [d.fecha, d.diaNombre||"",
+                d.presentes||0, d.tardanzas||0,
+                d.ausentes||0, d.justificados||0];
+      }),
+      styles: { fontSize:8, cellPadding:2, halign:"center" },
+      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      columnStyles: { 0:{halign:"left"}, 1:{halign:"left"} },
+      alternateRowStyles: { fillColor:C_CREMA }
+    });
+
+    pdfFooter(doc);
+    doc.save("Reporte_Fechas_" + desde.replace(/\//g,"-") + "_" +
+             hasta.replace(/\//g,"-") + ".pdf");
+  });
+}
+
+// ── HELPERS UI ────────────────────────────────────────────────────
+function mostrarMsgPDF(msg) {
+  var el = document.getElementById("pdf-msg-global");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "pdf-msg-global";
+    el.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);" +
+      "background:#7B3F00;color:white;padding:16px 24px;border-radius:12px;" +
+      "font-size:14px;font-weight:bold;z-index:9999;font-family:Arial";
+    document.body.appendChild(el);
+  }
+  el.textContent = "⏳ " + msg;
+  el.style.display = "block";
+}
+
+function ocultarMsgPDF() {
+  var el = document.getElementById("pdf-msg-global");
+  if (el) el.style.display = "none";
 }
 
 </script>
