@@ -168,13 +168,15 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
     </div>
 
     <div class="manual-card">
-      <div class="manual-titulo">⌨️ Ingreso manual / lector externo</div>
+      <div class="manual-titulo">⌨️ Ingreso manual / buscar por nombre o DNI</div>
       <div class="manual-body">
-        <input type="text" id="input-id" placeholder="DNI del alumno"
-               autocomplete="off" inputmode="numeric"
+        <input type="text" id="input-id" placeholder="Nombre o DNI..."
+               autocomplete="off"
+               oninput="buscarAlumnoKiosco()"
                onkeydown="if(event.key==='Enter')procesarManual()">
         <button id="btn-enviar" onclick="procesarManual()">Enviar</button>
       </div>
+      <div id="busqueda-resultados" style="padding:0 8px 8px"></div>
     </div>
 
     <div class="historial-card">
@@ -484,13 +486,51 @@ function toggleCamara() {
 }
 
 // ══════════════════════════════════════════════
-//  INGRESO MANUAL
+//  INGRESO MANUAL + BÚSQUEDA POR NOMBRE
 // ══════════════════════════════════════════════
 function procesarManual() {
   initAudio();
-  var id = document.getElementById("input-id").value.trim().toUpperCase();
-  if (!id) return;
+  var val = document.getElementById("input-id").value.trim().toUpperCase();
+  if (!val) return;
+  if (/^\d{5,12}$/.test(val)) {
+    document.getElementById("input-id").value = "";
+    document.getElementById("busqueda-resultados").innerHTML = "";
+    procesarId(val);
+  } else {
+    buscarAlumnoKiosco();
+  }
+}
+
+function buscarAlumnoKiosco() {
+  var busq = document.getElementById("input-id").value.trim().toUpperCase();
+  var cont = document.getElementById("busqueda-resultados");
+  if (busq.length < 2) { cont.innerHTML = ""; return; }
+  if (/^\d+$/.test(busq)) { cont.innerHTML = ""; return; }
+
+  var resultados = Object.keys(tablaAlumnos).filter(function(id) {
+    return tablaAlumnos[id].nombre.toUpperCase().indexOf(busq) >= 0;
+  }).slice(0, 6);
+
+  if (resultados.length === 0) {
+    cont.innerHTML = "<div style=\'font-size:11px;color:#C68642;padding:6px\'>Sin resultados</div>";
+    return;
+  }
+
+  cont.innerHTML = resultados.map(function(id) {
+    var a = tablaAlumnos[id];
+    return "<div onclick=\'seleccionarAlumnoKiosco(\"" + id + "\",\"" + a.nombre + "\")\' " +
+      "style=\'padding:8px 10px;background:#FFF8F0;border-radius:8px;margin-bottom:4px;" +
+      "border-left:3px solid #D2691E;cursor:pointer\'>" +
+      "<div style=\'font-size:12px;font-weight:bold;color:#3A1800\'>" + a.nombre + "</div>" +
+      "<div style=\'font-size:10px;color:#C68642\'>" + (a.grado||"") + " - DNI: " + id + "</div>" +
+      "</div>";
+  }).join("");
+}
+
+function seleccionarAlumnoKiosco(id, nombre) {
   document.getElementById("input-id").value = "";
+  document.getElementById("busqueda-resultados").innerHTML = "";
+  initAudio();
   procesarId(id);
 }
 
@@ -515,7 +555,7 @@ function procesarId(id) {
     sonidoError();
     cD++; document.getElementById("c-d").textContent = cD;
     mostrarEstado("duplic", "=", "Ya registrado hoy", nombre);
-    agregarHistorial(nombre, "YA REGISTRADO", hora);
+    agregarHistorial(nombre, "DUPLICADO", hora);
     setTimeout(resetear, 1500);
     return;
   }
