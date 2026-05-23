@@ -446,6 +446,7 @@ function validarPin() {
     document.getElementById("login-error").textContent = "Ingrese los 4 dígitos";
     return;
   }
+  
   document.getElementById("login-error").textContent = "Verificando...";
   fetch(AS_URL + "?accion=pin&valor=" + encodeURIComponent(pin))
     .then(function(r){ return r.json(); })
@@ -960,7 +961,7 @@ function renderSugerencias(busq) {
     return;
   }
   document.getElementById("alum-sugerencias").innerHTML = res.map(function(a){
-    return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' onclick='verHistorialAlumno("" + a.id + "","" + a.nombre + "")'>" +
+    return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' onclick='verHistorialAlumno(\"" + a.id + "\",\"" + a.nombre + "\")'>" +
       "<div><div class='alum-nombre'>👤 " + a.nombre + "</div>" +
       "<div class='alum-det'>" + a.grado + " · " + a.id + "</div></div>" +
       "<span style='font-size:11px;color:#7B3F00;font-weight:bold'>Ver →</span>" +
