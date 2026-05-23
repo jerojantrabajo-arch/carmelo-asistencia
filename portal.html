@@ -307,6 +307,101 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       </div>
     </div>
 
+    <!-- ══ SECCIÓN: REPORTE MENSUAL ══ -->
+    <div class="seccion" id="sec-mensual">
+      <div class="sec-title">📅 Reporte mensual</div>
+      <div class="grid-2" style="margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Mes:</label>
+          <select id="men-mes" class="buscador" style="margin-bottom:0">
+            <option value="1">Enero</option><option value="2">Febrero</option>
+            <option value="3">Marzo</option><option value="4">Abril</option>
+            <option value="5" selected>Mayo</option><option value="6">Junio</option>
+            <option value="7">Julio</option><option value="8">Agosto</option>
+            <option value="9">Septiembre</option><option value="10">Octubre</option>
+            <option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Año:</label>
+          <select id="men-anio" class="buscador" style="margin-bottom:0">
+            <option value="2026" selected>2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-accion" onclick="cargarMensual()">📊 Ver reporte</button>
+      <div id="mensual-loading" class="loading" style="display:none">⏳ Cargando...</div>
+      <div id="mensual-resultado"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: REPORTE SEMANAL ══ -->
+    <div class="seccion" id="sec-semanal">
+      <div class="sec-title">📊 Reporte semanal</div>
+      <button class="btn-accion" onclick="cargarSemanal()">🔄 Ver semana actual</button>
+      <div id="semanal-loading" class="loading" style="display:none">⏳ Cargando...</div>
+      <div id="semanal-resultado"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: ALUMNOS CON FALTAS ══ -->
+    <div class="seccion" id="sec-faltas">
+      <div class="sec-title">⚠️ Alumnos con 3+ faltas</div>
+      <div class="grid-2" style="margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Mes:</label>
+          <select id="fal-mes" class="buscador" style="margin-bottom:0">
+            <option value="1">Enero</option><option value="2">Febrero</option>
+            <option value="3">Marzo</option><option value="4">Abril</option>
+            <option value="5" selected>Mayo</option><option value="6">Junio</option>
+            <option value="7">Julio</option><option value="8">Agosto</option>
+            <option value="9">Septiembre</option><option value="10">Octubre</option>
+            <option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Año:</label>
+          <select id="fal-anio" class="buscador" style="margin-bottom:0">
+            <option value="2026" selected>2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-accion" onclick="cargarFaltas()">⚠️ Ver alumnos con faltas</button>
+      <div id="faltas-loading" class="loading" style="display:none">⏳ Cargando...</div>
+      <div id="faltas-resultado"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: BUSCAR ALUMNO ══ -->
+    <div class="seccion" id="sec-alumno">
+      <div class="sec-title">🔎 Historial de alumno</div>
+      <input class="buscador" id="alum-buscar" placeholder="🔍 Buscar por nombre o DNI..." oninput="buscarAlumnoHist()">
+      <div id="alum-sugerencias"></div>
+      <div id="alum-historial"></div>
+    </div>
+
+    <!-- ══ SECCIÓN: JUSTIFICACIONES ══ -->
+    <div class="seccion" id="sec-justif">
+      <div class="sec-title">📝 Registrar justificación</div>
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">DNI del alumno:</label>
+      <input type="text" id="just-dni" class="buscador" placeholder="Ej: 78138989" maxlength="12" inputmode="numeric">
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha de la falta:</label>
+      <input type="date" id="just-fecha" class="buscador">
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Tipo:</label>
+      <select id="just-tipo" class="buscador">
+        <option value="FALTA_JUSTIFICADA">Falta justificada</option>
+        <option value="TARDANZA_JUSTIFICADA">Tardanza justificada</option>
+      </select>
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Motivo:</label>
+      <input type="text" id="just-motivo" class="buscador" placeholder="Ej: Cita médica, emergencia familiar...">
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Registrado por:</label>
+      <input type="text" id="just-reg" class="buscador" placeholder="Nombre del auxiliar">
+      <button class="btn-accion" onclick="registrarJustif()">💾 Guardar justificación</button>
+      <div id="just-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;border-radius:6px;margin-top:6px"></div>
+      <div class="sec-title" style="margin-top:12px">Justificaciones del mes</div>
+      <button class="btn-accion btn-naranja" onclick="cargarJustificaciones()">🔄 Ver justificaciones</button>
+      <div id="just-lista" style="margin-top:8px"></div>
+    </div>
+
   </div>
 </div>
 
@@ -865,7 +960,7 @@ function renderSugerencias(busq) {
     return;
   }
   document.getElementById("alum-sugerencias").innerHTML = res.map(function(a){
-  return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' onclick='verHistorialAlumno(\"" + a.id + "\",\"" + a.nombre + "\")'>" +
+    return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' onclick='verHistorialAlumno("" + a.id + "","" + a.nombre + "")'>" +
       "<div><div class='alum-nombre'>👤 " + a.nombre + "</div>" +
       "<div class='alum-det'>" + a.grado + " · " + a.id + "</div></div>" +
       "<span style='font-size:11px;color:#7B3F00;font-weight:bold'>Ver →</span>" +
