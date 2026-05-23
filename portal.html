@@ -252,7 +252,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <!-- ══ SECCIÓN: TARDANZAS ══ -->
     <div class="seccion" id="sec-tardanzas">
       <div class="sec-title">⏰ Historial de tardanzas del mes</div>
-      <div id="tardanzas-loading" class="loading">⏳ Cargando...</div>
+      <div id="tardanzas-loading" class="loading" style="display:block">⏳ Cargando...</div>
       <div id="lista-tardanzas"></div>
     </div>
 
@@ -645,7 +645,7 @@ function cargarTardanzas() {
     .then(function(r){ return r.json(); })
     .then(function(d){
       var el = document.getElementById("tardanzas-loading");
-      if (el) el.style.display = "none";
+      if (el) { el.style.display = "none"; el.style.visibility = "hidden"; }
       var lista = d.tardanzas || [];
       if (lista.length === 0) {
         document.getElementById("lista-tardanzas").innerHTML =
