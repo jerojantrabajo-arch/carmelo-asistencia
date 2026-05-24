@@ -665,6 +665,7 @@ function cargarTardanzas() {
   fetch(AS_URL + "?accion=historialTardanzas")
     .then(function(r){ return r.json(); })
     .then(function(d){
+      window._datosTardanzas = d; // ← agregar esta línea
       var el = document.getElementById("tardanzas-loading");
       if (el) { el.style.display = "none"; el.style.visibility = "hidden"; }
       var lista = d.tardanzas || [];
@@ -1518,64 +1519,23 @@ function exportarPDFFaltas() {
 // 5. PDF REPORTE DE TARDANZAS CON GRÁFICO
 // ══════════════════════════════════════════════════════════════════
 function exportarPDFTardanzas() {
+  var cached = window._datosTardanzas;
+  if (cached) {
+    // Usar datos ya cargados
+    var lista = cached.tardanzas || [];
+    if (lista.length === 0) { alert("Sin tardanzas este mes"); return; }
+    _generarPDFTardanzas(lista);
+    return;
+  }
+  // Si no hay cache, hacer fetch
   mostrarMsgPDF("Generando PDF de tardanzas...");
   fetch(AS_URL + "?accion=historialTardanzas")
     .then(function(r){ return r.json(); })
     .then(function(d){
+      window._datosTardanzas = d;
       var lista = d.tardanzas || [];
       if (lista.length === 0) { ocultarMsgPDF(); alert("Sin tardanzas este mes"); return; }
-
-      cargarLibreriasPDF(function() {
-        var top10   = lista.slice(0,12);
-        var labels  = top10.map(function(a){ return a.nombre.split(" ").slice(0,2).join(" "); });
-        var valores = top10.map(function(a){ return a.count; });
-        var mes     = new Date().getMonth()+1;
-        var anio    = new Date().getFullYear();
-        var mesNombre = MESES_PDF[mes] + " " + anio;
-
-        renderGraficoBase64("bar", labels, [
-          { label:"Tardanzas", data:valores,
-            backgroundColor:"rgba(245,127,23,0.8)", borderRadius:4 }
-        ], { w:800, h:350, leyenda:false })
-        .then(function(img) {
-          var doc = new jspdf.jsPDF("p","mm","a4");
-          var y = pdfHeader(doc, "REPORTE DE TARDANZAS", mesNombre);
-
-          doc.setFillColor(C_CREMA[0],C_CREMA[1],C_CREMA[2]);
-          doc.rect(14,y,182,14,"F");
-          doc.setFontSize(10); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
-          doc.setFont("helvetica","bold");
-          doc.text("Total alumnos con tardanzas: " + lista.length, 105, y+9, {align:"center"});
-          y += 18;
-
-          doc.setFontSize(9); doc.setFont("helvetica","bold");
-          doc.text("Ranking de tardanzas — " + mesNombre, 14, y);
-          y += 4;
-          doc.addImage(img, "PNG", 14, y, 182, 75);
-          y += 80;
-
-          doc.autoTable({
-            startY: y,
-            head: [["#","Alumno","Grado","Tardanzas"]],
-            body: lista.map(function(a,i){
-              return [i+1, a.nombre, a.grado, a.count];
-            }),
-            styles: { fontSize:8, cellPadding:2 },
-            headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
-            alternateRowStyles: { fillColor:C_CREMA },
-            didParseCell: function(data) {
-              if (data.section==="body" && data.column.index===3) {
-                data.cell.styles.textColor = C_AMARILLO;
-                data.cell.styles.fontStyle = "bold";
-              }
-            }
-          });
-
-          pdfFooter(doc);
-          doc.save("Reporte_Tardanzas_" + mesNombre.replace(" ","_") + ".pdf");
-          ocultarMsgPDF();
-        });
-      });
+      _generarPDFTardanzas(lista);
     })
     .catch(function(){ ocultarMsgPDF(); alert("Error al generar PDF"); });
 }
@@ -1678,6 +1638,55 @@ function exportarPDFPorFechas(dias) {
   });
 }
 
+  function _generarPDFTardanzas(lista) {
+  mostrarMsgPDF("Generando PDF de tardanzas...");
+  cargarLibreriasPDF(function() {
+    var top12   = lista.slice(0,12);
+    var labels  = top12.map(function(a){ return a.nombre.split(" ").slice(0,2).join(" "); });
+    var valores = top12.map(function(a){ return a.count; });
+    var mes     = new Date().getMonth()+1;
+    var anio    = new Date().getFullYear();
+    var mesNombre = MESES_PDF[mes] + " " + anio;
+
+    renderGraficoBase64("bar", labels, [
+      { label:"Tardanzas", data:valores,
+        backgroundColor:"rgba(245,127,23,0.8)", borderRadius:4 }
+    ], { w:800, h:350, leyenda:false })
+    .then(function(img) {
+      var doc = new jspdf.jsPDF("p","mm","a4");
+      var y = pdfHeader(doc, "REPORTE DE TARDANZAS", mesNombre);
+
+      doc.setFillColor(C_CREMA[0],C_CREMA[1],C_CREMA[2]);
+      doc.rect(14,y,182,14,"F");
+      doc.setFontSize(10); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
+      doc.setFont("helvetica","bold");
+      doc.text("Total alumnos con tardanzas: " + lista.length, 105, y+9, {align:"center"});
+      y += 18;
+
+      doc.setFontSize(9); doc.setFont("helvetica","bold");
+      doc.text("Ranking de tardanzas — " + mesNombre, 14, y);
+      y += 4;
+      doc.addImage(img, "PNG", 14, y, 182, 75);
+      y += 80;
+
+      doc.autoTable({
+        startY: y,
+        head: [["#","Alumno","Grado","Tardanzas"]],
+        body: lista.map(function(a,i){
+          return [i+1, a.nombre, a.grado, a.count];
+        }),
+        styles: { fontSize:8, cellPadding:2 },
+        headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+        alternateRowStyles: { fillColor:C_CREMA }
+      });
+
+      pdfFooter(doc);
+      doc.save("Reporte_Tardanzas_" + mesNombre.replace(" ","_") + ".pdf");
+      ocultarMsgPDF();
+    });
+  });
+}
+  
 // ── HELPERS UI ────────────────────────────────────────────────────
 function mostrarMsgPDF(msg) {
   var el = document.getElementById("pdf-msg-global");
