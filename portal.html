@@ -403,7 +403,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <input type="text" id="just-reg" class="buscador" placeholder="Nombre del auxiliar">
       <button class="btn-accion" onclick="registrarJustif()">💾 Guardar justificación</button>
       <div id="just-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;border-radius:6px;margin-top:6px"></div>
-      <div class="sec-title" style="margin-top:12px">Justificaciones del mes</div>
+      <div class="sec-title" style="margin-top:12px" id="just-titulo-mes">Justificaciones</div>
       <button class="btn-accion btn-naranja" onclick="cargarJustificaciones()">🔄 Ver justificaciones</button>
       <div id="just-lista" style="margin-top:8px"></div>
     </div>
@@ -1089,6 +1089,14 @@ function setJustMsg(txt, bg, color) {
 }
 
 function cargarJustificaciones() {
+  // Actualizar título con el mes actual
+  var meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+               "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  var ahora = new Date();
+  var titulo = document.getElementById("just-titulo-mes");
+  if (titulo) titulo.textContent = "Justificaciones de " + 
+    meses[ahora.getMonth()] + " " + ahora.getFullYear();
+
   fetch(AS_URL + "?accion=listarJustificaciones")
     .then(function(r){ return r.json(); })
     .then(function(d){
