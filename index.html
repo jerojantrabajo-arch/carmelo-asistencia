@@ -560,55 +560,64 @@ var historial = [];
 var cE = 0, cD = 0;
 
 function procesarId(id) {
+  // 1. ANTIDEBOUNCE (Filtro de clicks/escaneos rápidos)
   var ahora = Date.now();
   if (ahora - ultimoEscaneo < TIEMPO_MIN) return;
   ultimoEscaneo = ahora;
 
-  var reg    = registrosHoy[id] || { e: 0, fecha: fechaHoy() };
+  // 2. CONFIGURACIÓN DE VARIABLES BÁSICAS
   var nombre = getNombre(id);
   var grado  = getGrado(id);
   var hora   = new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
 
-  // ── DUPLICADO ─────────────────────────────────────────────────
+  // 3. VALIDACIÓN: FIN DE SEMANA (Prioridad Alta)
+  var hoyDow = new Date().getDay();
+  if (hoyDow === 0 || hoyDow === 6) {
+    sonidoError();
+    mostrarEstado("duplic", "🚫", "Hoy no hay clases", "Sábado o domingo — sin registro de asistencia");
+    setTimeout(resetear, 2500);
+    return;
+  }
+
+  // 4. VALIDACIÓN: DÍA SIN ESCANEO CONFIGURADO (Prioridad Alta)
+  if (window._diaSinEscaneo === true) {
+    sonidoError();
+    mostrarEstado("duplic", "🚫", "Hoy no hay registro", window._motivoSinEscaneo || "Día sin escaneo configurado");
+    setTimeout(resetear, 2500);
+    return;
+  }
+
+  // 5. OBTENER O INICIALIZAR REGISTRO DEL USUARIO
+  if (!registrosHoy[id]) {
+    registrosHoy[id] = { e: 0, fecha: fechaHoy() };
+  }
+  var reg = registrosHoy[id];
+
+  // 6. VALIDACIÓN: DUPLICADO (Ya se validó que hoy es un día hábil)
   if (reg.e >= 1) {
     sonidoError();
-    cD++; document.getElementById("c-d").textContent = cD;
+    cD++; 
+    document.getElementById("c-d").textContent = cD;
     mostrarEstado("duplic", "=", "Ya registrado hoy", nombre);
     agregarHistorial(nombre, "DUPLICADO", hora);
     setTimeout(resetear, 1500);
     return;
   }
 
-  // ── VERIFICAR FIN DE SEMANA ───────────────────────────────────
-  var hoyDow = new Date().getDay();
-  if (hoyDow === 0 || hoyDow === 6) {
-    sonidoError();
-    mostrarEstado("duplic", "🚫", "Hoy no hay clases",
-      "Sábado o domingo — sin registro de asistencia");
-    setTimeout(resetear, 2500);
-    return;
-  }
-
-  // ── VERIFICAR DÍA SIN ESCANEO (caché, sin fetch) ─────────────
-  if (window._diaSinEscaneo === true) {
-    sonidoError();
-    mostrarEstado("duplic", "🚫", "Hoy no hay registro",
-      window._motivoSinEscaneo || "Día sin escaneo configurado");
-    setTimeout(resetear, 2500);
-    return;
-  }
-
-  // ── REGISTRAR ENTRADA ─────────────────────────────────────────
+  // 7. REGISTRAR ENTRADA EXITOSA
   reg.e = 1;
   reg.fecha = fechaHoy();
-  registrosHoy[id] = reg;
+  // registrosHoy[id] = reg; // Ya está referenciado en el paso 5, se actualiza automáticamente
   guardarRegistros();
 
-  cE++; document.getElementById("c-e").textContent = cE;
-  document.getElementById("c-t").textContent = cE;
+  cE++; 
+  document.getElementById("c-e").textContent = cE;
+  document.getElementById("c-t").textContent = cE; // Asegúrate de si 'c-t' es el total o si debe ser (cE + cD)
+  
   sonidoOK();
   mostrarEstado("entrada", "✓", "ENTRADA: " + nombre, hora + (grado ? " — " + grado : ""));
   agregarHistorial(nombre, "ENTRADA", hora);
+  
   setTimeout(resetear, 1200);
   agregarCola(id);
 }
