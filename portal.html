@@ -388,8 +388,10 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <!-- ══ SECCIÓN: JUSTIFICACIONES ══ -->
     <div class="seccion" id="sec-justif">
       <div class="sec-title">📝 Registrar justificación</div>
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">DNI del alumno:</label>
-      <input type="text" id="just-dni" class="buscador" placeholder="Ej: 78138989" maxlength="12" inputmode="numeric">
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Buscar alumno por nombre o DNI:</label>
+      <input type="text" id="just-buscar" class="buscador" placeholder="🔍 Nombre o DNI..." oninput="buscarAlumnoJustif()">
+      <div id="just-sugerencias" style="margin-bottom:8px"></div>
+      <input type="hidden" id="just-dni">
       <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha de la falta:</label>
       <input type="date" id="just-fecha" class="buscador">
       <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Tipo:</label>
@@ -524,6 +526,52 @@ function cargarHoy() {
     .catch(function(){
       document.getElementById("hoy-loading").textContent = "Error al cargar — verifique conexión";
     });
+}
+
+  function buscarAlumnoJustif() {
+  var busq = document.getElementById("just-buscar").value.trim().toUpperCase();
+  var cont = document.getElementById("just-sugerencias");
+
+  if (busq.length < 2) { cont.innerHTML = ""; return; }
+
+  if (listaAlumnos.length === 0) {
+    fetch(AS_URL + "?accion=alumnos")
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        listaAlumnos = d.alumnos || [];
+        renderSugerenciasJustif(busq);
+      });
+    return;
+  }
+  renderSugerenciasJustif(busq);
+}
+
+function renderSugerenciasJustif(busq) {
+  var cont = document.getElementById("just-sugerencias");
+  var res  = listaAlumnos.filter(function(a){
+    return a.nombre.toUpperCase().indexOf(busq) >= 0 ||
+           a.id.indexOf(busq) >= 0;
+  }).slice(0, 6);
+
+  if (res.length === 0) {
+    cont.innerHTML = "<div class='vacio'>Sin resultados</div>";
+    return;
+  }
+
+  cont.innerHTML = res.map(function(a){
+    return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' " +
+      "onclick='seleccionarAlumnoJustif(\"" + a.id + "\",\"" + a.nombre + "\")'>" +
+      "<div><div class='alum-nombre'>👤 " + a.nombre + "</div>" +
+      "<div class='alum-det'>" + a.grado + " · DNI: " + a.id + "</div></div>" +
+      "<span style='font-size:11px;color:#7B3F00;font-weight:bold'>Seleccionar →</span>" +
+      "</div>";
+  }).join("");
+}
+
+function seleccionarAlumnoJustif(id, nombre) {
+  document.getElementById("just-dni").value    = id;
+  document.getElementById("just-buscar").value = nombre + " — " + id;
+  document.getElementById("just-sugerencias").innerHTML = "";
 }
 
 function renderHoy() {
