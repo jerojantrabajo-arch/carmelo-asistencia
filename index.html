@@ -402,6 +402,24 @@ function mostrarKiosco() {
   document.getElementById("pantalla-pin").style.display = "none";
   document.getElementById("kiosco").style.display       = "flex";
   document.getElementById("disp-bar").textContent       = "Dispositivo: Tablet " + DISPOSITIVO;
+  
+  // Verificar día sin escaneo UNA SOLA VEZ al iniciar
+  fetch(AS_URL + "?accion=config")
+    .then(function(r){ return r.json(); })
+    .then(function(cfg){
+      window._diaSinEscaneo    = cfg.diaSinEscaneo || false;
+      window._motivoSinEscaneo = cfg.motivoSinEscaneo || "";
+      if (window._diaSinEscaneo) {
+        mostrarEstado("duplic", "🚫", "Hoy no hay registro",
+          window._motivoSinEscaneo || "Día sin escaneo configurado");
+        document.getElementById("btn-cam").disabled    = true;
+        document.getElementById("btn-enviar").disabled = true;
+      }
+    })
+    .catch(function(){
+      window._diaSinEscaneo = false;
+    });
+
   cargarAlumnos();
   iniciarCamara();
   document.getElementById("input-id").focus();
@@ -561,43 +579,39 @@ function procesarId(id) {
     return;
   }
 
-  // ── VERIFICAR FIN DE SEMANA ───────────────────────────────────
-  var hoyDow = new Date().getDay();
-  if (hoyDow === 0 || hoyDow === 6) {
-    sonidoError();
-    mostrarEstado("duplic", "🚫", "Hoy no hay clases",
-      "Sábado o domingo — sin registro de asistencia");
-    setTimeout(resetear, 2500);
-    return;
-  }
-
-  // ── VERIFICAR DÍA SIN ESCANEO ─────────────────────────────────
-  fetch(AS_URL + "?accion=config")
-    .then(function(r){ return r.json(); })
-    .then(function(cfg){
-      if (cfg.diaSinEscaneo) {
-        sonidoError();
-        mostrarEstado("duplic", "🚫", "Hoy no hay registro",
-          cfg.motivoSinEscaneo || "Día sin escaneo configurado");
-        setTimeout(resetear, 2500);
-        return;
-      }
-
-      // ── REGISTRAR ENTRADA ───────────────────────────────────────
-      reg.e = 1;
-      reg.fecha = fechaHoy();
-      registrosHoy[id] = reg;
-      guardarRegistros();
-
-      cE++; document.getElementById("c-e").textContent = cE;
-      document.getElementById("c-t").textContent = cE;
-      sonidoOK();
-      mostrarEstado("entrada", "✓", "ENTRADA: " + nombre, hora + (grado ? " — " + grado : ""));
-      agregarHistorial(nombre, "ENTRADA", hora);
-      setTimeout(resetear, 1200);
-
-      // ── ENVIAR AL SERVIDOR EN SEGUNDO PLANO ────────────────────
-      agregarCola(id);
+    // ── VERIFICAR FIN DE SEMANA ───────────────────────────────────
+    var hoyDow = new Date().getDay();
+    if (hoyDow === 0 || hoyDow === 6) {
+      sonidoError();
+      mostrarEstado("duplic", "🚫", "Hoy no hay clases",
+        "Sábado o domingo — sin registro de asistencia");
+      setTimeout(resetear, 2500);
+      return;
+    }
+  
+    // ── VERIFICAR DÍA SIN ESCANEO (usa caché, no fetch) ──────────
+    if (window._diaSinEscaneo === true) {
+      sonidoError();
+      mostrarEstado("duplic", "🚫", "Hoy no hay registro",
+        window._motivoSinEscaneo || "Día sin escaneo configurado");
+      setTimeout(resetear, 2500);
+      return;
+    }
+  
+    // ── REGISTRAR ENTRADA ─────────────────────────────────────────
+    reg.e = 1;
+    reg.fecha = fechaHoy();
+    registrosHoy[id] = reg;
+    guardarRegistros();
+  
+    cE++; document.getElementById("c-e").textContent = cE;
+    document.getElementById("c-t").textContent = cE;
+    sonidoOK();
+    mostrarEstado("entrada", "✓", "ENTRADA: " + nombre, hora + (grado ? " — " + grado : ""));
+    agregarHistorial(nombre, "ENTRADA", hora);
+    setTimeout(resetear, 1200);
+    agregarCola(id);
+      
     })
     .catch(function(){
       // Si no hay conexión para verificar, registrar igual
