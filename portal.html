@@ -859,16 +859,35 @@ function cargarDetalleDia() {
   var f = document.getElementById("dd-fecha").value;
   var cont = document.getElementById("dd-lista");
   cont.innerHTML = "<div class='loading'>🔍 Consultando asistencia para " + f + "...</div>";
-  fetch(AS_URL + "?accion=detalleDia&fecha=" + f)
-    .then(function(r){return r.json();})
+  
+  // Usamos encodeURIComponent por si la fecha tiene "/"
+  fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(f))
+    .then(function(r){ return r.json(); })
     .then(function(d){
-      var lista = d.asistencias || d || [];
-      if(lista.length === 0) { cont.innerHTML = "<div class='loading'>No hay registros en esta fecha.</div>"; return; }
+      // --- CAMBIO AQUÍ: Ahora buscamos 'registros' ---
+      var lista = d.registros || []; 
+      
+      if(lista.length === 0) { 
+        cont.innerHTML = "<div class='loading'>No hay registros para la fecha " + f + ".</div>"; 
+        return; 
+      }
+      
       cont.innerHTML = lista.map(function(a){
-        return "<div class='alum-item verde'><div><div class='alum-nombre'>" + a.nombre + "</div><div class='alum-det'>DNI: " + a.dni + "</div></div><div class='alum-hora'>" + (a.hora || "--:--") + "</div></div>";
+        return "<div class='alum-item verde'>" +
+                 "<div>" +
+                   "<div class='alum-nombre'>" + a.nombre + "</div>" +
+                   "<div class='alum-det'>DNI: " + a.dni + " | Grado: " + a.grado + "</div>" +
+                 "</div>" +
+                 "<div class='alum-hora'>" + (a.hora || "--:--") + "</div>" +
+               "</div>";
       }).join("");
-    }).catch(function(){ cont.innerHTML = "<div class='loading'>Error al conectar.</div>"; });
+    })
+    .catch(function(e){ 
+      console.error(e);
+      cont.innerHTML = "<div class='loading'>Error al conectar.</div>"; 
+    });
 }
+  
 function cargarDetalle() {
   document.getElementById("detalle-loading").style.display = "block";
   fetch(AS_URL + "?accion=alumnos")
