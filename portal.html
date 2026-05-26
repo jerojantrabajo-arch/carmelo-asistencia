@@ -122,9 +122,25 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 .b-justif{background:var(--azul-clr);color:var(--azul)}
 .b-anticip{background:#E8F5E9;color:#2E7D32}
 
-/* Buscador */
-.buscador{width:100%;padding:8px;border:2px solid var(--naranja-clr);border-radius:8px;font-size:13px;margin-bottom:8px;font-family:Arial}
-.buscador:focus{outline:none;border-color:var(--marron)}
+/* Buscador optimizado para pantallas táctiles (Evita el bloqueo de "Pegar") */
+.buscador {
+  width: 100%;
+  border: 2px solid var(--naranja-clr);
+  border-radius: 10px;        /* Bordes un poco más suaves */
+  font-family: Arial;
+  margin-bottom: 8px;
+  
+  /* CAMBIOS CLAVE: */
+  font-size: 16px !important;   /* Al medir 16px, el celular abre el teclado al instante sin hacer zoom */
+  padding: 12px 10px !important; /* Lo hace más alto y grueso para que el dedo no falle el toque */
+  height: auto !important;
+}
+
+.buscador:focus {
+  outline: none;
+  border-color: var(--marron);
+  background-color: #FFFDF9;     /* Un sutil cambio de fondo al escribir */
+}
 
 /* Reporte días */
 .rep-dia{background:white;border-radius:8px;padding:10px;margin-bottom:8px;border-left:4px solid var(--naranja)}
