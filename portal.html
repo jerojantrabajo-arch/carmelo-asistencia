@@ -2018,6 +2018,20 @@ function cargarConfiguracionActual() {
     if (elem) elem.placeholder = "Cargando...";
   });
 
+  // ── 🛠️ PARCHADOR DE HORAS (Debe estar arriba de todo para que funcione) ──
+  var corregirFormatoHora = function(horaStr) {
+    if (!horaStr) return "00:00";
+    var partes = String(horaStr).trim().split(":");
+    if (partes.length >= 2) {
+      var h = partes[0].trim();
+      var m = partes[1].trim();
+      if (h.length === 1) h = "0" + h; // Si es "6" lo vuelve "06"
+      if (m.length === 1) m = "0" + m; // Si es "5" lo vuelve "05"
+      return h + ":" + m;
+    }
+    return horaStr;
+  };
+
   var url = AS_URL + "?accion=config";
   console.log("🔄 Descargando variables globales desde:", url);
 
@@ -2034,29 +2048,13 @@ function cargarConfiguracionActual() {
         if (document.getElementById("cfg-tolerancia-secundaria")) document.getElementById("cfg-tolerancia-secundaria").value = cfg.toleranciaMin.secundaria || 0;
       }
       
-      // ── 🛠️ SOLUCIÓN: FUNCIÓN PARA AUTOPARCHEAR HORAS (AÑADE CERO A LA IZQUIERDA) ──
-      function formatearHoraHTML(horaStr) {
-        if (!horaStr) return "00:00";
-        var partes = horaStr.split(":");
-        if (partes.length >= 2) {
-          var h = partes[0].trim();
-          var m = partes[1].trim();
-          // Si la hora tiene 1 solo dígito (ej: "6"), le agrega el "0" adelante
-          if (h.length === 1) h = "0" + h;
-          // Si el minuto tiene 1 solo dígito (ej: "5"), le agrega el "0" adelante
-          if (m.length === 1) m = "0" + m;
-          return h + ":" + m;
-        }
-        return horaStr;
-      }
-
+      // Aplicamos el corregidor antes de inyectar el valor en el HTML
       if (document.getElementById("cfg-hora-inicio")) {
-        document.getElementById("cfg-hora-inicio").value = formatearHoraHTML(cfg.horaInicioIngreso);
+        document.getElementById("cfg-hora-inicio").value = corregirFormatoHora(cfg.horaInicioIngreso);
       }
       if (document.getElementById("cfg-hora-fin")) {
-        document.getElementById("cfg-hora-fin").value = formatearHoraHTML(cfg.horaFinIngreso);
+        document.getElementById("cfg-hora-fin").value = corregirFormatoHora(cfg.horaFinIngreso);
       }
-      // ─────────────────────────────────────────────────────────────────────────────
 
       var chkDiaSinEscaneo = document.getElementById("cfg-dia-sin-escaneo");
       if (chkDiaSinEscaneo) {
