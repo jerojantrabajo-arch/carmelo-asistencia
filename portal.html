@@ -83,7 +83,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 .alum-item.amarillo{background:#FFFDE7;border-color:#F57F17}
 .alum-item.azul{background:#F0F7FF;border-color:var(--azul)}
 .alum-nombre{font-weight:bold;color:#3A1800;font-size:11px}
-.alum-det{font-size:10px;color:#888}
+.alum-det Bloom{font-size:10px;color:#888}
 .alum-hora{font-size:10px;color:var(--marron-clr);font-weight:bold}
 .vacio{text-align:center;color:var(--marron-clr);padding:20px;font-size:12px;background:white;border-radius:8px}
 
@@ -146,7 +146,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 </head>
 <body>
 
-<!-- ══ LOGIN ══ -->
 <div id="login">
   <div class="login-card">
     <div class="login-logo">🏫</div>
@@ -160,7 +159,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
   </div>
 </div>
 
-<!-- ══ PORTAL ══ -->
 <div id="portal">
   <div class="p-header">
     <div class="p-header-left">
@@ -177,7 +175,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <span id="hora-actual">--:--</span>
   </div>
 
-  <!-- Navegación -->
   <div class="nav-tabs">
     <button class="nav-tab" onclick="irSeccion('hoy')">📊 Hoy</button>
     <button class="nav-tab" onclick="irSeccion('detalledia')">📋 Detalle día</button>
@@ -196,7 +193,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 
   <div class="p-content">
 
-    <!-- ══ SECCIÓN: HOY ══ -->
     <div class="seccion" id="sec-hoy">
       <div id="hoy-loading" class="loading">⏳ Cargando datos de hoy...</div>
       <div id="hoy-contenido" style="display:none">
@@ -217,41 +213,38 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
           <button class="btn-accion btn-naranja" onclick="exportarPDFDia()">📄 Exportar PDF</button>
         </div>
       </div>
-      <!-- ══ SECCIÓN: DETALLE DÍA ══ -->
-      <div class="seccion" id="sec-detalledia">
-        <div class="sec-title">📋 Detalle completo del día</div>
-        <div class="grid-2" style="margin-bottom:8px">
-          <div>
-            <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha:</label>
-            <input type="date" id="dd-fecha" class="buscador" style="margin-bottom:0">
-          </div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn-accion" onclick="cargarDetalleDia()" style="margin-bottom:0">🔍 Ver detalle</button>
-          </div>
-        </div>
-        <div id="dd-loading" class="loading" style="display:none">⏳ Cargando...</div>
-        <div id="dd-resumen" style="margin-bottom:8px"></div>
-        <div id="dd-lista"></div>
-        <button class="btn-accion btn-naranja" onclick="exportarPDFDetalleDia()" style="margin-top:6px">📄 Exportar PDF</button>
-      </div>
-      
     </div>
 
-    <!-- ══ SECCIÓN: DETALLE ══ -->
+    <div class="seccion" id="sec-detalledia">
+      <div class="sec-title">📋 Detalle completo del día</div>
+      <div class="grid-2" style="margin-bottom:8px">
+        <div>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha:</label>
+          <input type="date" id="dd-fecha" class="buscador" style="margin-bottom:0">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn-accion" onclick="cargarDetalleDia()" style="margin-bottom:0">🔍 Ver detalle</button>
+        </div>
+      </div>
+      <div id="dd-loading" class="loading" style="display:none">⏳ Cargando...</div>
+      <div id="dd-resumen" style="margin-bottom:8px"></div>
+      <div id="dd-lista"></div>
+      <button class="btn-accion btn-naranja" onclick="exportarPDFDetalleDia()" style="margin-top:6px">📄 Exportar PDF</button>
+    </div>
+      
     <div class="seccion" id="sec-detalle">
       <input class="buscador" id="buscador" placeholder="🔍 Buscar alumno..." oninput="filtrarDetalle()">
       <div class="mini-tabs">
-        <button class="mini-tab active" onclick="filtrarEstado('TODOS')">Todos</button>
-        <button class="mini-tab" onclick="filtrarEstado('PRESENTE')">✅ Presentes</button>
-        <button class="mini-tab" onclick="filtrarEstado('AUSENTE')">❌ Ausentes</button>
-        <button class="mini-tab" onclick="filtrarEstado('TARDE')">⏰ Tarde</button>
-        <button class="mini-tab" onclick="filtrarEstado('JUSTIFICADO')">📝 Justif.</button>
+        <button class="mini-tab active" onclick="filtrarEstado('TODOS', this)">Todos</button>
+        <button class="mini-tab" onclick="filtrarEstado('PRESENTE', this)">✅ Presentes</button>
+        <button class="mini-tab" onclick="filtrarEstado('AUSENTE', this)">❌ Ausentes</button>
+        <button class="mini-tab" onclick="filtrarEstado('TARDE', this)">⏰ Tarde</button>
+        <button class="mini-tab" onclick="filtrarEstado('JUSTIFICADO', this)">📝 Justif.</button>
       </div>
       <div id="detalle-loading" class="loading">⏳ Cargando...</div>
       <div class="alum-lista" id="lista-detalle" style="max-height:500px"></div>
     </div>
 
-    <!-- ══ SECCIÓN: REPORTES ══ -->
     <div class="seccion" id="sec-reportes">
       <div class="sec-title">📅 Reportes por fecha</div>
       <div class="grid-2" style="margin-bottom:10px">
@@ -270,7 +263,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion btn-naranja" onclick="exportarPDFPorFechas(window._diasReportes||[])" style="margin-top:6px">📄 Exportar PDF</button>
     </div>
 
-    <!-- ══ SECCIÓN: TARDANZAS ══ -->
     <div class="seccion" id="sec-tardanzas">
       <div class="sec-title">⏰ Historial de tardanzas del mes</div>
       <div id="tardanzas-loading" class="loading" style="display:block">⏳ Cargando...</div>
@@ -278,7 +270,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion btn-naranja" onclick="exportarPDFTardanzas()" style="margin-top:6px">📄 Exportar PDF con gráfico</button>
     </div>
 
-    <!-- ══ SECCIÓN: DÍAS SIN ESCANEO ══ -->
     <div class="seccion" id="sec-diasSinEscaneo">
       <div class="sec-title">🚫 Días sin escaneo</div>
       <div class="cal-nav">
@@ -305,18 +296,15 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <div id="dse-lista"></div>
     </div>
 
-    <!-- ══ SECCIÓN: REGISTRO MANUAL ══ -->
     <div class="seccion" id="sec-registro">
       <div class="sec-title">✏️ Registro manual de asistencia</div>
       <input class="buscador" id="reg-buscar" placeholder="🔍 Buscar alumno por nombre o DNI..."
         oninput="buscarAlumnoReg()">
       <div id="reg-resultados"></div>
-      <div id="reg-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;
-        border-radius:6px;margin-top:6px"></div>
+      <div id="reg-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;border-radius:6px;margin-top:6px"></div>
     </div>
 
-    <!-- ══ SECCIÓN: KIOSCO ══ -->
-    <div class="seccion activa" id="sec-kiosco">
+    <div class="seccion" id="sec-kiosco">
       <div class="sec-title">📷 Kiosco QR</div>
       <div class="grid-2" style="margin-bottom:8px">
         <button class="btn-accion" onclick="abrirKiosco(1)">📱 Tablet 1</button>
@@ -329,7 +317,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       </div>
     </div>
 
-    <!-- ══ SECCIÓN: REPORTE MENSUAL ══ -->
     <div class="seccion" id="sec-mensual">
       <div class="sec-title">📅 Reporte mensual</div>
       <div class="grid-2" style="margin-bottom:10px">
@@ -358,7 +345,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion btn-naranja" onclick="exportarPDFMensual()" style="margin-top:6px">📄 Exportar PDF mensual con gráficos</button>
     </div>
 
-    <!-- ══ SECCIÓN: REPORTE SEMANAL ══ -->
     <div class="seccion" id="sec-semanal">
       <div class="sec-title">📊 Reporte semanal</div>
       <button class="btn-accion" onclick="cargarSemanal()">🔄 Ver semana actual</button>
@@ -367,7 +353,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion btn-naranja" onclick="exportarPDFSemanal()" style="margin-top:6px">📄 Exportar PDF</button>
     </div>
 
-    <!-- ══ SECCIÓN: ALUMNOS CON FALTAS ══ -->
     <div class="seccion" id="sec-faltas">
       <div class="sec-title">⚠️ Alumnos con 3+ faltas</div>
       <div class="grid-2" style="margin-bottom:10px">
@@ -396,7 +381,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion btn-naranja" onclick="exportarPDFFaltas()" style="margin-top:6px">📄 Exportar PDF con gráfico</button>
     </div>
 
-    <!-- ══ SECCIÓN: BUSCAR ALUMNO ══ -->
     <div class="seccion" id="sec-alumno">
       <div class="sec-title">🔎 Historial de alumno</div>
       <input class="buscador" id="alum-buscar" placeholder="🔍 Buscar por nombre o DNI..." oninput="buscarAlumnoHist()">
@@ -404,7 +388,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <div id="alum-historial"></div>
     </div>
 
-    <!-- ══ SECCIÓN: JUSTIFICACIONES ══ -->
     <div class="seccion" id="sec-justif">
       <div class="sec-title">📝 Registrar justificación</div>
       <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Buscar alumno por nombre o DNI:</label>
@@ -440,6 +423,7 @@ var tabActual = "hoy";
 // Datos en memoria
 var datosHoy    = null;
 var datosDet    = [];
+var listaAlumnos = []; 
 var filtroEstado = "TODOS";
 var calMes      = new Date().getMonth();
 var calAnio     = new Date().getFullYear();
@@ -496,7 +480,7 @@ function mostrarPortal() {
   document.getElementById("portal").style.display = "flex";
   irSeccion("kiosco");
   cargarHoy();
-  setInterval(function(){ if(tabActual==="hoy") cargarHoy(); }, 120000);
+  setInterval(function(){ if(tabActual==='hoy') cargarHoy(); }, 120000);
 }
 
 function cerrarSesion() {
@@ -525,16 +509,13 @@ function irSeccion(id) {
     document.getElementById("dd-fecha").value = hoy.getFullYear() + "-" + mm + "-" + dd;
   }
   
-  // Activar tab correcto
   document.querySelectorAll(".nav-tab").forEach(function(t){
-    if (t.getAttribute("onclick") &&
-        t.getAttribute("onclick").indexOf("'" + id + "'") >= 0) {
+    if (t.getAttribute("onclick") && t.getAttribute("onclick").indexOf("'" + id + "'") >= 0) {
       t.classList.add("active");
     }
   });
 
-  // Cargar datos según sección
-  if (id === "detalle"   && datosDet.length === 0) cargarDetalle();
+  if (id === "detalle" && datosDet.length === 0) cargarDetalle();
   if (id === "tardanzas") cargarTardanzas();
   if (id === "diasSinEscaneo") cargarDiasRegistrados();
 }
@@ -554,10 +535,9 @@ function cargarHoy() {
     });
 }
 
-  function buscarAlumnoJustif() {
+function buscarAlumnoJustif() {
   var busq = document.getElementById("just-buscar").value.trim().toUpperCase();
   var cont = document.getElementById("just-sugerencias");
-
   if (busq.length < 2) { cont.innerHTML = ""; return; }
 
   if (listaAlumnos.length === 0) {
@@ -575,8 +555,9 @@ function cargarHoy() {
 function renderSugerenciasJustif(busq) {
   var cont = document.getElementById("just-sugerencias");
   var res  = listaAlumnos.filter(function(a){
-    return a.nombre.toUpperCase().indexOf(busq) >= 0 ||
-           a.id.indexOf(busq) >= 0;
+    var nombreStr = (a.nombre || "").toUpperCase();
+    var idStr = String(a.dni || a.id || "");
+    return nombreStr.indexOf(busq) >= 0 || idStr.indexOf(busq) >= 0;
   }).slice(0, 6);
 
   if (res.length === 0) {
@@ -585,10 +566,12 @@ function renderSugerenciasJustif(busq) {
   }
 
   cont.innerHTML = res.map(function(a){
+    var codAlum = a.dni || a.id || "";
+    var nameClean = (a.nombre || "").replace(/'/g, "\\'");
     return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' " +
-      "onclick='seleccionarAlumnoJustif(\"" + a.id + "\",\"" + a.nombre + "\")'>" +
+      "onclick='seleccionarAlumnoJustif(\"" + codAlum + "\",\"" + nameClean + "\")'>" +
       "<div><div class='alum-nombre'>👤 " + a.nombre + "</div>" +
-      "<div class='alum-det'>" + a.grado + " · DNI: " + a.id + "</div></div>" +
+      "<div class='alum-det'>" + (a.grado || "") + " · DNI: " + codAlum + "</div></div>" +
       "<span style='font-size:11px;color:#7B3F00;font-weight:bold'>Seleccionar →</span>" +
       "</div>";
   }).join("");
@@ -618,7 +601,6 @@ function renderHoy() {
   document.getElementById("h-justif").textContent    = justif;
   document.getElementById("h-pct").textContent       = pct + "%";
 
-  // Usar registros del dashboard y filtrar ausentes
   var todos = datosHoy.registros || datosHoy.listaAusentes || [];
   var lista = todos.filter ? todos.filter(function(r){
     return String(r.estado).toUpperCase() === "AUSENTE";
@@ -651,14 +633,20 @@ function cargarDetalle() {
     });
 }
 
-function filtrarEstado(estado) {
+function filtrarEstado(estado, elem) {
   filtroEstado = estado;
   document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
-  event && event.target && event.target.classList.add("active");
+  if (elem) {
+    elem.classList.add("active");
+  } else if (window.event && window.event.target) {
+    window.event.target.classList.add("active");
+  }
   renderDetalle();
 }
 
-function filtrarDetalle() { renderDetalle(); }
+function filtrarDetalle() { 
+  renderDetalle();
+}
 
 function renderDetalle() {
   var busq = (document.getElementById("buscador").value || "").toUpperCase();
@@ -666,7 +654,9 @@ function renderDetalle() {
     var matchEstado = filtroEstado === "TODOS" ||
       (filtroEstado === "PRESENTE" && (a.estado === "PUNTUAL" || a.estado === "INGRESO ANTICIPADO")) ||
       a.estado === filtroEstado;
-    var matchNombre = a.nombre.toUpperCase().indexOf(busq) >= 0 || a.id.indexOf(busq) >= 0;
+    var nameStr = (a.nombre || "").toUpperCase();
+    var idStr = String(a.dni || a.id || "");
+    var matchNombre = nameStr.indexOf(busq) >= 0 || idStr.indexOf(busq) >= 0;
     return matchEstado && matchNombre;
   });
 
@@ -684,7 +674,7 @@ function renderDetalle() {
                 a.estado === "INGRESO ANTICIPADO" ? "b-anticip" : "b-puntual";
     return "<div class='alum-item " + cls + "'>" +
       "<div><div class='alum-nombre'>" + a.nombre + "</div>" +
-      "<div class='alum-det'>" + a.grado + " · " + a.id + "</div></div>" +
+      "<div class='alum-det'>" + (a.grado || "") + " · " + (a.dni || a.id || "") + "</div></div>" +
       "<div style='text-align:right'>" +
       "<span class='badge " + badge + "'>" + a.estado + "</span>" +
       "<div class='alum-hora'>" + (a.hora || "") + "</div></div>" +
@@ -699,7 +689,6 @@ function cargarReportes() {
   if (!desde || !hasta) { alert("Seleccione rango de fechas"); return; }
   document.getElementById("reportes-loading").style.display = "block";
   document.getElementById("lista-reportes").innerHTML = "";
-
   var desdeStr = desde.split("-").reverse().join("/");
   var hastaStr = hasta.split("-").reverse().join("/");
 
@@ -739,13 +728,12 @@ function cargarTardanzas() {
   fetch(AS_URL + "?accion=historialTardanzas")
     .then(function(r){ return r.json(); })
     .then(function(d){
-      window._datosTardanzas = d; // ← agregar esta línea
+      window._datosTardanzas = d;
       var el = document.getElementById("tardanzas-loading");
       if (el) { el.style.display = "none"; el.style.visibility = "hidden"; }
       var lista = d.tardanzas || [];
       if (lista.length === 0) {
-        document.getElementById("lista-tardanzas").innerHTML =
-          "<div class='vacio'>Sin tardanzas este mes</div>";
+        document.getElementById("lista-tardanzas").innerHTML = "<div class='vacio'>Sin tardanzas este mes</div>";
         return;
       }
       document.getElementById("lista-tardanzas").innerHTML =
@@ -777,6 +765,7 @@ function cargarDiasRegistrados() {
     .catch(function(){});
 }
 
+// ── CALENDARIO ──
 function calCambiarMes(d) {
   calMes += d;
   if (calMes > 11) { calMes = 0; calAnio++; }
@@ -861,8 +850,6 @@ function abrirKiosco(num) {
 }
 
 // ── REGISTRO MANUAL ───────────────────────────────────────────────
-var listaAlumnos = [];
-
 function buscarAlumnoReg() {
   var busq = document.getElementById("reg-buscar").value.trim().toUpperCase();
   if (busq.length < 2) {
@@ -883,26 +870,26 @@ function buscarAlumnoReg() {
 
 function renderResultadosReg(busq) {
   var resultados = listaAlumnos.filter(function(a){
-    return a.nombre.toUpperCase().indexOf(busq) >= 0 ||
-           a.id.indexOf(busq) >= 0;
+    var nameStr = (a.nombre || "").toUpperCase();
+    var idStr = String(a.dni || a.id || "");
+    return nameStr.indexOf(busq) >= 0 || idStr.indexOf(busq) >= 0;
   }).slice(0, 8);
 
   if (resultados.length === 0) {
-    document.getElementById("reg-resultados").innerHTML =
-      "<div class=\'vacio\'>Sin resultados</div>";
+    document.getElementById("reg-resultados").innerHTML = "<div class='vacio'>Sin resultados</div>";
     return;
   }
 
   document.getElementById("reg-resultados").innerHTML =
     resultados.map(function(a){
-      return "<div class=\'alum-item verde\' style=\'margin-bottom:4px\'>" +
+      var codAlum = a.dni || a.id || "";
+      return "<div class='alum-item verde' style='margin-bottom:4px'>" +
         "<div>" +
-        "<div class=\'alum-nombre\'>" + a.nombre + "</div>" +
-        "<div class=\'alum-det\'>" + a.grado + " · DNI: " + a.id + "</div>" +
+        "<div class='alum-nombre'>" + a.nombre + "</div>" +
+        "<div class='alum-det'>" + (a.grado || "") + " · DNI: " + codAlum + "</div>" +
         "</div>" +
-        "<button onclick=\'registrarManual(\"" + a.id + "\",\"" + a.nombre + "\")\'  " +
-        "style=\'background:#7B3F00;color:white;border:none;border-radius:6px;" +
-        "padding:6px 10px;font-size:11px;cursor:pointer;font-weight:bold\'>✅ Registrar</button>" +
+        "<button onclick='registrarManual(\"" + codAlum + "\",\"" + a.nombre.replace(/'/g, "\\'") + "\")'  " +
+        "style='background:#7B3F00;color:white;border:none;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;font-weight:bold'>✅ Registrar</button>" +
         "</div>";
     }).join("");
 }
@@ -933,7 +920,6 @@ function registrarManual(id, nombre) {
       document.getElementById("reg-msg").style.background = "#FDECEA";
     });
 }
-
 
 // ── REPORTE MENSUAL ───────────────────────────────────────────────
 function cargarMensual() {
@@ -972,7 +958,6 @@ function cargarMensual() {
 function cargarSemanal() {
   document.getElementById("semanal-loading").style.display = "block";
   document.getElementById("semanal-resultado").innerHTML = "";
-
   fetch(AS_URL + "?accion=reporteSemanalPortal")
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -1035,8 +1020,6 @@ function cargarFaltas() {
 }
 
 // ── HISTORIAL DE ALUMNO ───────────────────────────────────────────
-var alumnosCache2 = [];
-
 function buscarAlumnoHist() {
   var busq = document.getElementById("alum-buscar").value.trim().toUpperCase();
   if (busq.length < 2) {
@@ -1058,7 +1041,9 @@ function buscarAlumnoHist() {
 
 function renderSugerencias(busq) {
   var res = listaAlumnos.filter(function(a){
-    return a.nombre.toUpperCase().indexOf(busq) >= 0 || a.id.indexOf(busq) >= 0;
+    var nameStr = (a.nombre || "").toUpperCase();
+    var idStr = String(a.dni || a.id || "");
+    return nameStr.indexOf(busq) >= 0 || idStr.indexOf(busq) >= 0;
   }).slice(0, 6);
 
   if (res.length === 0) {
@@ -1066,9 +1051,10 @@ function renderSugerencias(busq) {
     return;
   }
   document.getElementById("alum-sugerencias").innerHTML = res.map(function(a){
-    return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' onclick='verHistorialAlumno(\"" + a.id + "\",\"" + a.nombre + "\")'>" +
+    var codAlum = a.dni || a.id || "";
+    return "<div class='alum-item verde' style='margin-bottom:4px;cursor:pointer' onclick='verHistorialAlumno(\"" + codAlum + "\",\"" + a.nombre.replace(/'/g, "\\'") + "\")'>" +
       "<div><div class='alum-nombre'>👤 " + a.nombre + "</div>" +
-      "<div class='alum-det'>" + a.grado + " · " + a.id + "</div></div>" +
+      "<div class='alum-det'>" + (a.grado || "") + " · " + codAlum + "</div></div>" +
       "<span style='font-size:11px;color:#7B3F00;font-weight:bold'>Ver →</span>" +
       "</div>";
   }).join("");
@@ -1078,7 +1064,6 @@ function verHistorialAlumno(id, nombre) {
   document.getElementById("alum-sugerencias").innerHTML = "";
   document.getElementById("alum-buscar").value = nombre;
   document.getElementById("alum-historial").innerHTML = "<div class='loading'>⏳ Cargando historial...</div>";
-
   fetch(AS_URL + "?accion=historialAlumno&id=" + encodeURIComponent(id))
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -1108,9 +1093,8 @@ function verHistorialAlumno(id, nombre) {
         }).join("") +
         "</tbody></table></div>";
       document.getElementById("alum-historial").innerHTML = html +
-        "<button class=\'btn-accion btn-naranja\' style=\'margin-top:8px\' " +
-        "onclick=\'exportarPDFAlumno(\"" + id + "\",\"" + nombre + "\"," +
-        "window._regAlumno||[],window._resAlumno||{})\'>📄 Exportar PDF</button>";
+        "<button class='btn-accion btn-naranja' style='margin-top:8px' " +
+        "onclick='exportarPDFAlumno(\"" + id + "\",\"" + nombre.replace(/'/g, "\\'") + "\",window._regAlumno||[],window._resAlumno||{})'>📄 Exportar PDF</button>";
       window._regAlumno = registros;
       window._resAlumno = resumen;
     })
@@ -1126,18 +1110,15 @@ function registrarJustif() {
   var tipo   = document.getElementById("just-tipo").value;
   var motivo = document.getElementById("just-motivo").value.trim();
   var reg    = document.getElementById("just-reg").value.trim();
-
   if (!dni || !fecha || !motivo || !reg) {
     setJustMsg("⚠️ Complete todos los campos", "#FFF9C4", "#F57F17");
     return;
   }
 
-  // Convertir fecha de YYYY-MM-DD a DD/MM/YYYY
   var p = fecha.split("-");
   var fechaStr = p[2] + "/" + p[1] + "/" + p[0];
 
   setJustMsg("⏳ Guardando...", "#FFF9C4", "#856404");
-
   fetch(AS_URL + "?accion=justificar&dni=" + encodeURIComponent(dni) +
         "&fecha=" + encodeURIComponent(fechaStr) +
         "&tipo="  + encodeURIComponent(tipo) +
@@ -1147,6 +1128,7 @@ function registrarJustif() {
     .then(function(d){
       setJustMsg("✅ " + (d.msg || "Guardado correctamente"), "#D4EDDA", "#1E6B2E");
       document.getElementById("just-dni").value    = "";
+      document.getElementById("just-buscar").value  = "";
       document.getElementById("just-motivo").value = "";
       document.getElementById("just-reg").value    = "";
     })
@@ -1163,14 +1145,11 @@ function setJustMsg(txt, bg, color) {
 }
 
 function cargarJustificaciones() {
-  // Actualizar título con el mes actual
   var meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
                "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
   var ahora = new Date();
   var titulo = document.getElementById("just-titulo-mes");
-  if (titulo) titulo.textContent = "Justificaciones de " + 
-    meses[ahora.getMonth()] + " " + ahora.getFullYear();
-
+  if (titulo) titulo.textContent = "Justificaciones de " + meses[ahora.getMonth()] + " " + ahora.getFullYear();
   fetch(AS_URL + "?accion=listarJustificaciones")
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -1181,7 +1160,7 @@ function cargarJustificaciones() {
       }
       document.getElementById("just-lista").innerHTML =
         "<table class='tabla'><thead><tr>" +
-        "<th>Fecha</th><th>Alumno</th><th>Tipo</th><th>Motivo</th>" +
+        "<th>Fecha</th><th>Alumno DNI</th><th>Tipo</th><th>Motivo</th>" +
         "</tr></thead><tbody>" +
         lista.map(function(j){
           return "<tr><td>" + j.fecha + "</td><td>" + j.dni +
@@ -1201,19 +1180,15 @@ function cargarJustificaciones() {
 // ══════════════════════════════════════════════════════════════════
 
 var PDF_LOADED = false;
-
 function cargarLibreriasPDF(callback) {
   if (PDF_LOADED) { callback(); return; }
   
-  // Cargar jsPDF
   var s1 = document.createElement("script");
   s1.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
   s1.onload = function() {
-    // Cargar jsPDF-autotable
     var s2 = document.createElement("script");
     s2.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js";
     s2.onload = function() {
-      // Cargar Chart.js
       var s3 = document.createElement("script");
       s3.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js";
       s3.onload = function() {
@@ -1227,7 +1202,7 @@ function cargarLibreriasPDF(callback) {
   document.head.appendChild(s1);
 }
 
-// ── HELPERS ──────────────────────────────────────────────────────
+// ── HELPERS PDF ──────────────────────────────────────────────────
 var MESES_PDF = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio",
                  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 var C_MARRON  = [123, 63,  0];
@@ -1239,7 +1214,6 @@ var C_AZUL    = [ 12, 68,124];
 var C_AMARILLO= [245,127, 23];
 
 function pdfHeader(doc, titulo, subtitulo) {
-  // Fondo marrón header
   doc.setFillColor(C_MARRON[0], C_MARRON[1], C_MARRON[2]);
   doc.rect(0, 0, 210, 22, "F");
   doc.setTextColor(255,248,240);
@@ -1250,7 +1224,6 @@ function pdfHeader(doc, titulo, subtitulo) {
   doc.setFont("helvetica","normal");
   doc.text("Quillahuata — San Sebastián — Cusco, Perú", 105, 15, {align:"center"});
 
-  // Banda naranja
   doc.setFillColor(C_NARANJA[0], C_NARANJA[1], C_NARANJA[2]);
   doc.rect(0, 22, 210, 10, "F");
   doc.setTextColor(255,255,255);
@@ -1258,13 +1231,12 @@ function pdfHeader(doc, titulo, subtitulo) {
   doc.setFont("helvetica","bold");
   doc.text(titulo, 105, 29, {align:"center"});
 
-  // Subtítulo
   doc.setTextColor(80,80,80);
   doc.setFontSize(9);
   doc.setFont("helvetica","normal");
   doc.text(subtitulo, 105, 38, {align:"center"});
 
-  return 42; // y inicial del contenido
+  return 42;
 }
 
 function pdfFooter(doc) {
@@ -1297,8 +1269,7 @@ function renderGraficoBase64(tipo, labels, datasets, opciones) {
         responsive: false,
         animation: false,
         plugins: {
-          legend: { display: opciones.leyenda !== false,
-            labels: { font: { size: 10 } } }
+          legend: { display: opciones.leyenda !== false, labels: { font: { size: 10 } } }
         },
         scales: tipo !== "pie" && tipo !== "doughnut" ? {
           y: { beginAtZero: true, ticks: { font: { size: 9 } } },
@@ -1316,9 +1287,7 @@ function renderGraficoBase64(tipo, labels, datasets, opciones) {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════
-// 1. PDF REPORTE DEL DÍA (sin gráfico)
-// ══════════════════════════════════════════════════════════════════
+// ── 1. PDF REPORTE DEL DÍA ─────────────────────────────────────────
 function exportarPDFDia() {
   if (!datosHoy) { alert("Primero carga los datos de hoy"); return; }
   cargarLibreriasPDF(function() {
@@ -1326,7 +1295,6 @@ function exportarPDFDia() {
     var fecha = datosHoy.fecha || new Date().toLocaleDateString("es-PE");
     var y = pdfHeader(doc, "REPORTE DIARIO DE ASISTENCIA", "Fecha: " + fecha);
 
-    // Resumen
     doc.setFillColor(C_CREMA[0],C_CREMA[1],C_CREMA[2]);
     doc.rect(14, y, 182, 28, "F");
     doc.setDrawColor(C_NARANJA[0],C_NARANJA[1],C_NARANJA[2]);
@@ -1334,6 +1302,7 @@ function exportarPDFDia() {
 
     var total    = (datosHoy.presentes||0) + (datosHoy.ausentes||0);
     var pct      = datosHoy.pct || (total>0 ? Math.round((datosHoy.presentes||0)/total*100) : 0);
+   
     var cols     = ["Total","Presentes","Tardanzas","Ausentes","Justif.","% Asist."];
     var vals     = [
       datosHoy.total||total,
@@ -1345,7 +1314,8 @@ function exportarPDFDia() {
     ];
     var colW = 182/6;
     cols.forEach(function(c,i){
-      doc.setFontSize(8); doc.setTextColor(80,80,80); doc.setFont("helvetica","normal");
+      doc.setFontSize(8);
+      doc.setTextColor(80,80,80); doc.setFont("helvetica","normal");
       doc.text(c, 14 + i*colW + colW/2, y+8, {align:"center"});
       doc.setFontSize(14); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
       doc.setFont("helvetica","bold");
@@ -1353,15 +1323,13 @@ function exportarPDFDia() {
     });
     y += 34;
 
-    // Tabla de registros
     var registros = (datosHoy.registros||[]);
     if (registros.length > 0) {
       doc.autoTable({
         startY: y,
         head: [["#","DNI","Nombre","Grado","Hora","Estado"]],
         body: registros.map(function(r,i){
-          return [i+1, r.dni||r.id||"", r.nombre||"", r.grado||"",
-                  r.hora||"", r.estado||""];
+          return [i+1, r.dni||r.id||"", r.nombre||"", r.grado||"", r.hora||"", r.estado||""];
         }),
         styles: { fontSize: 7, cellPadding: 2 },
         headStyles: { fillColor: C_MARRON, textColor: [255,255,255], fontStyle:"bold" },
@@ -1385,9 +1353,7 @@ function exportarPDFDia() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════
-// 2. PDF REPORTE SEMANAL (sin gráfico)
-// ══════════════════════════════════════════════════════════════════
+// ── 2. PDF REPORTE SEMANAL ─────────────────────────────────────────
 function exportarPDFSemanal() {
   var datos = window._datosSemanal;
   if (!datos) { alert("Primero carga el reporte semanal"); return; }
@@ -1397,7 +1363,6 @@ function exportarPDFSemanal() {
     var sub    = "Semana: " + (datos.lunesStr||"") + " al " + (datos.viernesStr||"");
     var y = pdfHeader(doc, titulo, sub);
 
-    // Resumen
     doc.autoTable({
       startY: y,
       head: [["Días hábiles","Presentes","Tardanzas","Justificados","Ausentes","% Asistencia"]],
@@ -1415,15 +1380,12 @@ function exportarPDFSemanal() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════
-// 3. PDF REPORTE MENSUAL CON GRÁFICOS
-// ══════════════════════════════════════════════════════════════════
+// ── 3. PDF REPORTE MENSUAL CON GRÁFICOS ───────────────────────────
 function exportarPDFMensual() {
-  var mes  = document.getElementById("men-mes")  ? document.getElementById("men-mes").value  : "5";
+  var mes  = document.getElementById("men-mes") ? document.getElementById("men-mes").value : "5";
   var anio = document.getElementById("men-anio") ? document.getElementById("men-anio").value : "2026";
   
   mostrarMsgPDF("Generando PDF mensual...");
-
   fetch(AS_URL + "?accion=reporteMensualDetallado&mes=" + mes + "&anio=" + anio)
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -1432,34 +1394,27 @@ function exportarPDFMensual() {
         var labels = dias.map(function(x){ return x.fecha.substring(0,5); });
 
         renderGraficoBase64("bar", labels, [
-          { label:"Anticipados", data: dias.map(function(x){ return x.anticipados||0; }),
-            backgroundColor:"rgba(46,125,50,0.7)" },
-          { label:"Puntuales",   data: dias.map(function(x){ return x.puntuales||0; }),
-            backgroundColor:"rgba(30,107,46,0.9)" },
-          { label:"Tardanzas",   data: dias.map(function(x){ return x.tardanzas||0; }),
-            backgroundColor:"rgba(245,127,23,0.8)" },
-          { label:"Ausentes",    data: dias.map(function(x){ return x.ausentes||0; }),
-            backgroundColor:"rgba(183,28,28,0.8)" }
+          { label:"Anticipados", data: dias.map(function(x){ return x.anticipados||0; }), backgroundColor:"rgba(46,125,50,0.7)" },
+          { label:"Puntuales",   data: dias.map(function(x){ return x.puntuales||0; }), backgroundColor:"rgba(30,107,46,0.9)" },
+          { label:"Tardanzas",   data: dias.map(function(x){ return x.tardanzas||0; }), backgroundColor:"rgba(245,127,23,0.8)" },
+          { label:"Ausentes",    data: dias.map(function(x){ return x.ausentes||0; }), backgroundColor:"rgba(183,28,28,0.8)" }
         ], { w:900, h:380, leyenda:true })
         .then(function(imgBarras) {
-          // Gráfico torta totales
           var totAnticip  = dias.reduce(function(s,x){ return s+(x.anticipados||0);},0);
           var totPuntual  = dias.reduce(function(s,x){ return s+(x.puntuales||0);},0);
           var totTarde    = dias.reduce(function(s,x){ return s+(x.tardanzas||0);},0);
           var totAusente  = dias.reduce(function(s,x){ return s+(x.ausentes||0);},0);
           var totJustif   = dias.reduce(function(s,x){ return s+(x.justificados||0);},0);
-
+          
           return renderGraficoBase64("doughnut",
             ["Anticipados","Puntuales","Tardanzas","Ausentes","Justificados"],
-            [{ data:[totAnticip,totPuntual,totTarde,totAusente,totJustif],
-               backgroundColor:["#2E7D32","#1E6B2E","#F57F17","#B71C1C","#0C447C"] }],
+            [{ data:[totAnticip,totPuntual,totTarde,totAusente,totJustif], backgroundColor:["#2E7D32","#1E6B2E","#F57F17","#B71C1C","#0C447C"] }],
             { w:500, h:400, leyenda:true }
           ).then(function(imgTorta) {
             var doc = new jspdf.jsPDF("p","mm","a4");
             var mesNombre = MESES_PDF[parseInt(mes)] + " " + anio;
             var y = pdfHeader(doc, "REPORTE MENSUAL DE ASISTENCIA", mesNombre);
 
-            // Resumen numérico
             doc.autoTable({
               startY: y,
               head: [["Anticipados","Puntuales","Tardanzas","Ausentes","Justificados"]],
@@ -1470,41 +1425,35 @@ function exportarPDFMensual() {
             });
             y = doc.lastAutoTable.finalY + 6;
 
-            // Gráfico de barras
-            doc.setFontSize(9); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
+            doc.setFontSize(9);
+            doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
             doc.setFont("helvetica","bold");
             doc.text("Asistencia diaria — " + mesNombre, 14, y+4);
             y += 6;
             doc.addImage(imgBarras, "PNG", 14, y, 182, 75);
             y += 80;
 
-            // Gráfico torta
             doc.text("Distribución general del mes", 14, y+4);
             y += 6;
             doc.addImage(imgTorta, "PNG", 55, y, 100, 80);
-            y += 86;
-
-            // Tabla detalle por día
+            
             doc.addPage();
             y = 15;
             doc.setFontSize(10); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
             doc.setFont("helvetica","bold");
             doc.text("Detalle por día — " + mesNombre, 14, y);
             y += 4;
-
             doc.autoTable({
               startY: y,
               head: [["Fecha","Anticipados","Puntuales","Tardanzas","Ausentes","Justificados"]],
               body: dias.map(function(d){
-                return [d.fecha, d.anticipados||0, d.puntuales||0,
-                        d.tardanzas||0, d.ausentes||0, d.justificados||0];
+                return [d.fecha, d.anticipados||0, d.puntuales||0, d.tardanzas||0, d.ausentes||0, d.justificados||0];
               }),
               styles: { fontSize:8, cellPadding:2, halign:"center" },
               headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
               columnStyles: { 0: { halign:"left" } },
               alternateRowStyles: { fillColor:C_CREMA }
             });
-
             pdfFooter(doc);
             doc.save("Reporte_Mensual_" + mesNombre.replace(" ","_") + ".pdf");
             ocultarMsgPDF();
@@ -1515,15 +1464,12 @@ function exportarPDFMensual() {
     .catch(function(){ ocultarMsgPDF(); alert("Error al generar PDF"); });
 }
 
-// ══════════════════════════════════════════════════════════════════
-// 4. PDF REPORTE DE FALTAS CON GRÁFICO
-// ══════════════════════════════════════════════════════════════════
+// ── 4. PDF REPORTE DE FALTAS CON GRÁFICO ──────────────────────────
 function exportarPDFFaltas() {
-  var mes  = document.getElementById("fal-mes")  ? document.getElementById("fal-mes").value  : "5";
+  var mes  = document.getElementById("fal-mes") ? document.getElementById("fal-mes").value : "5";
   var anio = document.getElementById("fal-anio") ? document.getElementById("fal-anio").value : "2026";
   
   mostrarMsgPDF("Generando PDF de faltas...");
-
   fetch(AS_URL + "?accion=alumnosFaltas&mes=" + mes + "&anio=" + anio)
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -1536,19 +1482,13 @@ function exportarPDFFaltas() {
         var valores = top10.map(function(a){ return a.count; });
 
         renderGraficoBase64("bar", labels, [
-          { label:"Faltas", data:valores,
-            backgroundColor: valores.map(function(v){
-              return v>=6 ? "rgba(183,28,28,0.8)" : "rgba(245,127,23,0.8)";
-            }),
-            borderRadius: 4
-          }
+          { label:"Faltas", data:valores, backgroundColor: valores.map(function(v){ return v>=6 ? "rgba(183,28,28,0.8)" : "rgba(245,127,23,0.8)"; }), borderRadius: 4 }
         ], { w:800, h:380, leyenda:false })
         .then(function(imgBarras) {
           var doc = new jspdf.jsPDF("p","mm","a4");
           var mesNombre = MESES_PDF[parseInt(mes)] + " " + anio;
           var y = pdfHeader(doc, "REPORTE DE FALTAS ACUMULADAS", mesNombre);
 
-          // Resumen
           doc.setFillColor(C_CREMA[0],C_CREMA[1],C_CREMA[2]);
           doc.rect(14,y,182,14,"F");
           doc.setFontSize(10); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
@@ -1556,38 +1496,32 @@ function exportarPDFFaltas() {
           doc.text("Total alumnos con 3+ faltas: " + lista.length, 105, y+9, {align:"center"});
           y += 18;
 
-          // Gráfico
           doc.setFontSize(9); doc.setFont("helvetica","bold");
           doc.text("Top " + top10.length + " alumnos con más faltas", 14, y);
           y += 4;
           doc.addImage(imgBarras, "PNG", 14, y, 182, 80);
           y += 86;
 
-          // Tabla completa
           doc.autoTable({
             startY: y,
             head: [["#","Alumno","Grado","Faltas","Nivel"]],
             body: lista.map(function(a,i){
-              return [i+1, a.nombre, a.grado, a.count,
-                      a.count>=6 ? "⚠️ CRÍTICO" : "Atención"];
+              return [i+1, a.nombre, a.grado, a.count, a.count>=6 ? "⚠️ CRÍTICO" : "Atención"];
             }),
             styles: { fontSize:8, cellPadding:2 },
             headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
             alternateRowStyles: { fillColor:C_CREMA },
             didParseCell: function(data) {
               if (data.section==="body" && data.column.index===4) {
-                data.cell.styles.textColor =
-                  String(data.cell.raw).indexOf("CRÍTICO")>=0 ? C_ROJO : C_AMARILLO;
+                data.cell.styles.textColor = String(data.cell.raw).indexOf("CRÍTICO")>=0 ? C_ROJO : C_AMARILLO;
                 data.cell.styles.fontStyle = "bold";
               }
               if (data.section==="body" && data.column.index===3) {
-                data.cell.styles.textColor =
-                  data.cell.raw>=6 ? C_ROJO : C_AMARILLO;
+                data.cell.styles.textColor = data.cell.raw>=6 ? C_ROJO : C_AMARILLO;
                 data.cell.styles.fontStyle = "bold";
               }
             }
           });
-
           pdfFooter(doc);
           doc.save("Reporte_Faltas_" + mesNombre.replace(" ","_") + ".pdf");
           ocultarMsgPDF();
@@ -1597,19 +1531,15 @@ function exportarPDFFaltas() {
     .catch(function(){ ocultarMsgPDF(); alert("Error al generar PDF"); });
 }
 
-// ══════════════════════════════════════════════════════════════════
-// 5. PDF REPORTE DE TARDANZAS CON GRÁFICO
-// ══════════════════════════════════════════════════════════════════
+// ── 5. PDF REPORTE DE TARDANZAS CON GRÁFICO ───────────────────────
 function exportarPDFTardanzas() {
   var cached = window._datosTardanzas;
   if (cached) {
-    // Usar datos ya cargados
     var lista = cached.tardanzas || [];
     if (lista.length === 0) { alert("Sin tardanzas este mes"); return; }
     _generarPDFTardanzas(lista);
     return;
   }
-  // Si no hay cache, hacer fetch
   mostrarMsgPDF("Generando PDF de tardanzas...");
   fetch(AS_URL + "?accion=historialTardanzas")
     .then(function(r){ return r.json(); })
@@ -1622,106 +1552,7 @@ function exportarPDFTardanzas() {
     .catch(function(){ ocultarMsgPDF(); alert("Error al generar PDF"); });
 }
 
-// ══════════════════════════════════════════════════════════════════
-// 6. PDF HISTORIAL DE ALUMNO (sin gráfico)
-// ══════════════════════════════════════════════════════════════════
-function exportarPDFAlumno(id, nombre, registros, resumen) {
-  if (!registros || registros.length === 0) { alert("Sin registros para exportar"); return; }
-  cargarLibreriasPDF(function() {
-    var doc = new jspdf.jsPDF("p","mm","a4");
-    var y = pdfHeader(doc, "HISTORIAL DE ASISTENCIA", nombre);
-
-    // Resumen
-    var cols = ["Presentes","Tardanzas","Ausentes","Justificados"];
-    var vals = [resumen.presentes||0, resumen.tardanzas||0,
-                resumen.ausentes||0, resumen.justificados||0];
-    doc.autoTable({
-      startY: y,
-      head: [cols],
-      body: [vals],
-      styles: { fontSize:12, halign:"center", cellPadding:5 },
-      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
-      bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:14 }
-    });
-    y = doc.lastAutoTable.finalY + 6;
-
-    doc.autoTable({
-      startY: y,
-      head: [["#","Fecha","Estado","Hora"]],
-      body: registros.map(function(r,i){
-        return [i+1, r.fecha, r.estado, r.hora||"-"];
-      }),
-      styles: { fontSize:8, cellPadding:2 },
-      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
-      alternateRowStyles: { fillColor:C_CREMA },
-      didParseCell: function(data) {
-        if (data.section==="body" && data.column.index===2) {
-          var est = String(data.cell.raw).toUpperCase();
-          if      (est==="AUSENTE")   data.cell.styles.textColor = C_ROJO;
-          else if (est==="TARDE")     data.cell.styles.textColor = C_AMARILLO;
-          else if (est==="JUSTIFICADO") data.cell.styles.textColor = C_AZUL;
-          else                        data.cell.styles.textColor = C_VERDE;
-          data.cell.styles.fontStyle = "bold";
-        }
-      }
-    });
-
-    pdfFooter(doc);
-    doc.save("Historial_" + nombre.replace(/ /g,"_") + ".pdf");
-  });
-}
-
-// ══════════════════════════════════════════════════════════════════
-// 7. PDF REPORTE POR FECHAS (sin gráfico)
-// ══════════════════════════════════════════════════════════════════
-function exportarPDFPorFechas(dias) {
-  if (!dias || dias.length === 0) { alert("Sin datos para exportar"); return; }
-  cargarLibreriasPDF(function() {
-    var doc = new jspdf.jsPDF("p","mm","a4");
-    var desde = dias[dias.length-1].fecha;
-    var hasta = dias[0].fecha;
-    var y = pdfHeader(doc, "REPORTE POR FECHAS",
-      "Período: " + desde + " al " + hasta);
-
-    // Totales
-    var totP=0,totA=0,totT=0,totJ=0;
-    dias.forEach(function(d){
-      totP+=d.presentes||0; totA+=d.ausentes||0;
-      totT+=d.tardanzas||0; totJ+=d.justificados||0;
-    });
-
-    doc.autoTable({
-      startY: y,
-      head: [["Días","Presentes","Tardanzas","Ausentes","Justificados"]],
-      body: [[dias.length, totP, totT, totA, totJ]],
-      styles: { fontSize:11, halign:"center", cellPadding:4 },
-      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
-      bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:12 }
-    });
-    y = doc.lastAutoTable.finalY + 6;
-
-    doc.autoTable({
-      startY: y,
-      head: [["Fecha","Día","Presentes","Tardanzas","Ausentes","Justif."]],
-      body: dias.map(function(d){
-        return [d.fecha, d.diaNombre||"",
-                d.presentes||0, d.tardanzas||0,
-                d.ausentes||0, d.justificados||0];
-      }),
-      styles: { fontSize:8, cellPadding:2, halign:"center" },
-      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
-      columnStyles: { 0:{halign:"left"}, 1:{halign:"left"} },
-      alternateRowStyles: { fillColor:C_CREMA }
-    });
-
-    pdfFooter(doc);
-    doc.save("Reporte_Fechas_" + desde.replace(/\//g,"-") + "_" +
-             hasta.replace(/\//g,"-") + ".pdf");
-  });
-}
-
-  function _generarPDFTardanzas(lista) {
-  mostrarMsgPDF("Generando PDF de tardanzas...");
+function _generarPDFTardanzas(lista) {
   cargarLibreriasPDF(function() {
     var top12   = lista.slice(0,12);
     var labels  = top12.map(function(a){ return a.nombre.split(" ").slice(0,2).join(" "); });
@@ -1731,8 +1562,7 @@ function exportarPDFPorFechas(dias) {
     var mesNombre = MESES_PDF[mes] + " " + anio;
 
     renderGraficoBase64("bar", labels, [
-      { label:"Tardanzas", data:valores,
-        backgroundColor:"rgba(245,127,23,0.8)", borderRadius:4 }
+      { label:"Tardanzas", data:valores, backgroundColor:"rgba(245,127,23,0.8)", borderRadius:4 }
     ], { w:800, h:350, leyenda:false })
     .then(function(img) {
       var doc = new jspdf.jsPDF("p","mm","a4");
@@ -1754,9 +1584,7 @@ function exportarPDFPorFechas(dias) {
       doc.autoTable({
         startY: y,
         head: [["#","Alumno","Grado","Tardanzas"]],
-        body: lista.map(function(a,i){
-          return [i+1, a.nombre, a.grado, a.count];
-        }),
+        body: lista.map(function(a,i){ return [i+1, a.nombre, a.grado, a.count]; }),
         styles: { fontSize:8, cellPadding:2 },
         headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
         alternateRowStyles: { fillColor:C_CREMA }
@@ -1768,8 +1596,90 @@ function exportarPDFPorFechas(dias) {
     });
   });
 }
-  
-// ── HELPERS UI ────────────────────────────────────────────────────
+
+// ── 6. PDF HISTORIAL DE ALUMNO ────────────────────────────────────
+function exportarPDFAlumno(id, nombre, registros, resumen) {
+  if (!registros || registros.length === 0) { alert("Sin registros para exportar"); return; }
+  cargarLibreriasPDF(function() {
+    var doc = new jspdf.jsPDF("p","mm","a4");
+    var y = pdfHeader(doc, "HISTORIAL DE ASISTENCIA", nombre);
+
+    var cols = ["Presentes","Tardanzas","Ausentes","Justificados"];
+    var vals = [resumen.presentes||0, resumen.tardanzas||0, resumen.ausentes||0, resumen.justificados||0];
+    doc.autoTable({
+      startY: y,
+      head: [cols],
+      body: [vals],
+      styles: { fontSize:12, halign:"center", cellPadding:5 },
+      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:14 }
+    });
+    y = doc.lastAutoTable.finalY + 6;
+
+    doc.autoTable({
+      startY: y,
+      head: [["#","Fecha","Estado","Hora"]],
+      body: registros.map(function(r,i){ return [i+1, r.fecha, r.estado, r.hora||"-"]; }),
+      styles: { fontSize:8, cellPadding:2 },
+      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      alternateRowStyles: { fillColor:C_CREMA },
+      didParseCell: function(data) {
+        if (data.section==="body" && data.column.index===2) {
+          var est = String(data.cell.raw).toUpperCase();
+          if      (est==="AUSENTE")      data.cell.styles.textColor = C_ROJO;
+          else if (est==="TARDE")        data.cell.styles.textColor = C_AMARILLO;
+          else if (est==="JUSTIFICADO")  data.cell.styles.textColor = C_AZUL;
+          else                           data.cell.styles.textColor = C_VERDE;
+          data.cell.styles.fontStyle = "bold";
+        }
+      }
+    });
+
+    pdfFooter(doc);
+    doc.save("Historial_" + nombre.replace(/ /g,"_") + ".pdf");
+  });
+}
+
+// ── 7. PDF REPORTE POR FECHAS ─────────────────────────────────────
+function exportarPDFPorFechas(dias) {
+  if (!dias || dias.length === 0) { alert("Sin datos para exportar"); return; }
+  cargarLibreriasPDF(function() {
+    var doc = new jspdf.jsPDF("p","mm","a4");
+    var desde = dias[dias.length-1].fecha;
+    var hasta = dias[0].fecha;
+    var y = pdfHeader(doc, "REPORTE POR FECHAS", "Período: " + desde + " al " + hasta);
+
+    var totP=0,totA=0,totT=0,totJ=0;
+    dias.forEach(function(d){
+      totP+=d.presentes||0; totA+=d.ausentes||0;
+      totT+=d.tardanzas||0; totJ+=d.justificados||0;
+    });
+
+    doc.autoTable({
+      startY: y,
+      head: [["Días","Presentes","Tardanzas","Ausentes","Justificados"]],
+      body: [[dias.length, totP, totT, totA, totJ]],
+      styles: { fontSize:11, halign:"center", cellPadding:4 },
+      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:12 }
+    });
+    y = doc.lastAutoTable.finalY + 6;
+
+    doc.autoTable({
+      startY: y,
+      head: [["Fecha","Día","Presentes","Tardanzas","Ausentes","Justif."]],
+      body: dias.map(function(d){ return [d.fecha, d.diaNombre||"", d.presentes||0, d.tardanzas||0, d.ausentes||0, d.justificados||0]; }),
+      styles: { fontSize:8, cellPadding:2, halign:"center" },
+      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      columnStyles: { 0:{halign:"left"}, 1:{halign:"left"} },
+      alternateRowStyles: { fillColor:C_CREMA }
+    });
+    pdfFooter(doc);
+    doc.save("Reporte_Fechas_" + desde.replace(/\//g,"-") + "_" + hasta.replace(/\//g,"-") + ".pdf");
+  });
+}
+
+// ── HELPERS UI GLOBAL ─────────────────────────────────────────────
 function mostrarMsgPDF(msg) {
   var el = document.getElementById("pdf-msg-global");
   if (!el) {
@@ -1789,14 +1699,12 @@ function ocultarMsgPDF() {
   if (el) el.style.display = "none";
 }
 
-  // ── DETALLE DÍA ───────────────────────────────────────────────────
+// ── DETALLE DÍA INTERNO ───────────────────────────────────────────
 var _datosDetalleDia = null;
-
 function cargarDetalleDia() {
   var fecha = document.getElementById("dd-fecha").value;
   if (!fecha) { alert("Seleccione una fecha"); return; }
 
-  // Convertir YYYY-MM-DD a DD/MM/YYYY
   var p = fecha.split("-");
   var fechaStr = p[2] + "/" + p[1] + "/" + p[0];
 
@@ -1819,13 +1727,10 @@ function cargarDetalleDia() {
 
 function renderDetalleDia(d) {
   var lista = d.registros || [];
-
-  // Resumen
   var presentes = lista.filter(function(r){ return r.estado !== "AUSENTE"; }).length;
   var ausentes  = lista.filter(function(r){ return r.estado === "AUSENTE"; }).length;
   var tardanzas = lista.filter(function(r){ return r.estado === "TARDE" || r.estado === "TARDANZA_JUSTIFICADA"; }).length;
-  var temprano  = lista.filter(function(r){ return r.estado === "INGRESO ANTICIPADO"; }).length;
-
+  
   document.getElementById("dd-resumen").innerHTML =
     "<div class='grid-4' style='margin-bottom:8px'>" +
     "<div class='stat-card c-marron'><div class='num'>" + lista.length + "</div><div class='lbl'>Total</div></div>" +
@@ -1861,16 +1766,13 @@ function renderDetalleDia(d) {
 }
 
 function exportarPDFDetalleDia() {
-  if (!_datosDetalleDia || !_datosDetalleDia.registros) {
-    alert("Primero carga el detalle de un día"); return;
-  }
+  if (!_datosDetalleDia || !_datosDetalleDia.registros) { alert("Primero carga el detalle de un día"); return; }
   var lista  = _datosDetalleDia.registros;
   var fecha  = _datosDetalleDia.fecha || "";
   cargarLibreriasPDF(function() {
     var doc = new jspdf.jsPDF("p","mm","a4");
     var y   = pdfHeader(doc, "DETALLE DE ASISTENCIA DEL DÍA", "Fecha: " + fecha);
 
-    // Resumen
     var presentes = lista.filter(function(r){ return r.estado !== "AUSENTE"; }).length;
     var ausentes  = lista.filter(function(r){ return r.estado === "AUSENTE"; }).length;
     var tardanzas = lista.filter(function(r){ return r.estado === "TARDE"; }).length;
@@ -1879,9 +1781,7 @@ function exportarPDFDetalleDia() {
     doc.autoTable({
       startY: y,
       head: [["Total","Anticipados","Puntuales","Tardanzas","Ausentes"]],
-      body: [[lista.length, temprano,
-              lista.filter(function(r){ return r.estado==="PUNTUAL"; }).length,
-              tardanzas, ausentes]],
+      body: [[lista.length, temprano, lista.filter(function(r){ return r.estado==="PUNTUAL"; }).length, tardanzas, ausentes]],
       styles: { fontSize:11, halign:"center", cellPadding:4 },
       headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
       bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:13 }
@@ -1891,10 +1791,7 @@ function exportarPDFDetalleDia() {
     doc.autoTable({
       startY: y,
       head: [["#","DNI","Nombre","Grado","Hora","Estado","Dispositivo"]],
-      body: lista.map(function(r, i){
-        return [i+1, r.dni, r.nombre, r.grado,
-                r.hora||"-", r.estado, r.dispositivo||"-"];
-      }),
+      body: lista.map(function(r, i){ return [i+1, r.dni, r.nombre, r.grado, r.hora||"-", r.estado, r.dispositivo||"-"]; }),
       styles: { fontSize: 7, cellPadding: 2 },
       headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
       alternateRowStyles: { fillColor:C_CREMA },
@@ -1908,12 +1805,10 @@ function exportarPDFDetalleDia() {
         }
       }
     });
-
     pdfFooter(doc);
     doc.save("Detalle_Dia_" + fecha.replace(/\//g,"-") + ".pdf");
   });
 }
-  
 </script>
 </body>
 </html>
