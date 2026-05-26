@@ -2033,8 +2033,30 @@ function cargarConfiguracionActual() {
         if (document.getElementById("cfg-tolerancia-primaria"))  document.getElementById("cfg-tolerancia-primaria").value  = cfg.toleranciaMin.primaria || 0;
         if (document.getElementById("cfg-tolerancia-secundaria")) document.getElementById("cfg-tolerancia-secundaria").value = cfg.toleranciaMin.secundaria || 0;
       }
-      if (document.getElementById("cfg-hora-inicio")) document.getElementById("cfg-hora-inicio").value = cfg.horaInicioIngreso || "06:00";
-      if (document.getElementById("cfg-hora-fin"))    document.getElementById("cfg-hora-fin").value    = cfg.horaFinIngreso || "08:45";
+      
+      // ── 🛠️ SOLUCIÓN: FUNCIÓN PARA AUTOPARCHEAR HORAS (AÑADE CERO A LA IZQUIERDA) ──
+      function formatearHoraHTML(horaStr) {
+        if (!horaStr) return "00:00";
+        var partes = horaStr.split(":");
+        if (partes.length >= 2) {
+          var h = partes[0].trim();
+          var m = partes[1].trim();
+          // Si la hora tiene 1 solo dígito (ej: "6"), le agrega el "0" adelante
+          if (h.length === 1) h = "0" + h;
+          // Si el minuto tiene 1 solo dígito (ej: "5"), le agrega el "0" adelante
+          if (m.length === 1) m = "0" + m;
+          return h + ":" + m;
+        }
+        return horaStr;
+      }
+
+      if (document.getElementById("cfg-hora-inicio")) {
+        document.getElementById("cfg-hora-inicio").value = formatearHoraHTML(cfg.horaInicioIngreso);
+      }
+      if (document.getElementById("cfg-hora-fin")) {
+        document.getElementById("cfg-hora-fin").value = formatearHoraHTML(cfg.horaFinIngreso);
+      }
+      // ─────────────────────────────────────────────────────────────────────────────
 
       var chkDiaSinEscaneo = document.getElementById("cfg-dia-sin-escaneo");
       if (chkDiaSinEscaneo) {
