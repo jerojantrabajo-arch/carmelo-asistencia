@@ -617,19 +617,37 @@ function renderHoy() {
   document.getElementById("lista-ausentes-hoy").innerHTML = html;
 }
 
-// ── SECCIÓN DETALLE ───────────────────────────────────────────────
+// ── SECCIÓN DETALLE (CORREGIDA) ───────────────────────────────────
 function cargarDetalle() {
   document.getElementById("detalle-loading").style.display = "block";
   document.getElementById("lista-detalle").innerHTML = "";
+  
+  // Hacemos la petición al backend
   fetch(AS_URL + "?accion=dashboard")
     .then(function(r){ return r.json(); })
     .then(function(d){
-      datosDet = d.todos || [];
+      // Corrección crítica: Mapea correctamente si el backend envía .registros, .todos o .listaAusentes
+      datosDet = d.todos || d.registros || d.listaAusentes || [];
+      
+      // Si por alguna razón la lista general está vacía, intentamos pre-cargar desde la lista global de alumnos
+      if (datosDet.length === 0 && listaAlumnos.length > 0) {
+        datosDet = listaAlumnos.map(function(al) {
+          return {
+            nombre: al.nombre,
+            dni: al.dni || al.id,
+            grado: al.grado,
+            estado: "AUSENTE", // Estado por defecto si no hay escaneo registrado aún
+            hora: ""
+          };
+        });
+      }
+      
       document.getElementById("detalle-loading").style.display = "none";
       renderDetalle();
     })
-    .catch(function(){
-      document.getElementById("detalle-loading").textContent = "Error al cargar";
+    .catch(function(err){
+      console.error("Error en detalle:", err);
+      document.getElementById("detalle-loading").textContent = "Error al cargar la lista de alumnos.";
     });
 }
 
@@ -649,34 +667,49 @@ function filtrarDetalle() {
 }
 
 function renderDetalle() {
-  var busq = (document.getElementById("buscador").value || "").toUpperCase();
+  var buscadorElem = document.getElementById("buscador");
+  var busq = buscadorElem ? (buscadorElem.value || "").toUpperCase() : "";
+  
   var lista = datosDet.filter(function(a){
+    // Estandarizamos el estado a mayúsculas para evitar fallos de coincidencia
+    var estadoAlum = String(a.estado || "AUSENTE").toUpperCase();
+    
     var matchEstado = filtroEstado === "TODOS" ||
-      (filtroEstado === "PRESENTE" && (a.estado === "PUNTUAL" || a.estado === "INGRESO ANTICIPADO")) ||
-      a.estado === filtroEstado;
-    var nameStr = (a.nombre || "").toUpperCase();
+      (filtroEstado === "PRESENTE" && (estadoAlum === "PUNTUAL" || estadoAlum === "INGRESO ANTICIPADO" || estadoAlum === "PRESENTE")) ||
+      estadoAlum === filtroEstado;
+      
+    var nameStr = (a.nombre || a.name || "").toUpperCase();
     var idStr = String(a.dni || a.id || "");
     var matchNombre = nameStr.indexOf(busq) >= 0 || idStr.indexOf(busq) >= 0;
+    
     return matchEstado && matchNombre;
   });
 
+  var contenedor = document.getElementById("lista-detalle");
+  if (!contenedor) return;
+
   if (lista.length === 0) {
-    document.getElementById("lista-detalle").innerHTML = "<div class='vacio'>Sin resultados</div>";
+    contenedor.innerHTML = "<div class='vacio'>Sin alumnos que coincidan con el filtro</div>";
     return;
   }
-  document.getElementById("lista-detalle").innerHTML = lista.map(function(a){
-    var cls   = a.estado === "AUSENTE" ? "rojo" :
-                a.estado === "TARDE"   ? "amarillo" :
-                a.estado === "JUSTIFICADO" ? "azul" : "verde";
-    var badge = a.estado === "AUSENTE"  ? "b-ausente" :
-                a.estado === "TARDE"    ? "b-tarde" :
-                a.estado === "JUSTIFICADO" ? "b-justif" :
-                a.estado === "INGRESO ANTICIPADO" ? "b-anticip" : "b-puntual";
+  
+  contenedor.innerHTML = lista.map(function(a){
+    var est = String(a.estado || "AUSENTE").toUpperCase();
+    
+    var cls   = est === "AUSENTE" ? "rojo" :
+                (est === "TARDE" || est === "TARDANZA") ? "amarillo" :
+                (est === "JUSTIFICADO" || est === "FALTA_JUSTIFICADA") ? "azul" : "verde";
+                
+    var badge = est === "AUSENTE"  ? "b-ausente" :
+                (est === "TARDE" || est === "TARDANZA") ? "b-tarde" :
+                (est === "JUSTIFICADO" || est === "FALTA_JUSTIFICADA") ? "b-justif" :
+                est === "INGRESO ANTICIPADO" ? "b-anticip" : "b-puntual";
+                
     return "<div class='alum-item " + cls + "'>" +
-      "<div><div class='alum-nombre'>" + a.nombre + "</div>" +
-      "<div class='alum-det'>" + (a.grado || "") + " · " + (a.dni || a.id || "") + "</div></div>" +
+      "<div><div class='alum-nombre'>" + (a.nombre || a.name || "Sin Nombre") + "</div>" +
+      "<div class='alum-det'>" + (a.grado || "") + " · DNI: " + (a.dni || a.id || "") + "</div></div>" +
       "<div style='text-align:right'>" +
-      "<span class='badge " + badge + "'>" + a.estado + "</span>" +
+      "<span class='badge " + badge + "'>" + est + "</span>" +
       "<div class='alum-hora'>" + (a.hora || "") + "</div></div>" +
       "</div>";
   }).join("");
