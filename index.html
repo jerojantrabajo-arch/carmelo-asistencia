@@ -209,12 +209,37 @@ var colaEnvio    = [];
 var enviandoCola = false;
 
   
+// ── COLA CON ÉXITO OPTIMISTA (Velocidad Turbo) ──────────────────────
 function agregarCola(id) {
+  // 1. Lo metemos a la cola de inmediato y lo respaldamos en el disco de la tablet
   colaEnvio.push({ id: id, intentos: 0, ts: Date.now() });
   actualizarBarraCola();
   procesarCola();
-}
 
+  // 2. TRUCO OPTIMISTA: Le damos luz verde instantánea al alumno en la pantalla
+  // Intentamos pintar el mensaje de la cámara (qr-msg) o el manual (reg-msg) según corresponda
+  var msgElem = document.getElementById("qr-msg") || document.getElementById("reg-msg");
+  
+  if (msgElem) {
+    msgElem.textContent = "✅ ¡PASA! Registrado correctamente";
+    msgElem.style.background = "#D4EDDA"; // Fondo Verde
+    msgElem.style.color = "#1E6B2E";      // Texto Verde Oscuro
+    
+    // Opcional: Si tienes los buscadores a la mano, los limpiamos ya mismo
+    if (document.getElementById("reg-buscar")) document.getElementById("reg-buscar").value = "";
+    if (document.getElementById("reg-resultados")) document.getElementById("reg-resultados").innerHTML = "";
+
+    // 3. LIMPIEZA AUTOMÁTICA: A los 2 segundos vuelve a su estado normal para el próximo alumno
+    setTimeout(function() {
+      // Solo restauramos si sigue mostrando el mensaje de éxito (para no tapar alertas de error posteriores)
+      if (msgElem.textContent.includes("¡PASA!")) {
+        msgElem.textContent = "🔲 Esperando código...";
+        msgElem.style.background = "#E9ECEF"; // Gris neutro original
+        msgElem.style.color = "#495057";
+      }
+    }, 2200); // 2.2 segundos en pantalla es el tiempo ideal para que el alumno lo vea
+  }
+}
 // ── PROCESAR COLA CON RESPALDO OFFLINE REAL ──────────────────────────
 function procesarCola() {
   if (enviandoCola || colaEnvio.length === 0) return;
