@@ -965,30 +965,100 @@ function renderResultadosReg(busq) {
 
 function registrarManual(id, nombre) {
   if (!confirm("¿Registrar entrada de " + nombre + "?")) return;
-  document.getElementById("reg-msg").textContent = "⏳ Registrando...";
-  document.getElementById("reg-msg").style.background = "#FFF9C4";
+  
+  var msgElem = document.getElementById("reg-msg");
+  var horaActual = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-  fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(id) +
-        "&motivo=NORMAL&dispositivo=Manual-Portal")
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if (d.ok) {
-        document.getElementById("reg-msg").textContent = "✅ " + nombre + " registrado";
-        document.getElementById("reg-msg").style.background = "#D4EDDA";
-        document.getElementById("reg-msg").style.color = "#1E6B2E";
-        document.getElementById("reg-buscar").value = "";
-        document.getElementById("reg-resultados").innerHTML = "";
-      } else {
-        document.getElementById("reg-msg").textContent = "⚠️ " + (d.mensaje || "No se pudo registrar");
-        document.getElementById("reg-msg").style.background = "#FFF9C4";
-        document.getElementById("reg-msg").style.color = "#F57F17";
+  // 1. SI HAY CONEXIÓN A INTERNET: Hace el envío normal a Google Sheets
+  if (navigator.onLine) {
+    msgElem.textContent = "⏳ Registrando...";
+    msgElem.style.background = "#FFF9C4";
+    msgElem.style.color = "#000";
+
+    fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(id) +
+          "&motivo=NORMAL&dispositivo=Manual-Portal&hora=" + encodeURIComponent(horaActual))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (d.ok || d.exito) {
+          msgElem.textContent = "✅ " + nombre + " registrado";
+          msgElem.style.background = "#D4EDDA";
+          msgElem.style.color = "#1E6B2E";
+          document.getElementById("reg-buscar").value = "";
+          document.getElementById("reg-resultados").innerHTML = "";
+        } else {
+          msgElem.textContent = "⚠️ " + (d.mensaje || "No se pudo registrar");
+          msgElem.style.background = "#FFF9C4";
+          msgElem.style.color = "#F57F17";
+        }
+      })
+      .catch(function(){
+        // Si falla el fetch a mitad de camino por microcorte, va a la memoria local
+        guardarAsistenciaOffline(id, nombre, horaActual);
+      });
+      
+  } else {
+    // 2. SI NO HAY INTERNET: Se guarda en la memoria interna al instante
+    guardarAsistenciaOffline(id, nombre, horaActual);
+  }
+}
+
+// [FUNCIÓN DE RESPALDO] Guarda el alumno en la memoria de la tablet/celular
+function guardarAsistenciaOffline(idAlumno, nombreAlumno, hora) {
+  var msgElem = document.getElementById("reg-msg");
+  var colaOffline = JSON.parse(localStorage.getItem("asistencias_offline")) || [];
+  
+  colaOffline.push({
+    id: idAlumno,
+    nombre: nombreAlumno,
+    hora: hora,
+    fecha: new Date().toLocaleDateString()
+  });
+  
+  localStorage.setItem("asistencias_offline", JSON.stringify(colaOffline));
+  
+  // Alerta visual en color amarillo/naranja indicando que se guardó sin internet
+  if (msgElem) {
+    msgElem.textContent = "📌 " + nombreAlumno + " guardado OFFLINE (Sin Internet)";
+    msgElem.style.background = "#FFF3CD";
+    msgElem.style.color = "#856404";
+  }
+  
+  // Limpia el buscador para que puedas seguir pasando el siguiente alumno de inmediato
+  if (document.getElementById("reg-buscar")) document.getElementById("reg-buscar").value = "";
+  if (document.getElementById("reg-resultados")) document.getElementById("reg-resultados").innerHTML = "";
+}
+
+// [SINCRONIZADOR AUTOMÁTICO] Sube todo a Google Sheets apenas detecta Wi-Fi
+window.addEventListener('online', function() {
+  var msgElem = document.getElementById("reg-msg");
+  var colaOffline = JSON.parse(localStorage.getItem("asistencias_offline")) || [];
+  if (colaOffline.length === 0) return;
+  
+  if (msgElem) {
+    msgElem.textContent = "🔄 Internet restaurado. Sincronizando " + colaOffline.length + " asistencias...";
+    msgElem.style.background = "#D1ECF1";
+    msgElem.style.color = "#0C5460";
+  }
+  
+  var promesas = colaOffline.map(function(reg) {
+    return fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(reg.id) + 
+                 "&motivo=NORMAL&dispositivo=Manual-Portal&hora=" + encodeURIComponent(reg.hora))
+      .then(function(r) { return r.json(); });
+  });
+
+  Promise.all(promesas)
+    .then(function() {
+      localStorage.removeItem("asistencias_offline");
+      if (msgElem) {
+        msgElem.textContent = "🔄 ¡Éxito! Registros offline sincronizados en Google Sheets.";
+        msgElem.style.background = "#D4EDDA";
+        msgElem.style.color = "#1E6B2E";
       }
     })
-    .catch(function(){
-      document.getElementById("reg-msg").textContent = "❌ Error de conexión";
-      document.getElementById("reg-msg").style.background = "#FDECEA";
+    .catch(function(err) {
+      console.error("Fallo al subir registros offline, se mantienen guardados:", err);
     });
-}
+});
 
 // ── REPORTE MENSUAL ───────────────────────────────────────────────
 function cargarMensual() {
