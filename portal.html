@@ -223,6 +223,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <button class="nav-tab" onclick="irSeccion('alumno')">🔎 Alumno</button>
     <button class="nav-tab" onclick="irSeccion('justif')">📝 Justif.</button>    
     <button class="nav-tab active" onclick="irSeccion('kiosco')">📷 Kiosco</button>
+    <button class="nav-tab" onclick="irSeccion('configuracion')">⚙️ Configuración</button>
   </div>
 
   <div class="p-content">
@@ -448,7 +449,62 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 
   </div>
 </div>
+  
+<div class="seccion" id="sec-configuracion">
+      <div class="sec-title">⚙️ Configuración de Horarios y Tolerancias</div>
+      
+      <div style="background:white; border-radius:10px; padding:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom:15px;">
+        
+        <label style="font-size:12px; color:var(--marron); font-weight:bold; display:block; margin-bottom:4px">Tipo de Horario Activo:</label>
+        <select id="cfg-horario-activo" class="buscador" style="margin-bottom:12px">
+          <option value="NORMAL">HORARIO NORMAL</option>
+          <option value="INVIERNO">HORARIO DE INVIERNO</option>
+        </select>
 
+        <div class="sec-title" style="background:var(--naranja); margin-top:10px; font-size:11px">⏳ Minutos de Tolerancia Obligatoria</div>
+        <div class="grid-2" style="margin-top:8px">
+          <div>
+            <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Inicial (Minutos):</label>
+            <input type="number" id="cfg-tolerancia-inicial" class="buscador" value="0" min="0" max="60">
+          </div>
+          <div>
+            <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Primaria (Minutos):</label>
+            <input type="number" id="cfg-tolerancia-primaria" class="buscador" value="0" min="0" max="60">
+          </div>
+        </div>
+        <div style="margin-top:4px">
+          <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Secundaria (Minutos):</label>
+          <input type="number" id="cfg-tolerancia-secundaria" class="buscador" value="0" min="0" max="60">
+        </div>
+
+        <div class="sec-title" style="background:var(--naranja); margin-top:15px; font-size:11px">🚪 Rango de Apertura/Cierre de Puerta</div>
+        <div class="grid-2" style="margin-top:8px">
+          <div>
+            <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Hora Inicio Ingreso:</label>
+            <input type="time" id="cfg-hora-inicio" class="buscador" value="06:30">
+          </div>
+          <div>
+            <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Hora Fin Ingreso:</label>
+            <input type="time" id="cfg-hora-fin" class="buscador" value="08:30">
+          </div>
+        </div>
+
+        <div class="sec-title" style="background:var(--marron-clr); margin-top:15px; font-size:11px">🚫 Control Excepcional de Jornada</div>
+        <div style="margin-top:8px; display:flex; align-items:center; gap:10px; padding:10px 0;">
+          <input type="checkbox" id="cfg-dia-sin-escaneo" onchange="toggleMotivoCampos()" style="width:20px; height:20px; cursor:pointer">
+          <label for="cfg-dia-sin-escaneo" style="font-size:12px; color:var(--marron); font-weight:bold; cursor:pointer">Marcar HOY como Día Sin Escaneo</label>
+        </div>
+
+        <div id="cfg-grupo-motivo" style="display:none; margin-top:4px">
+          <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Motivo de la suspensión:</label>
+          <input type="text" id="cfg-motivo-sin-escaneo" class="buscador" placeholder="Ej: Feriado Nacional / Jornada de Gestión">
+        </div>
+
+        <button id="btn-guardar-config" class="btn-accion" onclick="guardarConfiguracionRemota()" style="margin-top:15px; height:45px; font-size:13px">💾 Guardar Parámetros en la Nube</button>
+
+      </div>
+    </div>
+  
 <script>
 var AS_URL = "https://script.google.com/macros/s/AKfycbyNNrmXIfsV_9X749aKMsAT1Lf1vgdfXDZJlM-akENKwA4TdMMY_f3HVfz-lvAeOeUpyw/exec";
 var PIN_KEY  = "portal_pin_" + new Date().toLocaleDateString("es-PE");
@@ -552,6 +608,8 @@ function irSeccion(id) {
   if (id === "detalle" && datosDet.length === 0) cargarDetalle();
   if (id === "tardanzas") cargarTardanzas();
   if (id === "diasSinEscaneo") cargarDiasRegistrados();
+  // Agregar esta línea al final de la función irSeccion
+  if (id === "configuracion") cargarConfiguracionActual();
 }
 
 // ── SECCIÓN HOY ───────────────────────────────────────────────────
@@ -1949,6 +2007,115 @@ function exportarPDFDetalleDia() {
     doc.save("Detalle_Dia_" + fecha.replace(/\//g,"-") + ".pdf");
   });
 }
+// =========================================================================
+// LÓGICA DE CONTROL PARA LA PESTAÑA DE CONFIGURACIÓN DEL SISTEMA
+// =========================================================================
+
+function cargarConfiguracionActual() {
+  var inputs = ["cfg-tolerancia-inicial", "cfg-tolerancia-primaria", "cfg-tolerancia-secundaria", "cfg-hora-inicio", "cfg-hora-fin", "cfg-motivo-sin-escaneo"];
+  inputs.forEach(function(id) {
+    var elem = document.getElementById(id);
+    if (elem) elem.placeholder = "Cargando...";
+  });
+
+  var url = AS_URL + "?accion=config";
+  console.log("🔄 Descargando variables globales desde:", url);
+
+  fetch(url)
+    .then(function(res) { return res.json(); })
+    .then(function(cfg) {
+      var selectHorario = document.getElementById("cfg-horario-activo");
+      if (selectHorario && cfg.horarioActivo) {
+        selectHorario.value = cfg.horarioActivo.toUpperCase();
+      }
+      if (cfg.toleranciaMin) {
+        if (document.getElementById("cfg-tolerancia-inicial"))   document.getElementById("cfg-tolerancia-inicial").value   = cfg.toleranciaMin.inicial || 0;
+        if (document.getElementById("cfg-tolerancia-primaria"))  document.getElementById("cfg-tolerancia-primaria").value  = cfg.toleranciaMin.primaria || 0;
+        if (document.getElementById("cfg-tolerancia-secundaria")) document.getElementById("cfg-tolerancia-secundaria").value = cfg.toleranciaMin.secundaria || 0;
+      }
+      if (document.getElementById("cfg-hora-inicio")) document.getElementById("cfg-hora-inicio").value = cfg.horaInicioIngreso || "06:00";
+      if (document.getElementById("cfg-hora-fin"))    document.getElementById("cfg-hora-fin").value    = cfg.horaFinIngreso || "08:45";
+
+      var chkDiaSinEscaneo = document.getElementById("cfg-dia-sin-escaneo");
+      if (chkDiaSinEscaneo) {
+        chkDiaSinEscaneo.checked = (cfg.diaSinEscaneo === true || cfg.diaSinEscaneo === "true");
+        toggleMotivoCampos();
+      }
+      if (document.getElementById("cfg-motivo-sin-escaneo")) {
+        document.getElementById("cfg-motivo-sin-escaneo").value = cfg.motivoSinEscaneo || "";
+      }
+    })
+    .catch(function(err) {
+      console.error("❌ Error cargando configuración:", err);
+    });
+}
+
+function guardarConfiguracionRemota() {
+  var btn = document.getElementById("btn-guardar-config");
+  var textoOriginal = btn ? btn.innerHTML : "💾 Guardar Parámetros en la Nube";
+
+  var datos = {
+    horarioActivo: document.getElementById("cfg-horario-activo").value,
+    toleranciaInicial: parseInt(document.getElementById("cfg-tolerancia-inicial").value) || 0,
+    toleranciaPrimaria: parseInt(document.getElementById("cfg-tolerancia-primaria").value) || 0,
+    toleranciaSecundaria: parseInt(document.getElementById("cfg-tolerancia-secundaria").value) || 0,
+    horaInicioIngreso: document.getElementById("cfg-hora-inicio").value,
+    horaFinIngreso: document.getElementById("cfg-hora-fin").value,
+    diaSinEscaneo: document.getElementById("cfg-dia-sin-escaneo").checked,
+    motivoSinEscaneo: document.getElementById("cfg-motivo-sin-escaneo").value.trim()
+  };
+
+  if (datos.horaInicioIngreso >= datos.horaFinIngreso) {
+    alert("⚠️ La 'Hora Inicio Ingreso' debe ser menor que la 'Hora Fin Ingreso'.");
+    return;
+  }
+  if (datos.diaSinEscaneo && datos.motivoSinEscaneo === "") {
+    alert("⚠️ Si marcas hoy como un día sin escaneo, debes escribir el motivo.");
+    document.getElementById("cfg-motivo-sin-escaneo").focus();
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Enviando datos a Google Sheets...";
+    btn.style.background = "#5A2D00";
+  }
+
+  var urlDestino = AS_URL + 
+    "?accion=guardarConfig" +
+    "&horarioActivo=" + encodeURIComponent(datos.horarioActivo) +
+    "&tolInicial=" + datos.toleranciaInicial +
+    "&tolPrimaria=" + datos.toleranciaSecundaria + // El script espera tolPrimaria y tolSecundaria mapeados
+    "&tolSecundaria=" + datos.toleranciaSecundaria + 
+    "&horaInicio=" + encodeURIComponent(datos.horaInicioIngreso) +
+    "&horaFin=" + encodeURIComponent(datos.horaFinIngreso) +
+    "&diaSinEscaneo=" + datos.diaSinEscaneo +
+    "&motivoSinEscaneo=" + encodeURIComponent(datos.motivoSinEscaneo);
+
+  fetch(urlDestino)
+    .then(function(res) { return res.json(); })
+    .then(function(resultado) {
+      if (btn) { btn.disabled = false; btn.innerHTML = textoOriginal; btn.style.background = ""; }
+      if (resultado.success || resultado.valido) {
+        alert("🎉 ¡Éxito! Configuración actualizada correctamente en la nube.");
+      } else {
+        alert("❌ Error: " + (resultado.mensaje || "Rechazado por el servidor."));
+      }
+    })
+    .catch(function(err) {
+      if (btn) { btn.disabled = false; btn.innerHTML = textoOriginal; btn.style.background = ""; }
+      alert("Error de red: No se pudo conectar.");
+    });
+}
+
+function toggleMotivoCampos() {
+  var chk = document.getElementById("cfg-dia-sin-escaneo");
+  var contenedorMotivo = document.getElementById("cfg-grupo-motivo");
+  if (!chk || !contenedorMotivo) return;
+  contenedorMotivo.style.display = chk.checked ? "block" : "none";
+  if (!chk.checked) document.getElementById("cfg-motivo-sin-escaneo").value = "";
+}
+  
 </script>
 </body>
 </html>
