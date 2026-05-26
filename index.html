@@ -215,27 +215,72 @@ function agregarCola(id) {
   procesarCola();
 }
 
+// ── PROCESAR COLA CON RESPALDO OFFLINE REAL ──────────────────────────
 function procesarCola() {
   if (enviandoCola || colaEnvio.length === 0) return;
   enviandoCola = true;
   var item = colaEnvio[0];
 
+  // Guardamos un respaldo en el disco de la tablet por si se apaga en este segundo
+  guardarColaEnDisco();
+
   fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(item.id) +
         "&motivo=NORMAL&dispositivo=" + encodeURIComponent(DISPOSITIVO))
     .then(function(r){ return r.json(); })
     .then(function(data){
+      // Si se registró con éxito en Google, lo sacamos de la cola
       colaEnvio.shift();
+      guardarColaEnDisco(); // Actualizamos el respaldo en disco (ahora hay uno menos)
+      
       enviandoCola = false;
       actualizarBarraCola();
       if (colaEnvio.length > 0) setTimeout(procesarCola, 300);
     })
     .catch(function(){
+      // Si falla por falta de internet, aumentamos el intento
       item.intentos++;
-      if (item.intentos >= 10) colaEnvio.shift();
+      
+      // Si falla 10 veces seguidas (por ejemplo, DNI dañado), lo salta para no trabar la fila
+      if (item.intentos >= 10) {
+        colaEnvio.shift();
+        guardarColaEnDisco();
+      }
+      
       enviandoCola = false;
       actualizarBarraCola();
+      
+      // Reintenta automáticamente en 5 segundos cuando vuelva la señal
       setTimeout(procesarCola, 5000);
     });
+}
+
+// [FUNCIÓN DE APOYO 1] Guarda la cola actual en el almacenamiento físico de la tablet
+function guardarColaEnDisco() {
+  try {
+    localStorage.setItem("copia_seguridad_cola", JSON.stringify(colaEnvio));
+  } catch(e) {
+    console.error("No se pudo guardar en disco:", e);
+  }
+}
+
+// [FUNCIÓN DE APOYO 2] Recupera los datos guardados al encender la tablet
+// PEGA ESTA LÍNEA en tu función inicio() o al cargar la página:
+// cargarColaDesdeDisco();
+function cargarColaDesdeDisco() {
+  var guardado = localStorage.getItem("copia_seguridad_cola");
+  if (guardado) {
+    try {
+      var datosRecuperados = JSON.parse(guardado);
+      if (datosRecuperados && datosRecuperados.length > 0) {
+        colaEnvio = datosRecuperados.concat(colaEnvio); // Une lo viejo con lo nuevo
+        console.log("🔄 ¡Éxito! Se recuperaron " + datosRecuperados.length + " alumnos pendientes de la sesión anterior.");
+        actualizarBarraCola();
+        procesarCola(); // Arranca el envío automático
+      }
+    } catch(e) {
+      console.error("Error al recuperar datos del disco:", e);
+    }
+  }
 }
 
 function actualizarBarraCola() {
@@ -352,6 +397,13 @@ function sonidoError() { initAudio(); beep(220,0.4,0.25); }
 //  PIN
 // ══════════════════════════════════════════════
 window.onload = function() {
+  // ── RECUPERACIÓN OFFLINE DE EMERGENCIA ────────────────────────────
+  // Si la tablet se apagó con alumnos en cola, los despierta de la memoria
+  if (typeof cargarColaDesdeDisco === "function") {
+    cargarColaDesdeDisco();
+  }
+  // ──────────────────────────────────────────────────────────────────
+
   limpiarRegistrosViejos();
   cargarRegistros();
   document.addEventListener("touchstart", initAudio, { once: true });
