@@ -421,36 +421,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <input class="buscador" id="alum-buscar" placeholder="🔍 Buscar por nombre o DNI..." oninput="buscarAlumnoHist()">
       <div id="alum-sugerencias"></div>
       <div id="alum-historial"></div>
-    </div>
-
-    <div class="seccion" id="sec-justif">
-      <div class="sec-title">📝 Registrar justificación</div>
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Buscar alumno por nombre o DNI:</label>
-      <input type="text" id="just-buscar" class="buscador" placeholder="🔍 Nombre o DNI..." oninput="buscarAlumnoJustif()">
-      <div id="just-sugerencias" style="margin-bottom:8px"></div>
-      <input type="hidden" id="just-dni">
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha de la falta:</label>
-      <input type="date" id="just-fecha" class="buscador">
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Tipo:</label>
-      <select id="just-tipo" class="buscador">
-        <option value="FALTA_JUSTIFICADA">Falta justificada</option>
-        <option value="TARDANZA_JUSTIFICADA">Tardanza justificada</option>
-      </select>
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Motivo:</label>
-      <input type="text" id="just-motivo" class="buscador" placeholder="Ej: Cita médica, emergencia familiar...">
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Registrado por:</label>
-      <input type="text" id="just-reg" class="buscador" placeholder="Nombre del auxiliar">
-      <button class="btn-accion" onclick="registrarJustif()">💾 Guardar justificación</button>
-      <div id="just-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;border-radius:6px;margin-top:6px"></div>
-      <div class="sec-title" style="margin-top:12px" id="just-titulo-mes">Justificaciones</div>
-      <button class="btn-accion btn-naranja" onclick="cargarJustificaciones()">🔄 Ver justificaciones</button>
-      <div id="just-lista" style="margin-top:8px"></div>
-    </div>
-
-  </div>
-</div>
-  
-<div class="seccion" id="sec-configuracion">
+    </div> <div class="seccion" id="sec-configuracion">
       <div class="sec-title">⚙️ Configuración de Horarios y Tolerancias</div>
       
       <div style="background:white; border-radius:10px; padding:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom:15px;">
@@ -504,8 +475,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 
       </div>
     </div>
-  
-<script>
+    </div> </div> <script>
 var AS_URL = "https://script.google.com/macros/s/AKfycbyNNrmXIfsV_9X749aKMsAT1Lf1vgdfXDZJlM-akENKwA4TdMMY_f3HVfz-lvAeOeUpyw/exec";
 var PIN_KEY  = "portal_pin_" + new Date().toLocaleDateString("es-PE");
 var tabActual = "hoy";
