@@ -918,22 +918,23 @@ function abrirKiosco(num) {
   window.open("https://jerojantrabajo-arch.github.io/carmelo-asistencia/?dispositivo=" + num, "_blank");
 }
 
-// ── REGISTRO MANUAL ───────────────────────────────────────────────
+// ── REGISTRO MANUAL (Optimizado contra caídas de Internet) ─────────
 function buscarAlumnoReg() {
   var busq = document.getElementById("reg-buscar").value.trim().toUpperCase();
   if (busq.length < 2) {
     document.getElementById("reg-resultados").innerHTML = "";
     return;
   }
+  
+  // Si por alguna razón la lista en memoria está vacía, intentamos cargarla del respaldo local
   if (listaAlumnos.length === 0) {
-    fetch(AS_URL + "?accion=alumnos")
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        listaAlumnos = d.alumnos || [];
-        renderResultadosReg(busq);
-      });
-    return;
+    var copiaLocal = localStorage.getItem("respaldo_alumnos");
+    if (copiaLocal) {
+      listaAlumnos = JSON.parse(copiaLocal);
+    }
   }
+
+  // Ejecuta la búsqueda instantánea en la pantalla sin importar si hay Wi-Fi o no
   renderResultadosReg(busq);
 }
 
