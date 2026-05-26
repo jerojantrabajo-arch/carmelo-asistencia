@@ -180,6 +180,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
   <!-- Navegación -->
   <div class="nav-tabs">
     <button class="nav-tab" onclick="irSeccion('hoy')">📊 Hoy</button>
+    <button class="nav-tab" onclick="irSeccion('detalledia')">📋 Detalle día</button>
     <button class="nav-tab" onclick="irSeccion('detalle')">📋 Detalle</button>
     <button class="nav-tab" onclick="irSeccion('reportes')">📅 Reportes</button>
     <button class="nav-tab" onclick="irSeccion('tardanzas')">⏰ Tardanzas</button>
@@ -189,7 +190,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <button class="nav-tab" onclick="irSeccion('semanal')">📊 Semanal</button>
     <button class="nav-tab" onclick="irSeccion('faltas')">⚠️ Faltas</button>
     <button class="nav-tab" onclick="irSeccion('alumno')">🔎 Alumno</button>
-    <button class="nav-tab" onclick="irSeccion('justif')">📝 Justif.</button>
+    <button class="nav-tab" onclick="irSeccion('justif')">📝 Justif.</button>    
     <button class="nav-tab active" onclick="irSeccion('kiosco')">📷 Kiosco</button>
   </div>
 
@@ -216,6 +217,24 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
           <button class="btn-accion btn-naranja" onclick="exportarPDFDia()">📄 Exportar PDF</button>
         </div>
       </div>
+      <!-- ══ SECCIÓN: DETALLE DÍA ══ -->
+      <div class="seccion" id="sec-detalledia">
+        <div class="sec-title">📋 Detalle completo del día</div>
+        <div class="grid-2" style="margin-bottom:8px">
+          <div>
+            <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha:</label>
+            <input type="date" id="dd-fecha" class="buscador" style="margin-bottom:0">
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn-accion" onclick="cargarDetalleDia()" style="margin-bottom:0">🔍 Ver detalle</button>
+          </div>
+        </div>
+        <div id="dd-loading" class="loading" style="display:none">⏳ Cargando...</div>
+        <div id="dd-resumen" style="margin-bottom:8px"></div>
+        <div id="dd-lista"></div>
+        <button class="btn-accion btn-naranja" onclick="exportarPDFDetalleDia()" style="margin-top:6px">📄 Exportar PDF</button>
+      </div>
+      
     </div>
 
     <!-- ══ SECCIÓN: DETALLE ══ -->
@@ -499,6 +518,13 @@ function irSeccion(id) {
     return;
   }
 
+  if (id === "detalledia") {
+    var hoy = new Date();
+    var dd  = (hoy.getDate()<10?"0":"") + hoy.getDate();
+    var mm  = (hoy.getMonth()+1<10?"0":"") + (hoy.getMonth()+1);
+    document.getElementById("dd-fecha").value = hoy.getFullYear() + "-" + mm + "-" + dd;
+  }
+  
   // Activar tab correcto
   document.querySelectorAll(".nav-tab").forEach(function(t){
     if (t.getAttribute("onclick") &&
@@ -1763,6 +1789,131 @@ function ocultarMsgPDF() {
   if (el) el.style.display = "none";
 }
 
+  // ── DETALLE DÍA ───────────────────────────────────────────────────
+var _datosDetalleDia = null;
+
+function cargarDetalleDia() {
+  var fecha = document.getElementById("dd-fecha").value;
+  if (!fecha) { alert("Seleccione una fecha"); return; }
+
+  // Convertir YYYY-MM-DD a DD/MM/YYYY
+  var p = fecha.split("-");
+  var fechaStr = p[2] + "/" + p[1] + "/" + p[0];
+
+  document.getElementById("dd-loading").style.display = "block";
+  document.getElementById("dd-lista").innerHTML = "";
+  document.getElementById("dd-resumen").innerHTML = "";
+
+  fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(fechaStr))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      _datosDetalleDia = d;
+      document.getElementById("dd-loading").style.display = "none";
+      renderDetalleDia(d);
+    })
+    .catch(function(){
+      document.getElementById("dd-loading").style.display = "none";
+      document.getElementById("dd-lista").innerHTML = "<div class='vacio'>Error al cargar</div>";
+    });
+}
+
+function renderDetalleDia(d) {
+  var lista = d.registros || [];
+
+  // Resumen
+  var presentes = lista.filter(function(r){ return r.estado !== "AUSENTE"; }).length;
+  var ausentes  = lista.filter(function(r){ return r.estado === "AUSENTE"; }).length;
+  var tardanzas = lista.filter(function(r){ return r.estado === "TARDE" || r.estado === "TARDANZA_JUSTIFICADA"; }).length;
+  var temprano  = lista.filter(function(r){ return r.estado === "INGRESO ANTICIPADO"; }).length;
+
+  document.getElementById("dd-resumen").innerHTML =
+    "<div class='grid-4' style='margin-bottom:8px'>" +
+    "<div class='stat-card c-marron'><div class='num'>" + lista.length + "</div><div class='lbl'>Total</div></div>" +
+    "<div class='stat-card c-verde'><div class='num'>" + presentes + "</div><div class='lbl'>Presentes</div></div>" +
+    "<div class='stat-card c-rojo'><div class='num'>" + ausentes + "</div><div class='lbl'>Ausentes</div></div>" +
+    "<div class='stat-card c-amarillo'><div class='num'>" + tardanzas + "</div><div class='lbl'>Tardanzas</div></div>" +
+    "</div>";
+
+  if (lista.length === 0) {
+    document.getElementById("dd-lista").innerHTML = "<div class='vacio'>Sin registros para esta fecha</div>";
+    return;
+  }
+
+  document.getElementById("dd-lista").innerHTML =
+    "<table class='tabla'><thead><tr>" +
+    "<th>#</th><th>DNI</th><th>Nombre</th><th>Grado</th><th>Hora</th><th>Estado</th><th>Dispositivo</th>" +
+    "</tr></thead><tbody>" +
+    lista.map(function(r, i){
+      var badge = r.estado === "AUSENTE"  ? "b-ausente" :
+                  r.estado === "TARDE"    ? "b-tarde"   :
+                  r.estado === "INGRESO ANTICIPADO" ? "b-anticip" :
+                  r.estado === "JUSTIFICADO" ? "b-justif" : "b-puntual";
+      return "<tr><td>" + (i+1) + "</td>" +
+        "<td>" + r.dni + "</td>" +
+        "<td>" + r.nombre + "</td>" +
+        "<td>" + r.grado + "</td>" +
+        "<td>" + (r.hora||"-") + "</td>" +
+        "<td><span class='badge " + badge + "'>" + r.estado + "</span></td>" +
+        "<td style='font-size:10px;color:#888'>" + (r.dispositivo||"-") + "</td>" +
+        "</tr>";
+    }).join("") +
+    "</tbody></table>";
+}
+
+function exportarPDFDetalleDia() {
+  if (!_datosDetalleDia || !_datosDetalleDia.registros) {
+    alert("Primero carga el detalle de un día"); return;
+  }
+  var lista  = _datosDetalleDia.registros;
+  var fecha  = _datosDetalleDia.fecha || "";
+  cargarLibreriasPDF(function() {
+    var doc = new jspdf.jsPDF("p","mm","a4");
+    var y   = pdfHeader(doc, "DETALLE DE ASISTENCIA DEL DÍA", "Fecha: " + fecha);
+
+    // Resumen
+    var presentes = lista.filter(function(r){ return r.estado !== "AUSENTE"; }).length;
+    var ausentes  = lista.filter(function(r){ return r.estado === "AUSENTE"; }).length;
+    var tardanzas = lista.filter(function(r){ return r.estado === "TARDE"; }).length;
+    var temprano  = lista.filter(function(r){ return r.estado === "INGRESO ANTICIPADO"; }).length;
+
+    doc.autoTable({
+      startY: y,
+      head: [["Total","Anticipados","Puntuales","Tardanzas","Ausentes"]],
+      body: [[lista.length, temprano,
+              lista.filter(function(r){ return r.estado==="PUNTUAL"; }).length,
+              tardanzas, ausentes]],
+      styles: { fontSize:11, halign:"center", cellPadding:4 },
+      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:13 }
+    });
+    y = doc.lastAutoTable.finalY + 6;
+
+    doc.autoTable({
+      startY: y,
+      head: [["#","DNI","Nombre","Grado","Hora","Estado","Dispositivo"]],
+      body: lista.map(function(r, i){
+        return [i+1, r.dni, r.nombre, r.grado,
+                r.hora||"-", r.estado, r.dispositivo||"-"];
+      }),
+      styles: { fontSize: 7, cellPadding: 2 },
+      headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+      alternateRowStyles: { fillColor:C_CREMA },
+      didParseCell: function(data) {
+        if (data.section==="body" && data.column.index===5) {
+          var est = String(data.cell.raw).toUpperCase();
+          if      (est==="AUSENTE") data.cell.styles.textColor = C_ROJO;
+          else if (est==="TARDE")   data.cell.styles.textColor = C_AMARILLO;
+          else                      data.cell.styles.textColor = C_VERDE;
+          data.cell.styles.fontStyle = "bold";
+        }
+      }
+    });
+
+    pdfFooter(doc);
+    doc.save("Detalle_Dia_" + fecha.replace(/\//g,"-") + ".pdf");
+  });
+}
+  
 </script>
 </body>
 </html>
