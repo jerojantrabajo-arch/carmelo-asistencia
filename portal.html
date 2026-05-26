@@ -75,17 +75,35 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 /* Títulos sección */
 .sec-title{background:var(--marron);color:white;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:bold;margin-bottom:8px;display:flex;align-items:center;gap:8px}
 
-/* Lista alumnos */
+/* Lista alumnos (CORREGIDO: Todo pequeño y compacto como el nombre) */
 .alum-lista{display:flex;flex-direction:column;gap:4px;max-height:340px;overflow-y:auto}
-.alum-item{border-radius:8px;padding:8px 10px;border-left:4px solid;display:flex;justify-content:space-between;align-items:center}
+.alum-item{border-radius:8px;padding:8px 10px;border-left:4px solid;display:flex;justify-content:space-between;align-items:center;box-shadow: 0 1px 3px rgba(0,0,0,0.02)}
 .alum-item.verde{background:#F0FFF4;border-color:var(--verde)}
 .alum-item.rojo{background:#FFF5F5;border-color:var(--rojo)}
 .alum-item.amarillo{background:#FFFDE7;border-color:#F57F17}
 .alum-item.azul{background:#F0F7FF;border-color:var(--azul)}
-.alum-nombre{font-weight:bold;color:#3A1800;font-size:11px}
-.alum-det Bloom{font-size:11px;color:#888}
-.alum-hora{font-size:11px;color:var(--marron-clr);font-weight:bold}
-.vacio{text-align:center;color:var(--marron-clr);padding:20px;font-size:12px;background:white;border-radius:8px}
+
+/* El nombre se mantiene en su tamaño original pequeño de 11px */
+.alum-nombre {
+  font-weight: bold;
+  color: #3A1800;
+  font-size: 11px !important;
+}
+
+/* Reducimos el Grado y DNI a 11px para igualar el tamaño exacto del nombre */
+.alum-det {
+  font-size: 11px !important;
+  color: #777 !important; /* Un gris suave para mantenerlo discreto */
+  font-weight: normal !important;
+  margin-top: 2px;
+}
+
+/* La hora también se ajusta de forma discreta a 11px */
+.alum-hora {
+  font-size: 11px !important;
+  color: var(--marron-clr);
+  font-weight: bold;
+}
 
 /* Tabs internos */
 .mini-tabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
@@ -671,7 +689,6 @@ function renderDetalle() {
   var busq = buscadorElem ? (buscadorElem.value || "").toUpperCase() : "";
   
   var lista = datosDet.filter(function(a){
-    // Estandarizamos el estado a mayúsculas para evitar fallos de coincidencia
     var estadoAlum = String(a.estado || "AUSENTE").toUpperCase();
     
     var matchEstado = filtroEstado === "TODOS" ||
@@ -706,12 +723,15 @@ function renderDetalle() {
                 est === "INGRESO ANTICIPADO" ? "b-anticip" : "b-puntual";
                 
     return "<div class='alum-item " + cls + "'>" +
-      "<div><div class='alum-nombre'>" + (a.nombre || a.name || "Sin Nombre") + "</div>" +
-      "<div class='alum-det'>" + (a.grado || "") + " · DNI: " + (a.dni || a.id || "") + "</div></div>" +
-      "<div style='text-align:right'>" +
-      "<span class='badge " + badge + "'>" + est + "</span>" +
-      "<div class='alum-hora'>" + (a.hora || "") + "</div></div>" +
-      "</div>";
+      "<div>" +
+        "<div class='alum-nombre'>" + (a.nombre || a.name || "Sin Nombre") + "</div>" +
+        "<div class='alum-det'>Grado: " + (a.grado || "—") + " · DNI: " + (a.dni || a.id || "—") + "</div>" +
+      "</div>" +
+      "<div style='text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:2px;'>" +
+        "<span class='badge " + badge + "' style='font-size:10px; padding:2px 6px;'>" + est + "</span>" +
+        "<div class='alum-hora'>" + (a.hora || "") + "</div>" +
+      "</div>" +
+    "</div>";
   }).join("");
 }
 
