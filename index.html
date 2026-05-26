@@ -38,10 +38,14 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
 
 /* ── KIOSCO ── */
 #kiosco{display:none;flex-direction:column;min-height:100vh}
-.header{background:var(--marron-osc);padding:10px 14px;display:flex;align-items:center;gap:10px}
+.header{background:var(--marron-osc);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.header-left{display:flex;align-items:center;gap:10px}
 .header-logo{width:40px;height:40px;background:var(--naranja);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .header-info h1{color:var(--crema);font-size:14px;font-weight:bold;line-height:1.2}
 .header-info p{color:var(--naranja-clr);font-size:11px}
+.btn-logout{background:transparent;border:1px solid var(--marron-clr);color:var(--naranja-clr);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:bold;}
+.btn-logout:active{background:var(--marron)}
+
 .main{flex:1;display:flex;flex-direction:column;padding:10px;gap:8px}
 
 /* Barra dispositivo */
@@ -131,14 +135,16 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
   </div>
 </div>
 
-<!-- ══ KIOSCO ══ -->
 <div id="kiosco">
   <div class="header">
-    <div class="header-logo">🏫</div>
-    <div class="header-info">
-      <h1>El Carmelo de María</h1>
-      <p>Sistema de Asistencia v3.3 — Modo Kiosco</p>
+    <div class="header-left">
+      <div class="header-logo">🏫</div>
+      <div class="header-info">
+        <h1>El Carmelo de María</h1>
+        <p>Sistema de Asistencia v3.3 — Modo Kiosco</p>
+      </div>
     </div>
+    <button class="btn-logout" onclick="cerrarSesionKiosco()">🔒 Bloquear</button>
   </div>
 
   <div class="main">
@@ -214,78 +220,60 @@ var PIN_KEY = "pin_ok_" + new Date().toLocaleDateString("es-PE");
 var colaEnvio    = [];
 var enviandoCola = false;
 
-  
 // ── COLA CON ÉXITO OPTIMISTA (Velocidad Turbo) ──────────────────────
 function agregarCola(id) {
-  // 1. Lo metemos a la cola de inmediato y lo respaldamos en el disco de la tablet
   colaEnvio.push({ id: id, intentos: 0, ts: Date.now() });
   actualizarBarraCola();
   procesarCola();
 
-  // 2. TRUCO OPTIMISTA: Le damos luz verde instantánea al alumno en la pantalla
-  // Intentamos pintar el mensaje de la cámara (qr-msg) o el manual (reg-msg) según corresponda
-  var msgElem = document.getElementById("qr-msg") || document.getElementById("reg-msg");
-  
+  var msgElem = document.getElementById("cam-msg");
   if (msgElem) {
-    msgElem.textContent = "✅ ¡PASA! Registrado correctamente";
-    msgElem.style.background = "#D4EDDA"; // Fondo Verde
-    msgElem.style.color = "#1E6B2E";      // Texto Verde Oscuro
-    
-    // Opcional: Si tienes los buscadores a la mano, los limpiamos ya mismo
-    if (document.getElementById("reg-buscar")) document.getElementById("reg-buscar").value = "";
-    if (document.getElementById("reg-resultados")) document.getElementById("reg-resultados").innerHTML = "";
+    var textoOriginal = msgElem.textContent;
+    var fondoOriginal = msgElem.style.background;
+    var colorOriginal = msgElem.style.color;
 
-    // 3. LIMPIEZA AUTOMÁTICA: A los 2 segundos vuelve a su estado normal para el próximo alumno
+    msgElem.textContent = "✅ ¡REGISTRADO EXITOSAMENTE!";
+    msgElem.style.background = "#D4EDDA"; 
+    msgElem.style.color = "#1E6B2E";      
+
     setTimeout(function() {
-      // Solo restauramos si sigue mostrando el mensaje de éxito (para no tapar alertas de error posteriores)
-      if (msgElem.textContent.includes("¡PASA!")) {
-        msgElem.textContent = "🔲 Esperando código...";
-        msgElem.style.background = "#E9ECEF"; // Gris neutro original
-        msgElem.style.color = "#495057";
-      }
-    }, 2200); // 2.2 segundos en pantalla es el tiempo ideal para que el alumno lo vea
+      msgElem.textContent = "Encuadre el QR en el recuadro naranja";
+      msgElem.style.background = fondoOriginal; 
+      msgElem.style.color = colorOriginal;
+    }, 2000); 
   }
 }
-// ── PROCESAR COLA CON RESPALDO OFFLINE REAL ──────────────────────────
+
 function procesarCola() {
   if (enviandoCola || colaEnvio.length === 0) return;
   enviandoCola = true;
   var item = colaEnvio[0];
 
-  // Guardamos un respaldo en el disco de la tablet por si se apaga en este segundo
   guardarColaEnDisco();
 
   fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(item.id) +
         "&motivo=NORMAL&dispositivo=" + encodeURIComponent(DISPOSITIVO))
     .then(function(r){ return r.json(); })
     .then(function(data){
-      // Si se registró con éxito en Google, lo sacamos de la cola
       colaEnvio.shift();
-      guardarColaEnDisco(); // Actualizamos el respaldo en disco (ahora hay uno menos)
+      guardarColaEnDisco(); 
       
       enviandoCola = false;
       actualizarBarraCola();
       if (colaEnvio.length > 0) setTimeout(procesarCola, 300);
     })
     .catch(function(){
-      // Si falla por falta de internet, aumentamos el intento
       item.intentos++;
-      
-      // Si falla 10 veces seguidas (por ejemplo, DNI dañado), lo salta para no trabar la fila
       if (item.intentos >= 10) {
         colaEnvio.shift();
         guardarColaEnDisco();
       }
-      
       enviandoCola = false;
       actualizarBarraCola();
-      
-      // Reintenta automáticamente en 5 segundos cuando vuelva la señal
       setTimeout(procesarCola, 5000);
     });
 }
 
-// [FUNCIÓN DE APOYO 1] Guarda la cola actual en el almacenamiento físico de la tablet
 function guardarColaEnDisco() {
   try {
     localStorage.setItem("copia_seguridad_cola", JSON.stringify(colaEnvio));
@@ -294,19 +282,16 @@ function guardarColaEnDisco() {
   }
 }
 
-// [FUNCIÓN DE APOYO 2] Recupera los datos guardados al encender la tablet
-// PEGA ESTA LÍNEA en tu función inicio() o al cargar la página:
-// cargarColaDesdeDisco();
 function cargarColaDesdeDisco() {
   var guardado = localStorage.getItem("copia_seguridad_cola");
   if (guardado) {
     try {
       var datosRecuperados = JSON.parse(guardado);
       if (datosRecuperados && datosRecuperados.length > 0) {
-        colaEnvio = datosRecuperados.concat(colaEnvio); // Une lo viejo con lo nuevo
-        console.log("🔄 ¡Éxito! Se recuperaron " + datosRecuperados.length + " alumnos pendientes de la sesión anterior.");
+        colaEnvio = datosRecuperados.concat(colaEnvio); 
+        console.log("🔄 ¡Éxito! Se recuperaron " + datosRecuperados.length + " alumnos pendientes.");
         actualizarBarraCola();
-        procesarCola(); // Arranca el envío automático
+        procesarCola(); 
       }
     } catch(e) {
       console.error("Error al recuperar datos del disco:", e);
@@ -351,8 +336,7 @@ function limpiarRegistrosViejos() {
     var hoy = fechaHoy();
     var ultimoDia = localStorage.getItem("ultimo_dia");
     if (ultimoDia !== hoy) {
-      // Nuevo día — limpiar todo excepto tabla de alumnos
-      var ta  = localStorage.getItem("tabla_alumnos");
+      var ta   = localStorage.getItem("tabla_alumnos");
       var tts = localStorage.getItem("tabla_alumnos_ts");
       localStorage.clear();
       if (ta)  localStorage.setItem("tabla_alumnos",    ta);
@@ -428,19 +412,15 @@ function sonidoError() { initAudio(); beep(220,0.4,0.25); }
 //  PIN
 // ══════════════════════════════════════════════
 window.onload = function() {
-  // ── RECUPERACIÓN OFFLINE DE EMERGENCIA ────────────────────────────
-  // Si la tablet se apagó con alumnos en cola, los despierta de la memoria
   if (typeof cargarColaDesdeDisco === "function") {
     cargarColaDesdeDisco();
   }
-  // ──────────────────────────────────────────────────────────────────
 
   limpiarRegistrosViejos();
   cargarRegistros();
   document.addEventListener("touchstart", initAudio, { once: true });
   document.addEventListener("click",      initAudio, { once: true });
 
-  // Verificar sesión
   try {
     if (localStorage.getItem(PIN_KEY) === "OK") {
       mostrarKiosco();
@@ -481,20 +461,17 @@ function validarPin() {
     });
 }
 
-// ── ENVIAR COMANDO DE REENVÍO DE PIN AL BACKEND (¡NUEVO!) ─────────────
 function solicitarReenvioPIN() {
   var btn = document.getElementById("btn-reenviar-pin");
   var status = document.getElementById("msg-pin-status");
   
   if (!btn || !status) return;
 
-  // 1. Bloqueamos el enlace para evitar spam de clics
   btn.style.pointerEvents = "none";
   btn.style.color = "#6c757d"; 
   status.textContent = "⏳ Solicitando reenvío...";
   status.style.color = "#6c757d";
 
-  // 2. Hacemos la petición HTTP a tu Google Apps Script usando AS_URL
   var urlPeticion = AS_URL + "?accion=reenviarPIN";
 
   fetch(urlPeticion)
@@ -512,7 +489,6 @@ function solicitarReenvioPIN() {
         btn.style.color = "#007BFF";
       }
       
-      // 3. TEMPORIZADOR: Limpiamos el estado y reactivamos el enlace en 12 segundos
       setTimeout(function() {
         status.textContent = "";
         btn.style.pointerEvents = "auto";
@@ -527,20 +503,25 @@ function solicitarReenvioPIN() {
     });
 }
 
+function cerrarSesionKiosco() {
+  try {
+    localStorage.removeItem(PIN_KEY);
+    location.reload();
+  } catch(e){}
+}
+
 function mostrarKiosco() {
   document.getElementById("pantalla-pin").style.display = "none";
   document.getElementById("kiosco").style.display       = "flex";
   document.getElementById("disp-bar").textContent       = "Dispositivo: Tablet " + DISPOSITIVO;
   
-  // Verificar día sin escaneo UNA SOLA VEZ al iniciar
   fetch(AS_URL + "?accion=config")
     .then(function(r){ return r.json(); })
     .then(function(cfg){
       window._diaSinEscaneo    = cfg.diaSinEscaneo || false;
       window._motivoSinEscaneo = cfg.motivoSinEscaneo || "";
       if (window._diaSinEscaneo) {
-        mostrarEstado("duplic", "🚫", "Hoy no hay registro",
-          window._motivoSinEscaneo || "Día sin escaneo configurado");
+        mostrarEstado("duplic", "🚫", "Hoy no hay registro", window._motivoSinEscaneo || "Día sin escaneo configurado");
         document.getElementById("btn-cam").disabled    = true;
         document.getElementById("btn-enviar").disabled = true;
       }
@@ -660,17 +641,17 @@ function buscarAlumnoKiosco() {
   }).slice(0, 6);
 
   if (resultados.length === 0) {
-    cont.innerHTML = "<div style=\'font-size:11px;color:#C68642;padding:6px\'>Sin resultados</div>";
+    cont.innerHTML = "<div style='font-size:11px;color:#C68642;padding:6px'>Sin resultados</div>";
     return;
   }
 
   cont.innerHTML = resultados.map(function(id) {
     var a = tablaAlumnos[id];
-    return "<div onclick=\'seleccionarAlumnoKiosco(\"" + id + "\",\"" + a.nombre + "\")\' " +
-      "style=\'padding:8px 10px;background:#FFF8F0;border-radius:8px;margin-bottom:4px;" +
-      "border-left:3px solid #D2691E;cursor:pointer\'>" +
-      "<div style=\'font-size:12px;font-weight:bold;color:#3A1800\'>" + a.nombre + "</div>" +
-      "<div style=\'font-size:10px;color:#C68642\'>" + (a.grado||"") + " - DNI: " + id + "</div>" +
+    return "<div onclick='seleccionarAlumnoKiosco(\"" + id + "\",\"" + a.nombre + "\")' " +
+      "style='padding:8px 10px;background:#FFF8F0;border-radius:8px;margin-bottom:4px;" +
+      "border-left:3px solid #D2691E;cursor:pointer'>" +
+      "<div style='font-size:12px;font-weight:bold;color:#3A1800'>" + a.nombre + "</div>" +
+      "<div style='font-size:10px;color:#C68642'>" + (a.grado||"") + " - DNI: " + id + "</div>" +
       "</div>";
   }).join("");
 }
@@ -689,26 +670,22 @@ var historial = [];
 var cE = 0, cD = 0;
 
 function procesarId(id) {
-  // 1. ANTIDEBOUNCE (Filtro de clicks/escaneos rápidos)
   var ahora = Date.now();
   if (ahora - ultimoEscaneo < TIEMPO_MIN) return;
   ultimoEscaneo = ahora;
 
-  // 2. CONFIGURACIÓN DE VARIABLES BÁSICAS
   var nombre = getNombre(id);
   var grado  = getGrado(id);
   var hora   = new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
 
-  // 3. VALIDACIÓN: FIN DE SEMANA (Prioridad Alta)
   var hoyDow = new Date().getDay();
   if (hoyDow === 0 || hoyDow === 6) {
     sonidoError();
-    mostrarEstado("duplic", "🚫", "Hoy no hay clases", "Sábado o domingo — sin registro de asistencia");
+    mostrarEstado("duplic", "🚫", "Hoy no hay clases", "Sábado o domingo — sin registro");
     setTimeout(resetear, 2500);
     return;
   }
 
-  // 4. VALIDACIÓN: DÍA SIN ESCANEO CONFIGURADO (Prioridad Alta)
   if (window._diaSinEscaneo === true) {
     sonidoError();
     mostrarEstado("duplic", "🚫", "Hoy no hay registro", window._motivoSinEscaneo || "Día sin escaneo configurado");
@@ -716,13 +693,11 @@ function procesarId(id) {
     return;
   }
 
-  // 5. OBTENER O INICIALIZAR REGISTRO DEL USUARIO
   if (!registrosHoy[id]) {
     registrosHoy[id] = { e: 0, fecha: fechaHoy() };
   }
   var reg = registrosHoy[id];
 
-  // 6. VALIDACIÓN: DUPLICADO (Ya se validó que hoy es un día hábil)
   if (reg.e >= 1) {
     sonidoError();
     cD++; 
@@ -733,15 +708,13 @@ function procesarId(id) {
     return;
   }
 
-  // 7. REGISTRAR ENTRADA EXITOSA
   reg.e = 1;
   reg.fecha = fechaHoy();
-  // registrosHoy[id] = reg; // Ya está referenciado en el paso 5, se actualiza automáticamente
   guardarRegistros();
 
   cE++; 
   document.getElementById("c-e").textContent = cE;
-  document.getElementById("c-t").textContent = cE; // Asegúrate de si 'c-t' es el total o si debe ser (cE + cD)
+  document.getElementById("c-t").textContent = cE + cD; 
   
   sonidoOK();
   mostrarEstado("entrada", "✓", "ENTRADA: " + nombre, hora + (grado ? " — " + grado : ""));
