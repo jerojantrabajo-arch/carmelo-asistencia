@@ -856,7 +856,12 @@ function abrirKiosco(disp) {
 
 // ── MÁS FUNCIONES STUB (Para evitar errores de llamadas en UI) ────
 function cargarDetalleDia() {
-  var f = document.getElementById("dd-fecha").value;
+  var inputFecha = document.getElementById("dd-fecha").value; // Ejemplo: 2026-05-26
+  
+  // Convertimos de 2026-05-26 a 26/05/2026
+  var partes = inputFecha.split('-');
+  var f = partes[2] + "/" + partes[1] + "/" + partes[0]; 
+  
   var cont = document.getElementById("dd-lista");
   cont.innerHTML = "<div class='loading'>🔍 Consultando asistencia para " + f + "...</div>";
   
