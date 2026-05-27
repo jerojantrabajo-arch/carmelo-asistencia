@@ -548,25 +548,54 @@ var BLOQUEO_MS   = 3000;
 var ultimoEscaneo = 0;
 var TIEMPO_MIN    = 800;
 
+// CÓDIGO CORREGIDO (Ultra compatible con celulares)
 function iniciarCamara() {
+  var msgElem = document.getElementById("cam-msg");
+  var btnCam = document.getElementById("btn-cam");
+  
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    document.getElementById("cam-msg").textContent = "Cámara no disponible — usar ingreso manual";
-    document.getElementById("btn-cam").style.display = "none";
+    if (msgElem) msgElem.textContent = "Cámara no soportada por el navegador — use ingreso manual";
+    if (btnCam) btnCam.style.display = "none";
     return;
   }
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
-  }).then(function(s){
-    videoStream = s;
-    var v = document.getElementById("video");
-    v.srcObject = s; v.play();
-    camaraActiva = true;
-    document.getElementById("cam-msg").textContent = "Encuadre el QR en el recuadro naranja";
-    scanInterval = setInterval(escanearFrame, 50);
-  }).catch(function(){
-    document.getElementById("cam-msg").textContent = "Sin acceso a cámara — usar ingreso manual";
-    document.getElementById("btn-cam").style.display = "none";
-  });
+
+  // Configuramos una petición de video flexible para que cualquier celular la acepte
+  var opcionesVideo = {
+    video: { 
+      facingMode: "environment",
+      width: { ideal: 640, max: 1280 },
+      height: { ideal: 480, max: 720 }
+    }
+  };
+
+  if (msgElem) msgElem.textContent = "Solicitando acceso a la cámara...";
+
+  navigator.mediaDevices.getUserMedia(opcionesVideo)
+    .then(function(s){
+      videoStream = s;
+      var v = document.getElementById("video");
+      if (v) {
+        v.srcObject = s; 
+        v.setAttribute("playsinline", true); // Crucial para que funcione en iPhone/Safari
+        v.play().catch(function(e) {
+          alert("Error al reproducir el video: " + e.message);
+        });
+      }
+      camaraActiva = true;
+      if (msgElem) msgElem.textContent = "Encuadre el QR en el recuadro naranja";
+      if (btnCam) btnCam.textContent = "⏸ Pausar cámara";
+      
+      // Limpiamos intervalos previos por seguridad antes de activar el escáner
+      if (scanInterval) clearInterval(scanInterval);
+      scanInterval = setInterval(escanearFrame, 60);
+    })
+    .catch(function(err) {
+      console.error("Error detallado de cámara:", err);
+      if (msgElem) msgElem.textContent = "Error de cámara — Use ingreso manual";
+      
+      // Alerta informativa en pantalla para saber qué configuración del celular bloquea el paso
+      alert("Aviso del celular:\nNo se pudo activar la cámara.\nMotivo: " + err.name + " (" + err.message + ")\n\nPor favor, verifique que Chrome tenga permisos de cámara en los ajustes de su celular.");
+    });
 }
 
 function escanearFrame() {
