@@ -1007,36 +1007,27 @@ function filtrarDetalle() {
     return "<div class='alum-item verde'><div class='alum-nombre'>" + a.nombre + "</div><div class='alum-det'>DNI: " + (a.dni||a.id) + "</div></div>";
   }).join("");
 }
+  
 function filtrarEstado(est, btn) {
-
   document.querySelectorAll(".mini-tab").forEach(function(t){
     t.classList.remove("active");
   });
-
   if(btn) btn.classList.add("active");
-
   filtroEstado = est;
-
+  console.log(datosDet);
   var b = document.getElementById("buscador").value.toUpperCase();
-
   var cont = document.getElementById("lista-detalle");
-
   var filtrados = datosDet.filter(function(a){
-
     // FILTRO POR NOMBRE
     var coincideBusqueda =
       (a.nombre || "").toUpperCase().indexOf(b) >= 0;
-
     // FILTRO POR ESTADO
     var estadoAlumno = (a.estado || "").toUpperCase();
-
     var coincideEstado = false;
-
     if(est === "TODOS"){
       coincideEstado = true;
     }
     else if(est === "PRESENTE"){
-
   coincideEstado =
     estadoAlumno.includes("PUNTUAL") ||
     estadoAlumno.includes("✅");
@@ -1059,7 +1050,6 @@ else if(est === "JUSTIFICADO"){
 }
 return coincideBusqueda && coincideEstado;
   });
-
   if(filtrados.length === 0){
     cont.innerHTML =
       "<div class='loading'>No se encontraron alumnos.</div>";
@@ -1067,9 +1057,7 @@ return coincideBusqueda && coincideEstado;
   }
 
   cont.innerHTML = filtrados.map(function(a){
-
     var clase = "verde";
-
     if((a.estado || "").indexOf("AUSENTE") >= 0){
       clase = "rojo";
     }
@@ -1089,9 +1077,7 @@ return coincideBusqueda && coincideEstado;
       "</div>" +
       "</div>" +
       "</div>";
-
   }).join("");
-
 }
 function cargarReportes() { console.log("Reportes invocados"); }
 function cargarTardanzas() { document.getElementById("tardanzas-loading").style.display="none"; }
