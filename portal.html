@@ -1036,26 +1036,28 @@ function filtrarEstado(est, btn) {
       coincideEstado = true;
     }
     else if(est === "PRESENTE"){
+
   coincideEstado =
-    estadoAlumno.indexOf("PUNTUAL") >= 0 ||
-    estadoAlumno.indexOf("PRESENTE") >= 0 ||
-    estadoAlumno.indexOf("INGRESO ANTICIPADO") >= 0;
+    estadoAlumno.includes("PUNTUAL") ||
+    estadoAlumno.includes("✅");
 }
 else if(est === "TARDE"){
   coincideEstado =
-    estadoAlumno.indexOf("TARDE") >= 0;
+    estadoAlumno.includes("TARDE") ||
+    estadoAlumno.includes("⚠️");
 }
 else if(est === "AUSENTE"){
   coincideEstado =
-    estadoAlumno.indexOf("AUSENTE") >= 0;
+    estadoAlumno.includes("AUSENTE") ||
+    estadoAlumno.includes("❌");
 }
 else if(est === "JUSTIFICADO"){
   coincideEstado =
-    estadoAlumno.indexOf("JUSTIFICADO") >= 0 ||
-    estadoAlumno.indexOf("JUSTIF") >= 0;
+    estadoAlumno.includes("JUSTIFICADO") ||
+    estadoAlumno.includes("JUSTIF") ||
+    estadoAlumno.includes("📄");
 }
 return coincideBusqueda && coincideEstado;
-
   });
 
   if(filtrados.length === 0){
