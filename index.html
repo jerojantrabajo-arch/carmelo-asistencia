@@ -570,28 +570,66 @@ function iniciarCamara() {
 
   if (msgElem) msgElem.textContent = "Iniciando cámara...";
 
-  navigator.mediaDevices.getUserMedia(opcionesVideo)
-    .then(function(s){
-      videoStream = s;
-      var v = document.getElementById("video");
-      if (v) {
-        v.srcObject = s; 
-        v.setAttribute("playsinline", true); // Obligatorio para móviles
-        v.play().catch(function(e) { console.error(e); });
-      }
-      camaraActiva = true;
-      if (msgElem) msgElem.textContent = "Encuadre el QR en el recuadro naranja";
-      if (btnCam) btnCam.textContent = "⏸ Pausar cámara";
-      
-      if (scanInterval) clearInterval(scanInterval);
-      scanInterval = setInterval(escanearFrame, 50);
-    })
-    .catch(function(err) {
-      console.error("Error cámara:", err);
-      if (msgElem) msgElem.textContent = "Sin acceso a cámara — usar ingreso manual";
-      // Esta alerta te dirá exactamente qué le pasa al celular
-      alert("Aviso del sistema: El celular bloqueó la cámara. Motivo: " + err.name);
+  navigator.mediaDevices.getUserMedia({
+  video: {
+    facingMode: { ideal: "environment" },
+    width: { ideal: 1280 },
+    height: { ideal: 720 }
+  },
+  audio: false
+})
+.then(function(s){
+
+  videoStream = s;
+
+  var v = document.getElementById("video");
+
+  if (v) {
+
+    v.srcObject = s;
+
+    v.setAttribute("playsinline", true);
+
+    v.setAttribute("webkit-playsinline", true);
+
+    v.muted = true;
+
+    v.play().catch(function(e){
+      console.error(e);
     });
+
+  }
+
+  camaraActiva = true;
+
+  if (msgElem)
+    msgElem.textContent =
+      "Encuadre el QR en el recuadro naranja";
+
+  if (btnCam)
+    btnCam.textContent =
+      "⏸ Pausar cámara";
+
+  if (scanInterval)
+    clearInterval(scanInterval);
+
+  scanInterval = setInterval(escanearFrame, 120);
+
+})
+.catch(function(err){
+
+  console.error("Error cámara:", err);
+
+  if (msgElem)
+    msgElem.textContent =
+      "Sin acceso a cámara — usar ingreso manual";
+
+  alert(
+    "El celular bloqueó la cámara.\n\n" +
+    "Motivo: " + err.name
+  );
+
+});
 }
 
 function escanearFrame() {
