@@ -76,7 +76,11 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 .sec-title{background:var(--marron);color:white;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:bold;margin-bottom:8px;display:flex;align-items:center;gap:8px}
 
 /* Lista alumnos */
-.alum-lista{display:flex;flex-direction:column;gap:4px;max-height:340px;overflow-y:auto}
+.alum-lista{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
 .alum-item{border-radius:8px;padding:8px 10px;border-left:4px solid;display:flex;justify-content:space-between;align-items:center;box-shadow: 0 1px 3px rgba(0,0,0,0.02)}
 .alum-item.verde{background:#F0FFF4;border-color:var(--verde)}
 .alum-item.rojo{background:#FFF5F5;border-color:var(--rojo)}
@@ -1031,11 +1035,48 @@ function exportarPDFDia(){
   
  function exportarPDFDetalleDia(){
 
-  alert("Exportando PDF...");
-
   var elemento = document.getElementById("dd-lista");
 
-  html2pdf().from(elemento).save();
+  if(!elemento){
+    alert("No hay datos para exportar");
+    return;
+  }
+
+  // Guardamos estilos originales
+  var originalHeight = elemento.style.maxHeight;
+  var originalOverflow = elemento.style.overflow;
+
+  // Expandimos TODO el contenido
+  elemento.style.maxHeight = "none";
+  elemento.style.overflow = "visible";
+
+  var opciones = {
+    margin: 0.3,
+    filename: 'Reporte_Detalle_Dia.pdf',
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: {
+      scale: 2,
+      scrollY: 0
+    },
+    jsPDF: {
+      unit: 'in',
+      format: 'a4',
+      orientation: 'portrait'
+    },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  html2pdf()
+    .set(opciones)
+    .from(elemento)
+    .save()
+    .then(function(){
+
+      // Restauramos estilos
+      elemento.style.maxHeight = originalHeight;
+      elemento.style.overflow = originalOverflow;
+
+    });
 
 }
   
