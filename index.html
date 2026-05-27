@@ -171,7 +171,13 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
     <div class="camara-card">
       <div class="camara-titulo">📷 Escáner de cámara</div>
       <div class="camara-body">
-        <video id="video" playsinline autoplay muted></video>
+        <video
+          id="video"
+          playsinline
+          webkit-playsinline
+          autoplay
+          muted>
+        </video>
         <canvas id="canvas-qr"></canvas>
         <div class="scan-overlay"><div class="scan-line"></div></div>
       </div>
