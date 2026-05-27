@@ -1028,56 +1028,18 @@ function exportarPDFDia(){
   };
   html2pdf().set(opciones).from(elemento).save();
 }
+  
  function exportarPDFDetalleDia(){
+
+  alert("Exportando PDF...");
 
   var elemento = document.getElementById("dd-lista");
 
-  if(!elemento){
-    alert("No se encontró el reporte");
-    return;
-  }
+  html2pdf().from(elemento).save();
 
-  if(elemento.innerText.trim() === ""){
-    alert("No hay datos para exportar");
-    return;
-  }
-
-  // Espera pequeña para asegurar render completo
-  setTimeout(function(){
-
-    var opciones = {
-      margin: 0.3,
-      filename: 'Detalle_Dia.pdf',
-
-      image: {
-        type: 'jpeg',
-        quality: 1
-      },
-
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        scrollY: 0
-      },
-
-      jsPDF: {
-        unit: 'in',
-        format: 'a4',
-        orientation: 'portrait'
-      },
-
-      pagebreak: {
-        mode: ['css', 'legacy']
-      }
-    };
-
-    html2pdf()
-      .set(opciones)
-      .from(elemento)
-      .save();
-
-  }, 500);
 }
+  
 </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
 </html>
