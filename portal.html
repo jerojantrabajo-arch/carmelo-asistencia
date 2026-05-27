@@ -850,8 +850,9 @@ function toggleMotivoCampos() {
 
 // ── KIOSCO QR ─────────────────────────────────────────────────────
 function abrirKiosco(disp) {
-  var urlKiosco = AS_URL.split("?")[0] + "?dispositivo=" + disp;
-  window.open(urlKiosco, "_blank");
+  var urlKiosco =
+    "https://jerojantrabajo-arch.github.io/carmelo-asistencia/?dispositivo=" + disp;
+  window.location.href = urlKiosco;
 }
 
 // ── MÁS FUNCIONES STUB (Para evitar errores de llamadas en UI) ────
