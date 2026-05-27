@@ -980,11 +980,13 @@ function cargarDetalleDia() {
 function cargarDetalle() {
   document.getElementById("detalle-loading").style.display = "block";
   fetch(AS_URL + "?accion=alumnos")
-    .then(function(r){return r.json();})
+    .then(function(r){
+      return r.json();
+    })
     .then(function(d){
       document.getElementById("detalle-loading").style.display = "none";
       datosDet = d.alumnos || [];
-      filtrarDetalle();
+      filtrarEstado("TODOS");
     });
 }
 function filtrarDetalle() {
@@ -998,10 +1000,87 @@ function filtrarDetalle() {
   }).join("");
 }
 function filtrarEstado(est, btn) {
-  document.querySelectorAll(".mini-tab").forEach(function(t){t.classList.remove("active");});
+
+  document.querySelectorAll(".mini-tab").forEach(function(t){
+    t.classList.remove("active");
+  });
+
   if(btn) btn.classList.add("active");
+
   filtroEstado = est;
-  // Implementación de lógica de filtrado por estados puntuales, tardes o ausencias según sea requerido.
+
+  var b = document.getElementById("buscador").value.toUpperCase();
+
+  var cont = document.getElementById("lista-detalle");
+
+  var filtrados = datosDet.filter(function(a){
+
+    // FILTRO POR NOMBRE
+    var coincideBusqueda =
+      (a.nombre || "").toUpperCase().indexOf(b) >= 0;
+
+    // FILTRO POR ESTADO
+    var estadoAlumno = (a.estado || "").toUpperCase();
+
+    var coincideEstado = false;
+
+    if(est === "TODOS"){
+      coincideEstado = true;
+    }
+    else if(est === "PRESENTE"){
+      coincideEstado =
+        estadoAlumno.indexOf("PUNTUAL") >= 0 ||
+        estadoAlumno.indexOf("PRESENTE") >= 0;
+    }
+    else if(est === "TARDE"){
+      coincideEstado =
+        estadoAlumno.indexOf("TARDE") >= 0;
+    }
+    else if(est === "AUSENTE"){
+      coincideEstado =
+        estadoAlumno.indexOf("AUSENTE") >= 0;
+    }
+    else if(est === "JUSTIFICADO"){
+      coincideEstado =
+        estadoAlumno.indexOf("JUSTIFICADO") >= 0;
+    }
+
+    return coincideBusqueda && coincideEstado;
+
+  });
+
+  if(filtrados.length === 0){
+    cont.innerHTML =
+      "<div class='loading'>No se encontraron alumnos.</div>";
+    return;
+  }
+
+  cont.innerHTML = filtrados.map(function(a){
+
+    var clase = "verde";
+
+    if((a.estado || "").indexOf("AUSENTE") >= 0){
+      clase = "rojo";
+    }
+    else if((a.estado || "").indexOf("TARDE") >= 0){
+      clase = "amarillo";
+    }
+    else if((a.estado || "").indexOf("JUSTIFICADO") >= 0){
+      clase = "azul";
+    }
+
+    return "<div class='alum-item " + clase + "'>" +
+      "<div>" +
+      "<div class='alum-nombre'>" + a.nombre + "</div>" +
+      "<div class='alum-det'>" +
+      "DNI: " + (a.dni || a.id || "") +
+      " | Estado: " + (a.estado || "SIN ESTADO") +
+      "</div>" +
+      "</div>" +
+      "</div>";
+
+  }).join("");
+
 }
 function cargarReportes() { console.log("Reportes invocados"); }
 function cargarTardanzas() { document.getElementById("tardanzas-loading").style.display="none"; }
