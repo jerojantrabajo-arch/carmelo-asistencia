@@ -554,21 +554,21 @@ function iniciarCamara() {
   var btnCam = document.getElementById("btn-cam");
   
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    if (msgElem) msgElem.textContent = "Cámara no soportada por el navegador — use ingreso manual";
+    if (msgElem) msgElem.textContent = "Cámara no disponible — usar ingreso manual";
     if (btnCam) btnCam.style.display = "none";
     return;
   }
 
-  // Configuramos una petición de video flexible para que cualquier celular la acepte
+  // Configuración flexible para que CUALQUIER celular la acepte de inmediato
   var opcionesVideo = {
     video: { 
       facingMode: "environment",
-      width: { ideal: 640, max: 1280 },
-      height: { ideal: 480, max: 720 }
+      width: { ideal: 640 },
+      height: { ideal: 480 }
     }
   };
 
-  if (msgElem) msgElem.textContent = "Solicitando acceso a la cámara...";
+  if (msgElem) msgElem.textContent = "Iniciando cámara...";
 
   navigator.mediaDevices.getUserMedia(opcionesVideo)
     .then(function(s){
@@ -576,25 +576,21 @@ function iniciarCamara() {
       var v = document.getElementById("video");
       if (v) {
         v.srcObject = s; 
-        v.setAttribute("playsinline", true); // Crucial para que funcione en iPhone/Safari
-        v.play().catch(function(e) {
-          alert("Error al reproducir el video: " + e.message);
-        });
+        v.setAttribute("playsinline", true); // Obligatorio para móviles
+        v.play().catch(function(e) { console.error(e); });
       }
       camaraActiva = true;
       if (msgElem) msgElem.textContent = "Encuadre el QR en el recuadro naranja";
       if (btnCam) btnCam.textContent = "⏸ Pausar cámara";
       
-      // Limpiamos intervalos previos por seguridad antes de activar el escáner
       if (scanInterval) clearInterval(scanInterval);
-      scanInterval = setInterval(escanearFrame, 60);
+      scanInterval = setInterval(escanearFrame, 50);
     })
     .catch(function(err) {
-      console.error("Error detallado de cámara:", err);
-      if (msgElem) msgElem.textContent = "Error de cámara — Use ingreso manual";
-      
-      // Alerta informativa en pantalla para saber qué configuración del celular bloquea el paso
-      alert("Aviso del celular:\nNo se pudo activar la cámara.\nMotivo: " + err.name + " (" + err.message + ")\n\nPor favor, verifique que Chrome tenga permisos de cámara en los ajustes de su celular.");
+      console.error("Error cámara:", err);
+      if (msgElem) msgElem.textContent = "Sin acceso a cámara — usar ingreso manual";
+      // Esta alerta te dirá exactamente qué le pasa al celular
+      alert("Aviso del sistema: El celular bloqueó la cámara. Motivo: " + err.name);
     });
 }
 
