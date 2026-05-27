@@ -172,6 +172,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
   .grid-4{grid-template-columns:1fr 1fr}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>  
 </head>
 <body>
 
@@ -226,7 +227,9 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 
     <div class="seccion" id="sec-hoy">
       <div id="hoy-loading" class="loading">⏳ Cargando datos de hoy...</div>
-      <div id="hoy-contenido" style="display:none">
+      <div id="tablaHoy">
+        <div id="tablaHoy">
+        <div id="hoy-contenido" style="display:none">
         <div class="grid-4">
           <div class="stat-card c-verde"><div class="num" id="h-presentes">0</div><div class="lbl">Presentes</div></div>
           <div class="stat-card c-rojo"><div class="num" id="h-ausentes">0</div><div class="lbl">Ausentes</div></div>
@@ -245,7 +248,8 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
         </div>
       </div>
     </div>
-
+</div>
+      
     <div class="seccion" id="sec-detalledia">
       <div class="sec-title">📋 Detalle completo del día</div>
       <div class="grid-2" style="margin-bottom:8px">
@@ -930,7 +934,25 @@ function cargarFaltas() { console.log("Reporte faltas invocado"); }
 function buscarAlumnoHist() { console.log("Buscando historial"); }
 function calCambiarMes(v) { console.log("Cambio de mes calendario"); }
 function dseAgregar() { console.log("Agregando día sin escaneo"); }
-function exportarPDFDia(){} function exportarPDFDetalleDia(){} function exportarPDFPorFechas(){} function exportarPDFTardanzas(){} function exportarPDFMensual(){} function exportarPDFSemanal(){} function exportarPDFFaltas(){}
+function exportarPDFDia(){
+  var elemento = document.getElementById("tablaHoy");
+  if(!elemento){
+    alert("No se encontró el reporte");
+    return;
+  }
+  var opciones = {
+    margin: 0.5,
+    filename: 'Reporte_Hoy.pdf',
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: { scale: 2 },
+    jsPDF: {
+      unit: 'in',
+      format: 'a4',
+      orientation: 'portrait'
+    }
+  };
+  html2pdf().set(opciones).from(elemento).save();
+}
 </script>
 </body>
 </html>
