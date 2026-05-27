@@ -979,14 +979,22 @@ function cargarDetalleDia() {
   
 function cargarDetalle() {
   document.getElementById("detalle-loading").style.display = "block";
-  fetch(AS_URL + "?accion=alumnos")
+  // Fecha de hoy
+  var hoy = new Date();
+  var dd = (hoy.getDate()<10?"0":"") + hoy.getDate();
+  var mm = (hoy.getMonth()+1<10?"0":"") + (hoy.getMonth()+1);
+  var fecha = dd + "/" + mm + "/" + hoy.getFullYear();
+  fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(fecha))
     .then(function(r){
       return r.json();
     })
     .then(function(d){
       document.getElementById("detalle-loading").style.display = "none";
-      datosDet = d.alumnos || [];
+      datosDet = d.registros || [];
       filtrarEstado("TODOS");
+    })
+    .catch(function(){
+      document.getElementById("detalle-loading").style.display = "none";
     });
 }
 function filtrarDetalle() {
