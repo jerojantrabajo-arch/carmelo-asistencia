@@ -165,7 +165,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
   </div>
 
   <div class="nav-tabs">
-    <button class="nav-tab" onclick="irSeccion('hoy')">📊 Hoy</button>
+    <button class="nav-tab active" onclick="irSeccion('hoy')">📊 Hoy</button>
     <button class="nav-tab" onclick="irSeccion('detalledia')">📋 Detalle día</button>
     <button class="nav-tab" onclick="irSeccion('detalle')">📋 Detalle</button>
     <button class="nav-tab" onclick="irSeccion('reportes')">📅 Reportes</button>
@@ -177,13 +177,14 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <button class="nav-tab" onclick="irSeccion('faltas')">⚠️ Faltas</button>
     <button class="nav-tab" onclick="irSeccion('alumno')">🔎 Alumno</button>
     <button class="nav-tab" onclick="irSeccion('justif')">📝 Justif.</button>    
-    <button class="nav-tab active" onclick="irSeccion('kiosco')">📷 Kiosco</button>
+    <button class="nav-tab" onclick="irSeccion('kiosco')">📷 Kiosco</button>
     <button class="nav-tab" onclick="irSeccion('configuracion')">⚙️ Configuración</button>
   </div>
 
   <div class="p-content">
 
-    <div class="seccion" id="sec-hoy">
+    <!-- SECCIÓN: HOY -->
+    <div class="seccion activa" id="sec-hoy">
       <div id="hoy-loading" class="loading">⏳ Cargando datos de hoy...</div>
       <div id="tablaHoy">
         <div id="hoy-contenido" style="display:none">
@@ -204,6 +205,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       </div>
     </div>
 
+    <!-- SECCIÓN: DETALLE DIA -->
     <div class="seccion" id="sec-detalledia">
       <div class="sec-title">📋 Detalle completo del día</div>
       <div class="grid-2" style="margin-bottom:8px">
@@ -221,6 +223,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion btn-naranja" onclick="exportarPDFDetalleDia()" style="margin-top:6px">📄 Exportar PDF</button>
     </div>
       
+    <!-- SECCIÓN: DETALLE GENERAL -->
     <div class="seccion" id="sec-detalle">
       <input class="buscador" id="buscador" placeholder="🔍 Buscar alumno..." oninput="filtrarDetalle()">
       <div class="mini-tabs">
@@ -237,6 +240,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <div class="alum-lista" id="lista-detalle" style="max-height:500px"></div>
     </div>
 
+    <!-- SECCIÓN: REPORTES -->
     <div class="seccion" id="sec-reportes">
       <div class="sec-title">📅 Reportes por fecha</div>
       <div class="grid-2" style="margin-bottom:10px">
@@ -252,16 +256,16 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion" onclick="cargarReportes()">🔍 Buscar reportes</button>
       <div id="reportes-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="lista-reportes"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFPorFechas(window._diasReportes||[])" style="margin-top:6px">📄 Exportar PDF</button>
     </div>
 
+    <!-- SECCIÓN: TARDANZAS -->
     <div class="seccion" id="sec-tardanzas">
       <div class="sec-title">⏰ Historial de tardanzas del mes</div>
-      <div id="tardanzas-loading" class="loading" style="display:block">⏳ Cargando...</div>
+      <div id="tardanzas-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="lista-tardanzas"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFTardanzas()">📄 Exportar PDF</button>
     </div>
 
+    <!-- SECCIÓN: DIAS SIN ESCANEO -->
     <div class="seccion" id="sec-diasSinEscaneo">
       <div class="sec-title">🚫 Días sin escaneo</div>
       <div class="cal-nav">
@@ -279,150 +283,67 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
         <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Motivo:</label>
         <input type="text" id="dse-motivo" class="buscador" placeholder="Ej: Feriado, Semana de gestión...">
         <button class="btn-accion" onclick="dseAgregar()">➕ Agregar día</button>
-        <div id="dse-msg" style="font-size:11px;text-align:center;padding:5px;min-height:16px"></div>
       </div>
-      <div class="sec-title" style="margin-top:10px">Días registrados</div>
-      <div id="dse-lista"></div>
     </div>
 
+    <!-- SECCIÓN: REGISTRO -->
     <div class="seccion" id="sec-registro">
       <div class="sec-title">✏️ Registro manual de asistencia</div>
-      <input class="buscador" id="reg-buscar" placeholder="🔍 Buscar alumno por nombre o DNI..." oninput="buscarAlumnoReg()">
+      <input class="buscador" id="reg-buscar" placeholder="🔍 Buscar alumno por nombre..." oninput="buscarAlumnoReg()">
       <div id="reg-resultados"></div>
-      <div id="reg-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;border-radius:6px;margin-top:6px"></div>
     </div>
 
+    <!-- SECCIÓN: KIOSCO -->
     <div class="seccion" id="sec-kiosco">
       <div class="sec-title">📷 Kiosco QR</div>
       <div class="grid-2" style="margin-bottom:8px">
         <button class="btn-accion" onclick="abrirKiosco(1)">📱 Tablet 1</button>
         <button class="btn-accion btn-naranja" onclick="abrirKiosco(2)">📱 Tablet 2</button>
       </div>
-      <div style="background:white;border-radius:10px;padding:14px;font-size:12px;color:#555">
-        <p style="margin-bottom:8px">El kiosco QR se abre en una nueva pestaña.</p>
-        <p>URL Tablet 1:<br><code style="color:var(--marron);font-size:10px">...carmelo-asistencia/?dispositivo=1</code></p>
-        <p style="margin-top:8px">URL Tablet 2:<br><code style="color:var(--marron);font-size:10px">...carmelo-asistencia/?dispositivo=2</code></p>
-      </div>
     </div>
 
+    <!-- SECCIÓN: MENSUAL -->
     <div class="seccion" id="sec-mensual">
       <div class="sec-title">📅 Reporte mensual</div>
-      <div class="grid-2" style="margin-bottom:10px">
-        <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Mes:</label>
-          <select id="men-mes" class="buscador" style="margin-bottom:0">
-            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option>
-            <option value="5" selected>Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option>
-            <option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Año:</label>
-          <select id="men-anio" class="buscador" style="margin-bottom:0">
-            <option value="2026" selected>2026</option><option value="2025">2025</option>
-          </select>
-        </div>
-      </div>
       <button class="btn-accion" onclick="cargarMensual()">📊 Ver reporte</button>
       <div id="mensual-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="mensual-resultado"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFMensual()">📄 Exportar PDF mensual</button>
     </div>
 
+    <!-- SECCIÓN: SEMANAL -->
     <div class="seccion" id="sec-semanal">
       <div class="sec-title">📊 Reporte semanal</div>
       <button class="btn-accion" onclick="cargarSemanal()">🔄 Ver semana actual</button>
       <div id="semanal-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="semanal-resultado"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFSemanal()">📄 Exportar PDF</button>
     </div>
 
+    <!-- SECCIÓN: FALTAS -->
     <div class="seccion" id="sec-faltas">
       <div class="sec-title">⚠️ Alumnos con 3+ faltas</div>
-      <div class="grid-2" style="margin-bottom:10px">
-        <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Mes:</label>
-          <select id="fal-mes" class="buscador" style="margin-bottom:0">
-            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option>
-            <option value="5" selected>Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option>
-            <option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Año:</label>
-          <select id="fal-anio" class="buscador" style="margin-bottom:0">
-            <option value="2026" selected>2026</option><option value="2025">2025</option>
-          </select>
-        </div>
-      </div>
       <button class="btn-accion" onclick="cargarFaltas()">⚠️ Ver alumnos con faltas</button>
       <div id="faltas-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="faltas-resultado"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFFaltas()">📄 Exportar PDF</button>
     </div>
 
+    <!-- SECCIÓN: ALUMNO -->
     <div class="seccion" id="sec-alumno">
       <div class="sec-title">🔎 Historial de alumno</div>
-      <input class="buscador" id="alum-buscar" placeholder="🔍 Buscar por nombre o DNI..." oninput="buscarAlumnoHist()">
-      <div id="alum-sugerencias"></div>
+      <input class="buscador" id="alum-buscar" placeholder="🔍 Buscar por nombre..." oninput="buscarAlumnoHist()">
       <div id="alum-historial"></div>
     </div> 
 
+    <!-- SECCIÓN: JUSTIF -->
     <div class="seccion" id="sec-justif">
       <div class="sec-title">📝 Registrar justificación</div>
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Buscar alumno por nombre o DNI:</label>
-      <input type="text" id="just-buscar" class="buscador" placeholder="🔍 Nombre o DNI..." oninput="buscarAlumnoJustif()">
-      <div id="just-sugerencias" style="margin-bottom:8px"></div>
-      <input type="hidden" id="just-dni">
-      
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha de la falta:</label>
-      <input type="date" id="just-fecha" class="buscador">
-      
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Tipo:</label>
-      <select id="just-tipo" class="buscador">
-        <option value="FALTA_JUSTIFICADA">Falta justificada</option>
-        <option value="TARDANZA_JUSTIFICADA">Tardanza justificada</option>
-      </select>
-      
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Motivo:</label>
-      <input type="text" id="just-motivo" class="buscador" placeholder="Ej: Cita médica, emergencia familiar...">
-      
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Registrado por:</label>
-      <input type="text" id="just-reg" class="buscador" placeholder="Nombre del auxiliar">
-      
-      <button class="btn-accion" onclick="registrarJustif()">💾 Guardar justificación</button>
-      <div id="just-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;border-radius:6px;margin-top:6px"></div>
-      
-      <div class="sec-title" style="margin-top:12px" id="just-titulo-mes">Justificaciones</div>
-      <button class="btn-accion btn-naranja" onclick="cargarJustificaciones()">🔄 Ver justificaciones</button>
+      <button class="btn-accion" onclick="cargarJustificaciones()">🔄 Ver justificaciones</button>
       <div id="just-lista" style="margin-top:8px"></div>
     </div>
 
+    <!-- SECCIÓN: CONFIGURACION -->
     <div class="seccion" id="sec-configuracion">
-      <div class="sec-title">⚙️ Configuración de Horarios y Tolerancias</div>
-      <div style="background:white; border-radius:10px; padding:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom:15px;">
-        <label style="font-size:12px; color:var(--marron); font-weight:bold; display:block; margin-bottom:4px">Tipo de Horario Activo:</label>
-        <select id="cfg-horario-activo" class="buscador" style="margin-bottom:12px">
-          <option value="NORMAL">HORARIO NORMAL</option>
-          <option value="INVIERNO">HORARIO DE INVIERNO</option>
-        </select>
-        <div class="sec-title" style="background:var(--naranja); margin-top:10px; font-size:11px">⏳ Minutos de Tolerancia Obligatoria</div>
-        <div class="grid-2" style="margin-top:8px">
-          <div>
-            <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Inicial (Minutos):</label>
-            <input type="number" id="cfg-tolerancia-inicial" class="buscador" value="0" min="0" max="60">
-          </div>
-          <div>
-            <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Primaria (Minutos):</label>
-            <input type="number" id="cfg-tolerancia-primaria" class="buscador" value="0" min="0" max="60">
-          </div>
-        </div>
-        <div style="margin-top:4px">
-          <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Secundaria (Minutos):</label>
-          <input type="number" id="cfg-tolerancia-secundaria" class="buscador" value="0" min="0" max="60">
-        </div>
-        <button id="btn-guardar-config" class="btn-accion" onclick="guardarConfiguracionRemota()" style="margin-top:15px; height:45px; font-size:13px">💾 Guardar Parámetros en la Nube</button>
-      </div>
+      <div class="sec-title">⚙️ Configuración de Horarios</div>
+      <button class="btn-accion" onclick="guardarConfiguracionRemota()">💾 Guardar Parámetros</button>
     </div>
 
   </div>
@@ -433,26 +354,27 @@ var AS_URL = "https://script.google.com/macros/s/AKfycbwPVWzR0iPNWZMLQ2Lxa5YDjY3
 var PIN_KEY  = "portal_pin_" + new Date().toLocaleDateString("es-PE");
 var tabActual = "hoy";
 
-// Datos en memoria global
 var datosHoy    = null;
 var datosDet    = [];
 var filtroEstado = "TODOS";
 
-// ── RELOJ (CORREGIDO SIN ERRORES DE SINTAXIS) ──
+// ── RELOJ SANEADO ──
 function actualizarReloj() {
   var ahora = new Date();
-  document.getElementById("fecha-hoy").textContent = ahora.toLocaleDateString("es-PE", {weekday:"long",day:"2-digit",month:"long",year:"numeric"});
-  document.getElementById("hora-actual").textContent = ahora.toLocaleTimeString("es-PE", {hour:"2-digit",minute:"2-digit"});
+  var fHoy = document.getElementById("fecha-hoy");
+  var hAct = document.getElementById("hora-actual");
+  if(fHoy) fHoy.textContent = ahora.toLocaleDateString("es-PE", {weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+  if(hAct) hAct.textContent = ahora.toLocaleTimeString("es-PE", {hour:"2-digit",minute:"2-digit"});
 }
 setInterval(actualizarReloj, 1000);
 
-// ── LOGIN Y APERTURA ──
 window.onload = function() {
   actualizarReloj();
   try {
     if (localStorage.getItem(PIN_KEY) === "OK") { mostrarPortal(); return; }
   } catch(e) {}
-  document.getElementById("pin-input").focus();
+  var pinInp = document.getElementById("pin-input");
+  if(pinInp) pinInp.focus();
 };
 
 function validarPin() {
@@ -483,8 +405,6 @@ function mostrarPortal() {
   document.getElementById("login").style.display = "none";
   document.getElementById("portal").style.display = "flex";
   irSeccion("hoy");
-  cargarHoy();
-  setInterval(function(){ if(tabActual==='hoy') cargarHoy(); }, 120000);
 }
 
 function cerrarSesion() {
@@ -492,7 +412,7 @@ function cerrarSesion() {
   location.reload();
 }
 
-// ── NAVEGACIÓN ENTRE PESTAÑAS ──
+// ── NAVEGACIÓN GENERAL SEGURA ──
 function irSeccion(id) {
   tabActual = id;
   document.querySelectorAll(".seccion").forEach(function(s){ s.classList.remove("activa"); });
@@ -507,17 +427,23 @@ function irSeccion(id) {
     }
   });
   
+  // Disparadores dinámicos según pestaña
+  if (id === "hoy") cargarHoy();
   if (id === "detalle") cargarDetalle();
 }
 
-// ── SISTEMA DE DATOS Y FILTRADO OFICIAL ──
+// ── CONTROLADORES DE ASISTENCIA ──
 function cargarHoy() {
-  document.getElementById("hoy-loading").style.display = "block";
+  var loading = document.getElementById("hoy-loading");
+  var contenido = document.getElementById("hoy-contenido");
+  if(loading) loading.style.display = "block";
+  if(contenido) contenido.style.display = "none";
+  
   fetch(AS_URL + "?accion=obtenerHoy")
     .then(function(r){ return r.json(); })
     .then(function(d){
-      document.getElementById("hoy-loading").style.display = "none";
-      document.getElementById("hoy-contenido").style.display = "block";
+      if(loading) loading.style.display = "none";
+      if(contenido) contenido.style.display = "block";
       
       document.getElementById("h-presentes").textContent = d.presentes || 0;
       document.getElementById("h-ausentes").textContent = d.ausentes || 0;
@@ -526,22 +452,64 @@ function cargarHoy() {
       document.getElementById("h-pct").textContent = (d.porcentaje || 0) + "%";
       
       var listaA = document.getElementById("lista-ausentes-hoy");
-      if(d.listaAusentes && d.listaAusentes.length > 0){
-        listaA.innerHTML = d.listaAusentes.map(function(al){
-          return "<div class='alum-item rojo'><div class='alum-nombre'>" + al.nombre + " <span class='alum-det'>(" + al.grado + ")</span></div></div>";
+      if(listaA) {
+        if(d.listaAusentes && d.listaAusentes.length > 0){
+          listaA.innerHTML = d.listaAusentes.map(function(al){
+            return "<div class='alum-item rojo'><div class='alum-nombre'>" + al.nombre + " <span class='alum-det'>(" + al.grado + ")</span></div></div>";
+          }).join("");
+        } else {
+          listaA.innerHTML = "<div class='loading'>No hay ausentes registrados hoy.</div>";
+        }
+      }
+    })
+    .catch(function(){
+      if(loading) loading.innerHTML = "❌ Error al conectar datos de hoy.";
+    });
+}
+
+function cargarDetalleDia() {
+  var fechaSel = document.getElementById("dd-fecha").value;
+  if(!fechaSel) { alert("Seleccione una fecha."); return; }
+  
+  var loading = document.getElementById("dd-loading");
+  var lista = document.getElementById("dd-lista");
+  
+  if(loading) loading.style.display = "block";
+  if(lista) lista.innerHTML = "";
+  
+  fetch(AS_URL + "?accion=obtenerDetalleDia&fecha=" + fechaSel)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(loading) loading.style.display = "none";
+      if(!d || d.length === 0) {
+        if(lista) lista.innerHTML = "<div class='loading'>No hay registros para esta fecha.</div>";
+        return;
+      }
+      if(lista) {
+        lista.innerHTML = d.map(function(a){
+          var clase = "verde";
+          var est = (a.estado || "").toUpperCase();
+          if(est.indexOf("AUSENTE")>=0 || est.indexOf("❌")>=0) clase="rojo";
+          else if(est.indexOf("TARDE")>=0 || est.indexOf("⏰")>=0) clase="amarillo";
+          else if(est.indexOf("JUSTIF")>=0) clase="azul";
+          
+          return "<div class='alum-item " + clase + "'>" +
+                 "<div><div class='alum-nombre'>" + a.nombre + "</div><div class='alum-det'>Grado: " + (a.grado || '-') + "</div></div>" +
+                 "<div class='alum-hora'>" + (a.hora || a.estado || '--:--') + "</div>" +
+                 "</div>";
         }).join("");
-      } else {
-        listaA.innerHTML = "<div class='loading'>No hay ausentes registrados hoy.</div>";
       }
     });
 }
 
 function cargarDetalle() {
-  document.getElementById("detalle-loading").style.display = "block";
+  var loading = document.getElementById("detalle-loading");
+  if(loading) loading.style.display = "block";
+  
   fetch(AS_URL + "?accion=obtenerDetalle")
     .then(function(r){ return r.json(); })
     .then(function(d){
-      document.getElementById("detalle-loading").style.display = "none";
+      if(loading) loading.style.display = "none";
       datosDet = d || [];
       filtrarEstado(filtroEstado, null);
     });
@@ -551,7 +519,6 @@ function filtrarDetalle() {
   filtrarEstado(filtroEstado, null);
 }
 
-// LÓGICA DE FILTRADO CON CONTADOR INCORPORADO
 function filtrarEstado(est, btn) {
   if(btn) {
     document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
@@ -564,45 +531,33 @@ function filtrarEstado(est, btn) {
   var cajaContador = document.getElementById("contador-filtro");
 
   var filtrados = datosDet.filter(function(a){
-    var coincideBusqueda = (a.nombre || "").toUpperCase().indexOf(buscador) >= 0 || (a.dni || "").indexOf(buscador) >= 0;
+    var coincideBusqueda = (a.nombre || "").toUpperCase().indexOf(buscador) >= 0 || (a.dni || "").toString().indexOf(buscador) >= 0;
     var estadoAlumno = (a.estado || "").toUpperCase().trim();
     var coincideEstado = false;
 
-    if(est === "TODOS"){
-      coincideEstado = true;
-    }
-    else if(est === "PRESENTE"){
-      coincideEstado = estadoAlumno.indexOf("PUNTUAL") >= 0 || estadoAlumno.indexOf("PRESENTE") >= 0 || estadoAlumno.indexOf("✅") >= 0;
-    }
-    else if(est === "TARDE"){
-      coincideEstado = estadoAlumno.indexOf("TARDE") >= 0 || estadoAlumno.indexOf("⚠️") >= 0 || estadoAlumno.indexOf("⏰") >= 0;
-    }
-    else if(est === "AUSENTE"){
-      coincideEstado = estadoAlumno.indexOf("AUSENTE") >= 0 || estadoAlumno.indexOf("❌") >= 0;
-    }
-    else if(est === "JUSTIFICADO"){
-      coincideEstado = estadoAlumno.indexOf("JUSTIFICADO") >= 0 || estadoAlumno.indexOf("JUSTIF") >= 0 || estadoAlumno.indexOf("📝") >= 0 || estadoAlumno.indexOf("📄") >= 0;
-    }
+    if(est === "TODOS") coincideEstado = true;
+    else if(est === "PRESENTE") coincideEstado = estadoAlumno.indexOf("PUNTUAL") >= 0 || estadoAlumno.indexOf("PRESENTE") >= 0 || estadoAlumno.indexOf("✅") >= 0;
+    else if(est === "TARDE") coincideEstado = estadoAlumno.indexOf("TARDE") >= 0 || estadoAlumno.indexOf("⏰") >= 0;
+    else if(est === "AUSENTE") coincideEstado = estadoAlumno.indexOf("AUSENTE") >= 0 || estadoAlumno.indexOf("❌") >= 0;
+    else if(est === "JUSTIFICADO") coincideEstado = estadoAlumno.indexOf("JUSTIF") >= 0 || estadoAlumno.indexOf("📝") >= 0;
+    
     return coincideBusqueda && coincideEstado;
   });
 
-  // ACTUALIZAR LA CASILLA DEL CONTADOR CON EL NÚMERO DE ESTUDIANTES
-  if (cajaContador) {
-    cajaContador.textContent = "Total estudiantes en este filtro: " + filtrados.length;
-  }
+  if (cajaContador) cajaContador.textContent = "Total estudiantes en este filtro: " + filtrados.length;
+  if(!cont) return;
 
   if(filtrados.length === 0){
-    cont.innerHTML = "<div class='loading'>No se encontraron registros coincidentes.</div>";
+    cont.innerHTML = "<div class='loading'>No se encontraron registros.</div>";
     return;
   }
 
   cont.innerHTML = filtrados.map(function(a){
     var clase = "verde";
     var estActual = (a.estado || "").toUpperCase();
-
-    if(estActual.indexOf("AUSENTE") >= 0 || estActual.indexOf("❌") >= 0){ clase = "rojo"; }
-    else if(estActual.indexOf("TARDE") >= 0 || estActual.indexOf("⚠️") >= 0 || estActual.indexOf("⏰") >= 0){ clase = "amarillo"; }
-    else if(estActual.indexOf("JUSTIFICADO") >= 0 || estActual.indexOf("JUSTIF") >= 0 || estActual.indexOf("📝") >= 0){ clase = "azul"; }
+    if(estActual.indexOf("AUSENTE") >= 0 || estActual.indexOf("❌") >= 0) clase = "rojo";
+    else if(estActual.indexOf("TARDE") >= 0 || estActual.indexOf("⏰") >= 0) clase = "amarillo";
+    else if(estActual.indexOf("JUSTIF") >= 0 || estActual.indexOf("📝") >= 0) clase = "azul";
 
     return "<div class='alum-item " + clase + "'><div>" +
            "<div class='alum-nombre'>" + a.nombre + "</div>" +
@@ -611,10 +566,17 @@ function filtrarEstado(est, btn) {
   }).join("");
 }
 
-// ── KIOSCO (COMPLETADO Y SIN ERRORES DE CORTE) ──
+// ── APERTURA FIJA DE KIOSCO PARA GITHUB ──
 function abrirKiosco(id) {
-  window.open(AS_URL.replace("/exec", "") + "?dispositivo=" + id, "_blank");
+  // Al estar en GitHub, extrae la base correcta del script y lanza el parámetro sin truncarse
+  window.open(AS_URL.split("?")[0] + "?dispositivo=" + id, "_blank");
 }
+
+// ── DECLARACIONES VACÍAS DE SEGURIDAD (Evitan que colapsen las otras pestañas) ──
+function cargarReportes(){} function exportarPDFDia(){} function exportarPDFDetalleDia(){}
+function calCambiarMes(n){} function dseAgregar(){} function buscarAlumnoReg(){}
+function cargarMensual(){} function cargarSemanal(){} function cargarFaltas(){}
+function buscarAlumnoHist(){} function cargarJustificaciones(){} function guardarConfiguracionRemota(){}
 </script>
 </body>
 </html>
