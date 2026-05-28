@@ -674,60 +674,51 @@ function renderHoy() {
   document.getElementById("hoy-loading").style.display = "none";
   document.getElementById("hoy-contenido").style.display = "block";
   
-  // Asignación de datos provenientes del Apps Script
-  var totalAsistentes = (datosHoy.presentes || 0); // Todo alumno que escaneó QR
-  var ausentes = (datosHoy.ausentes || 0);
-  var tardanzas = (datosHoy.tardanzas || 0);
-  var justif = (datosHoy.justificados || datosHoy.justif || 0);
+  // Asignación de datos provenientes del Apps Script [cite: 71, 72]
+  var totalAsistentes = (datosHoy.presentes || 0); // Todo alumno que escaneó QR [cite: 72]
+  var ausentes = (datosHoy.ausentes || 0); [cite: 73]
+  var tardanzas = (datosHoy.tardanzas || 0); [cite: 73]
+  var justif = (datosHoy.justificados || datosHoy.justif || 0); [cite: 73]
   
   // CORRECCIÓN MATEMÁTICA: Los puntuales son los asistentes que NO llegaron tarde
   var puntuales = totalAsistentes - tardanzas;
-  if (puntuales < 0) puntuales = 0; // Control de seguridad numérico
+  if (puntuales < 0) puntuales = 0; 
 
-  // El universo total de alumnos es la suma de los que asistieron más los que faltaron
-  var totalMatriculados = totalAsistentes + ausentes;
+  // El universo total de alumnos es la suma de los que asistieron más los que faltaron [cite: 74]
+  var totalMatriculados = totalAsistentes + ausentes; [cite: 74]
   
-  // Porcentaje de asistencia real del día
-  var pct = datosHoy.pct || (totalMatriculados > 0 ? Math.round(totalAsistentes / totalMatriculados * 100) : 0);
+  // Porcentaje de asistencia real del día [cite: 74, 75]
+  var pct = datosHoy.pct || (totalMatriculados > 0 ? Math.round(totalAsistentes / totalMatriculados * 100) : 0); [cite: 74, 75]
 
-  // Inyección de valores corregidos en las casillas correspondientes
-  document.getElementById("h-presentes").textContent = puntuales;
-  document.getElementById("h-ausentes").textContent = ausentes;
-  document.getElementById("h-tardanzas").textContent = tardanzas;
-  document.getElementById("h-justif").textContent = justif;
-  document.getElementById("h-pct").textContent = pct + "%";
+  // Inyección de valores en las casillas correspondientes [cite: 76]
+  document.getElementById("h-presentes").textContent = puntuales; [cite: 76]
+  document.getElementById("h-ausentes").textContent = ausentes; [cite: 76]
+  document.getElementById("h-tardanzas").textContent = tardanzas; [cite: 76]
+  document.getElementById("h-justif").textContent = justif; [cite: 76]
+  document.getElementById("h-pct").textContent = pct + "%"; [cite: 76]
   
-  var listaAus = document.getElementById("lista-ausentes-hoy");
-  if(datosHoy.listaAusentes && datosHoy.listaAusentes.length > 0) {
-    listaAus.innerHTML = datosHoy.listaAusentes.map(function(a){
-      return "<div class='alum-item rojo'>" +
+  var listaAus = document.getElementById("lista-ausentes-hoy"); [cite: 76]
+  
+  // SOPORTE MULTI-VARIABLE: Detecta automáticamente bajo qué nombre el backend envió los alumnos ausentes
+  var listaOrigen = datosHoy.listaAusentes || datosHoy.ausentesLista || datosHoy.alumnosAusentes || datosHoy.lista || [];
+  
+  if(listaOrigen && listaOrigen.length > 0) { [cite: 77]
+    listaAus.innerHTML = listaOrigen.map(function(a){ [cite: 77]
+      return "<div class='alum-item rojo'>" + [cite: 77]
                "<div>" +
-                 "<div class='alum-nombre'>👤 " + a.nombre + "</div>" +
-                 "<div class='alum-det'>" + (a.grado || "") + " · DNI: " + (a.dni || "") + "</div>" +
+                 "<div class='alum-nombre'>👤 " + a.nombre + "</div>" + [cite: 77]
+                 "<div class='alum-det'>" + (a.grado || a.seccion || "") + " · DNI: " + (a.dni || a.id || "") + "</div>" + [cite: 77]
                "</div>" +
              "</div>";
-    }).join("");
+    }).join(""); [cite: 77]
   } else {
-    listaAus.innerHTML = "<div style='font-size:11px;color:#777;text-align:center;padding:10px;'>No hay ausentes reportados hoy.</div>";
+    // Si la lista realmente viene vacía pero el contador dice que hay ausentes, mostramos una ayuda visual temporal
+    if (ausentes > 0) {
+      listaAus.innerHTML = "<div style='font-size:11px;color:var(--rojo);text-align:center;padding:10px;font-weight:bold;'>⚠️ Hay " + ausentes + " ausentes numéricos, pero el servidor no adjuntó la lista de nombres. Revise el menú 'Detalle día' o 'Detalle' para verlos todos.</div>";
+    } else {
+      listaAus.innerHTML = "<div style='font-size:11px;color:#777;text-align:center;padding:10px;'>No hay ausentes reportados hoy.</div>"; [cite: 78]
+    }
   }
-}
-
-// ── JUSTIFICACIONES ───────────────────────────────────────────────
-function buscarAlumnoJustif() {
-  var busq = document.getElementById("just-buscar").value.trim().toUpperCase();
-  var cont = document.getElementById("just-sugerencias");
-  if (busq.length < 2) { cont.innerHTML = ""; return; }
-  
-  if (listaAlumnos.length === 0) {
-    fetch(AS_URL + "?accion=alumnos")
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        listaAlumnos = d.alumnos || [];
-        renderSugerenciasJustif(busq);
-      });
-    return;
-  }
-  renderSugerenciasJustif(busq);
 }
 
 function renderSugerenciasJustif(busq) {
