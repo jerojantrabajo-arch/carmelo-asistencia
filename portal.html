@@ -108,25 +108,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 .buscador {width: 100%;border: 2px solid var(--naranja-clr);border-radius: 10px;font-family: Arial;margin-bottom: 8px;font-size: 16px !important;padding: 12px 10px !important;height: auto !important}
 .buscador:focus {outline: none;border-color: var(--marron);background-color: #FFFDF9}
 
-/* Reporte días */
-.rep-dia{background:white;border-radius:8px;padding:10px;margin-bottom:8px;border-left:4px solid var(--naranja)}
-.rep-dia-fecha{font-weight:bold;color:var(--marron);font-size:12px}
-.rep-dia-stats{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
-.rep-dia-stat{font-size:10px;padding:2px 6px;border-radius:4px}
-
-/* Calendario */
-.cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.cal-nav button{background:var(--naranja);color:white;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:14px}
-.cal-nav span{color:var(--marron);font-weight:bold;font-size:13px}
-.cal-tabla{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden}
-.cal-tabla th{background:var(--marron);color:white;padding:5px;font-size:11px;text-align:center}
-.cal-tabla td{padding:7px 3px;text-align:center;font-size:12px;cursor:pointer;border:1px solid #F4D3B8}
-.cal-tabla td:hover{background:var(--naranja);color:white}
-.cal-tabla td.reg{background:var(--naranja);color:white;font-weight:bold}
-.cal-tabla td.sel{background:var(--marron);color:white;font-weight:bold}
-.cal-tabla td.vacio-c{cursor:default;background:transparent;border:none}
-.cal-tabla td.finde{opacity:0.35}
-
 .loading{text-align:center;padding:20px;color:var(--marron-clr);font-size:12px}
 
 @media(max-width:400px){
@@ -183,6 +164,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 
   <div class="p-content">
 
+    <!-- HOY -->
     <div class="seccion" id="sec-hoy">
       <div id="hoy-loading" class="loading">⏳ Cargando datos de hoy...</div>
       <div id="tablaHoy">
@@ -198,12 +180,12 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
           <div class="alum-lista" id="lista-ausentes-hoy"></div>
           <div style="margin-top:10px">
             <button class="btn-accion" onclick="cargarHoy()">🔄 Actualizar</button>
-            <button class="btn-accion btn-naranja" onclick="exportarPDFDia()">📄 Exportar PDF</button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- DETALLE DÍA -->
     <div class="seccion" id="sec-detalledia">
       <div class="sec-title">📋 Detalle completo del día</div>
       <div class="grid-2" style="margin-bottom:8px">
@@ -218,7 +200,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <div id="dd-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="dd-resumen" style="margin-bottom:8px"></div>
       <div id="dd-lista"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFDetalleDia()" style="margin-top:6px">📄 Exportar PDF</button>
     </div>
       
     <!-- DETALLE GENERAL (CON CONTADOR DINÁMICO) -->
@@ -233,197 +214,18 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       </div>      
       <!-- CASILLA DE CONTADOR NUEVA -->
       <div id="contador-filtro" style="background: var(--marron); color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-bottom: 8px; display: inline-block;">
-        Total estudiantes en este filtro: 0
+        Estudiantes listados: 0
       </div>
       <div id="detalle-loading" class="loading">⏳ Cargando...</div>
       <div class="alum-lista" id="lista-detalle" style="max-height:500px"></div>
     </div>
 
-    <div class="seccion" id="sec-reportes">
-      <div class="sec-title">📅 Reportes por fecha</div>
-      <div class="grid-2" style="margin-bottom:10px">
-        <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Desde:</label>
-          <input type="date" id="fecha-desde" class="buscador" style="margin-bottom:0">
-        </div>
-        <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Hasta:</label>
-          <input type="date" id="fecha-hasta" class="buscador" style="margin-bottom:0">
-        </div>
-      </div>
-      <button class="btn-accion" onclick="cargarReportes()">🔍 Buscar reportes</button>
-      <div id="reportes-loading" class="loading" style="display:none">⏳ Cargando...</div>
-      <div id="lista-reportes"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFPorFechas(window._diasReportes||[])" style="margin-top:6px">📄 Exportar PDF</button>
-    </div>
-
-    <div class="seccion" id="sec-tardanzas">
-      <div class="sec-title">⏰ Historial de tardanzas del mes</div>
-      <div id="tardanzas-loading" class="loading" style="display:block">⏳ Cargando...</div>
-      <div id="lista-tardanzas"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFTardanzas()">📄 Exportar PDF</button>
-    </div>
-
-    <div class="seccion" id="sec-diasSinEscaneo">
-      <div class="sec-title">🚫 Días sin escaneo</div>
-      <div class="cal-nav">
-        <button onclick="calCambiarMes(-1)">◀</button>
-        <span id="cal-mes-label">—</span>
-        <button onclick="calCambiarMes(1)">▶</button>
-      </div>
-      <table class="cal-tabla">
-        <thead><tr><th>Lu</th><th>Ma</th><th>Mi</th><th>Ju</th><th>Vi</th><th style="opacity:0.5">Sa</th><th style="opacity:0.5">Do</th></tr></thead>
-        <tbody id="cal-body"></tbody>
-      </table>
-      <div style="margin-top:10px">
-        <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha seleccionada:</label>
-        <input type="text" id="dse-fecha" class="buscador" placeholder="Seleccione en el calendario" readonly>
-        <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Motivo:</label>
-        <input type="text" id="dse-motivo" class="buscador" placeholder="Ej: Feriado, Semana de gestión...">
-        <button class="btn-accion" onclick="dseAgregar()">➕ Agregar día</button>
-        <div id="dse-msg" style="font-size:11px;text-align:center;padding:5px;min-height:16px"></div>
-      </div>
-      <div class="sec-title" style="margin-top:10px">Días registrados</div>
-      <div id="dse-lista"></div>
-    </div>
-
-    <div class="seccion" id="sec-registro">
-      <div class="sec-title">✏️ Registro manual de asistencia</div>
-      <input class="buscador" id="reg-buscar" placeholder="🔍 Buscar alumno por nombre o DNI..." oninput="buscarAlumnoReg()">
-      <div id="reg-resultados"></div>
-      <div id="reg-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;border-radius:6px;margin-top:6px"></div>
-    </div>
-
+    <!-- KIOSCO EMBED -->
     <div class="seccion" id="sec-kiosco">
       <div class="sec-title">📷 Kiosco QR</div>
       <div class="grid-2" style="margin-bottom:8px">
         <button class="btn-accion" onclick="abrirKiosco(1)">📱 Tablet 1</button>
         <button class="btn-accion btn-naranja" onclick="abrirKiosco(2)">📱 Tablet 2</button>
-      </div>
-      <div style="background:white;border-radius:10px;padding:14px;font-size:12px;color:#555">
-        <p style="margin-bottom:8px">El kiosco QR se abre en una nueva pestaña.</p>
-        <p>URL Tablet 1:<br><code style="color:var(--marron);font-size:10px">...carmelo-asistencia/?dispositivo=1</code></p>
-        <p style="margin-top:8px">URL Tablet 2:<br><code style="color:var(--marron);font-size:10px">...carmelo-asistencia/?dispositivo=2</code></p>
-      </div>
-    </div>
-
-    <div class="seccion" id="sec-mensual">
-      <div class="sec-title">📅 Reporte mensual</div>
-      <div class="grid-2" style="margin-bottom:10px">
-        <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Mes:</label>
-          <select id="men-mes" class="buscador" style="margin-bottom:0">
-            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option>
-            <option value="5" selected>Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option>
-            <option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Año:</label>
-          <select id="men-anio" class="buscador" style="margin-bottom:0">
-            <option value="2026" selected>2026</option><option value="2025">2025</option>
-          </select>
-        </div>
-      </div>
-      <button class="btn-accion" onclick="cargarMensual()">📊 Ver reporte</button>
-      <div id="mensual-loading" class="loading" style="display:none">⏳ Cargando...</div>
-      <div id="mensual-resultado"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFMensual()">📄 Exportar PDF mensual</button>
-    </div>
-
-    <div class="seccion" id="sec-semanal">
-      <div class="sec-title">📊 Reporte semanal</div>
-      <button class="btn-accion" onclick="cargarSemanal()">🔄 Ver semana actual</button>
-      <div id="semanal-loading" class="loading" style="display:none">⏳ Cargando...</div>
-      <div id="semanal-resultado"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFSemanal()">📄 Exportar PDF</button>
-    </div>
-
-    <div class="seccion" id="sec-faltas">
-      <div class="sec-title">⚠️ Alumnos con 3+ faltas</div>
-      <div class="grid-2" style="margin-bottom:10px">
-        <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Mes:</label>
-          <select id="fal-mes" class="buscador" style="margin-bottom:0">
-            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option>
-            <option value="5" selected>Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option>
-            <option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Año:</label>
-          <select id="fal-anio" class="buscador" style="margin-bottom:0">
-            <option value="2026" selected>2026</option><option value="2025">2025</option>
-          </select>
-        </div>
-      </div>
-      <button class="btn-accion" onclick="cargarFaltas()">⚠️ Ver alumnos con faltas</button>
-      <div id="faltas-loading" class="loading" style="display:none">⏳ Cargando...</div>
-      <div id="faltas-resultado"></div>
-      <button class="btn-accion btn-naranja" onclick="exportarPDFFaltas()">📄 Exportar PDF</button>
-    </div>
-
-    <div class="seccion" id="sec-alumno">
-      <div class="sec-title">🔎 Historial de alumno</div>
-      <input class="buscador" id="alum-buscar" placeholder="🔍 Buscar por nombre o DNI..." oninput="buscarAlumnoHist()">
-      <div id="alum-sugerencias"></div>
-      <div id="alum-historial"></div>
-    </div> 
-
-    <div class="seccion" id="sec-justif">
-      <div class="sec-title">📝 Registrar justificación</div>
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Buscar alumno por nombre o DNI:</label>
-      <input type="text" id="just-buscar" class="buscador" placeholder="🔍 Nombre o DNI..." oninput="buscarAlumnoJustif()">
-      <div id="just-sugerencias" style="margin-bottom:8px"></div>
-      <input type="hidden" id="just-dni">
-      
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha de la falta:</label>
-      <input type="date" id="just-fecha" class="buscador">
-      
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Tipo:</label>
-      <select id="just-tipo" class="buscador">
-        <option value="FALTA_JUSTIFICADA">Falta justificada</option>
-        <option value="TARDANZA_JUSTIFICADA">Tardanza justificada</option>
-      </select>
-      
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Motivo:</label>
-      <input type="text" id="just-motivo" class="buscador" placeholder="Ej: Cita médica, emergencia familiar...">
-      
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Registrado por:</label>
-      <input type="text" id="just-reg" class="buscador" placeholder="Nombre del auxiliar">
-      
-      <button class="btn-accion" onclick="registrarJustif()">💾 Guardar justificación</button>
-      <div id="just-msg" style="font-size:12px;text-align:center;padding:8px;min-height:20px;border-radius:6px;margin-top:6px"></div>
-      
-      <div class="sec-title" style="margin-top:12px" id="just-titulo-mes">Justificaciones</div>
-      <button class="btn-accion btn-naranja" onclick="cargarJustificaciones()">🔄 Ver justificaciones</button>
-      <div id="just-lista" style="margin-top:8px"></div>
-    </div>
-
-    <div class="seccion" id="sec-configuracion">
-      <div class="sec-title">⚙️ Configuración de Horarios y Tolerancias</div>
-      <div style="background:white; border-radius:10px; padding:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom:15px;">
-        <label style="font-size:12px; color:var(--marron); font-weight:bold; display:block; margin-bottom:4px">Tipo de Horario Activo:</label>
-        <select id="cfg-horario-activo" class="buscador" style="margin-bottom:12px">
-          <option value="NORMAL">HORARIO NORMAL</option>
-          <option value="INVIERNO">HORARIO DE INVIERNO</option>
-        </select>
-        <div class="sec-title" style="background:var(--naranja); margin-top:10px; font-size:11px">⏳ Minutos de Tolerancia Obligatoria</div>
-        <div class="grid-2" style="margin-top:8px">
-          <div>
-            <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Inicial (Minutos):</label>
-            <input type="number" id="cfg-tolerancia-inicial" class="buscador" value="0" min="0" max="60">
-          </div>
-          <div>
-            <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Primaria (Minutos):</label>
-            <input type="number" id="cfg-tolerancia-primaria" class="buscador" value="0" min="0" max="60">
-          </div>
-        </div>
-        <div style="margin-top:4px">
-          <label style="font-size:11px; color:#555; font-weight:bold; display:block; margin-bottom:4px">Secundaria (Minutos):</label>
-          <input type="number" id="cfg-tolerancia-secundaria" class="buscador" value="0" min="0" max="60">
-        </div>
-        <button id="btn-guardar-config" class="btn-accion" onclick="guardarConfiguracionRemota()" style="margin-top:15px; height:45px; font-size:13px">💾 Guardar Parámetros en la Nube</button>
       </div>
     </div>
 
@@ -435,20 +237,17 @@ var AS_URL = "https://script.google.com/macros/s/AKfycbwPVWzR0iPNWZMLQ2Lxa5YDjY3
 var PIN_KEY  = "portal_pin_" + new Date().toLocaleDateString("es-PE");
 var tabActual = "hoy";
 
-// Datos en memoria global
 var datosHoy    = null;
 var datosDet    = [];
 var filtroEstado = "TODOS";
 
-// ── RELOJ ──
 function actualizarReloj() {
   var ahora = new Date();
   document.getElementById("fecha-hoy").textContent = ahora.toLocaleDateString("es-PE", {weekday:"long",day:"2-digit",month:"long",year:"numeric"});
-  document.getElementById("hora-actual").textContent = ahora.toLocaleTimeString("es-PE", {hour:"2-digit",minute:"2-digit"});
+  document.getElementById("hora-actual").textContent = Security=ahora.toLocaleTimeString("es-PE", {hour:"2-digit",minute:"2-digit"});
 }
 setInterval(actualizarReloj, 1000);
 
-// ── LOGIN Y APERTURA ──
 window.onload = function() {
   actualizarReloj();
   try {
@@ -494,7 +293,6 @@ function cerrarSesion() {
   location.reload();
 }
 
-// ── NAVEGACIÓN ENTRE PESTAÑAS ──
 function irSeccion(id) {
   tabActual = id;
   document.querySelectorAll(".seccion").forEach(function(s){ s.classList.remove("activa"); });
@@ -512,7 +310,6 @@ function irSeccion(id) {
   if (id === "detalle") cargarDetalle();
 }
 
-// ── SISTEMA DE DATOS Y FILTRADO OFICIAL COMPATIBLE CON TU NUEVO .GS ──
 function cargarHoy() {
   document.getElementById("hoy-loading").style.display = "block";
   fetch(AS_URL + "?accion=obtenerHoy")
@@ -540,12 +337,16 @@ function cargarHoy() {
 
 function cargarDetalle() {
   document.getElementById("detalle-loading").style.display = "block";
+  document.getElementById("lista-detalle").innerHTML = "";
   fetch(AS_URL + "?accion=obtenerDetalle")
     .then(function(r){ return r.json(); })
     .then(function(d){
       document.getElementById("detalle-loading").style.display = "none";
       datosDet = d || [];
       filtrarEstado(filtroEstado, null);
+    })
+    .catch(function(err){
+      document.getElementById("detalle-loading").innerHTML = "❌ Error al cargar los datos.";
     });
 }
 
@@ -553,7 +354,6 @@ function filtrarDetalle() {
   filtrarEstado(filtroEstado, null);
 }
 
-// LÓGICA DE FILTRADO CON CONTADOR INCORPORADO
 function filtrarEstado(est, btn) {
   if(btn) {
     document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
@@ -588,9 +388,8 @@ function filtrarEstado(est, btn) {
     return coincideBusqueda && coincideEstado;
   });
 
-  // ACTUALIZAR LA CASILLA DEL CONTADOR CON EL NÚMERO DE ESTUDIANTES
   if (cajaContador) {
-    cajaContador.textContent = "Total estudiantes en este filtro: " + filtrados.length;
+    cajaContador.textContent = "Estudiantes listados: " + filtrados.length;
   }
 
   if(filtrados.length === 0){
