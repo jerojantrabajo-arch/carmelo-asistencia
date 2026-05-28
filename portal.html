@@ -1032,91 +1032,115 @@ function dseAgregar() { console.log("Agregando día sin escaneo"); }
 // ── EXPORTACIÓN PDF ────────────────────────────────────────────────
 // ── EXPORTACIÓN UNIFICADA ANTI-BLANCO Y ANTI-CORTE ──────────────────
 
-function exportarElementoAPDF(idElemento, nombreArchivo) {
+// ── SISTEMA DE IMPRESIÓN DIRECTA REAL (ANTI-BLANCO) ──────────────────
+
+function exportarPantallaRealAPDF(idElemento, nombreArchivo) {
   var elementoOriginal = document.getElementById(idElemento);
   if(!elementoOriginal) { 
-    alert("No se encontraron datos para exportar."); 
+    alert("No se encontraron datos en pantalla para exportar."); 
     return; 
   }
-  
-  // Clonamos el elemento en memoria para no alterar lo que ve el usuario
-  var clon = elementoOriginal.cloneNode(true);
-  
-  // Eliminamos cualquier restricción de altura o scroll en el clon y sus hijos
-  clon.style.height = "auto";
-  clon.style.maxHeight = "none";
-  clon.style.overflow = "visible";
-  clon.style.display = "block";
-  clon.style.background = "white"; // Asegura fondo blanco limpio
-  clon.style.color = "#333";
-  
-  // Expandir selectores de listas internas si existen dentro del clon
-  var listasInternas = clon.querySelectorAll(".alum-lista, #dd-lista, #lista-reportes, #lista-tardanzas, #mensual-resultado, #semanal-resultado, #faltas-resultado");
-  listasInternas.forEach(function(lista) {
-    lista.style.height = "auto";
-    lista.style.maxHeight = "none";
-    lista.style.overflow = "visible";
-    lista.style.display = "block";
-  });
 
-  // Capa invisible pero real para forzar al navegador a dibujar el contenido
-  clon.style.position = "fixed";
-  clon.style.top = "0";
-  clon.style.left = "0";
-  clon.style.width = "750px"; 
-  clon.style.opacity = "0";
-  clon.style.zIndex = "-9999";
+  // 1. Guardamos el estado original de la aplicación móvil
+  var body = document.body;
+  var portal = document.getElementById("portal");
+  var content = document.querySelector(".p-content");
   
-  document.body.appendChild(clon);
+  var origBodyOverflow   = body.style.overflow;
+  var origPortalHeight   = portal ? portal.style.height : "";
+  var origPortalOverflow = portal ? portal.style.overflow : "";
+  var origContentMaxH    = content ? content.style.maxHeight : "";
+  var origContentOverflow= content ? content.style.overflow : "";
+  var origElemMaxH       = elementoOriginal.style.maxHeight;
+  var origElemOverflow   = elementoOriginal.style.overflow;
+
+  // 2. ROMPEMOS EL DISEÑO MÓVIL TEMPORALMENTE (Para que todo se estire hacia abajo)
+  body.style.overflow = "visible";
+  if(portal) {
+    portal.style.height = "auto";
+    portal.style.overflow = "visible";
+  }
+  if(content) {
+    content.style.maxHeight = "none";
+    content.style.overflow = "visible";
+  }
   
+  // Forzamos la apertura total del contenedor específico del reporte
+  elementoOriginal.style.maxHeight = "none";
+  elementoOriginal.style.overflow = "visible";
+  elementoOriginal.style.display = "block";
+
+  // Opciones de captura optimizadas para la pantalla activa
   var opciones = {
     margin:       [0.5, 0.4, 0.5, 0.4],
     filename:     nombreArchivo + '.pdf',
     image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, logging: false, useCORS: true, letterRendering: true, scrollY: 0 },
+    html2canvas:  { 
+      scale: 2, 
+      logging: false, 
+      useCORS: true, 
+      scrollY: 0,
+      windowWidth: document.documentElement.clientWidth // Captura basándose en el ancho real del teléfono
+    },
     jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], avoid: ['.alum-item', 'tr', '.stat-card'] }
   };
-  
-  // Pausa de 150ms para garantizar que el navegador dibuje tablas, nombres y gráficos
+
+  // 3. Tomamos la foto de la pantalla estirada real con una pausa segura de 200ms
   setTimeout(function(){
-    html2pdf().set(opciones).from(clon).save().then(function(){
-      document.body.removeChild(clon);
+    html2pdf().set(opciones).from(elementoOriginal).save().then(function(){
+      // 4. RESTAURAMOS EL PORTAL MÓVIL (El usuario no nota el cambio)
+      body.style.overflow = origBodyOverflow;
+      if(portal) {
+        portal.style.height = origPortalHeight;
+        portal.style.overflow = origPortalOverflow;
+      }
+      if(content) {
+        content.style.maxHeight = origContentMaxH;
+        content.style.overflow = origContentOverflow;
+      }
+      elementoOriginal.style.maxHeight = origElemMaxH;
+      elementoOriginal.style.overflow = origElemOverflow;
     }).catch(function(err){
-      console.error("Error al generar PDF:", err);
-      document.body.removeChild(clon);
+      console.error("Error en PDF:", err);
+      // Restauración de seguridad en caso de falla
+      body.style.overflow = origBodyOverflow;
+      if(portal) { portal.style.height = origPortalHeight; portal.style.overflow = origPortalOverflow; }
+      if(content) { content.style.maxHeight = origContentMaxH; content.style.overflow = origContentOverflow; }
+      elementoOriginal.style.maxHeight = origElemMaxH;
+      elementoOriginal.style.overflow = origElemOverflow;
     });
-  }, 150);
+  }, 200);
 }
 
-// Vinculación de los botones de la interfaz con el motor unificado:
+// Vinculación directa de tus botones con la pantalla real:
 
 function exportarPDFDia(){
-  exportarElementoAPDF("tablaHoy", "Reporte_Hoy");
+  exportarPantallaRealAPDF("tablaHoy", "Reporte_Hoy");
 }
   
 function exportarPDFDetalleDia(){
-  exportarElementoAPDF("dd-lista", "Reporte_Detalle_Dia");
+  exportarPantallaRealAPDF("dd-lista", "Reporte_Detalle_Dia");
 }
 
 function exportarPDFPorFechas() {
-  exportarElementoAPDF("lista-reportes", "Reporte_Por_Fechas");
+  exportarPantallaRealAPDF("lista-reportes", "Reporte_Por_Fechas");
 }
 
 function exportarPDFTardanzas() {
-  exportarElementoAPDF("lista-tardanzas", "Reporte_Tardanzas_Mes");
+  exportarPantallaRealAPDF("lista-tardanzas", "Reporte_Tardanzas_Mes");
 }
 
 function exportarPDFMensual() {
-  exportarElementoAPDF("mensual-resultado", "Reporte_Mensual");
+  exportarPantallaRealAPDF("mensual-resultado", "Reporte_Mensual");
 }
 
 function exportarPDFSemanal() {
-  exportarElementoAPDF("semanal-resultado", "Reporte_Semanal");
+  exportarPantallaRealAPDF("semanal-resultado", "Reporte_Semanal");
 }
 
 function exportarPDFFaltas() {
-  exportarElementoAPDF("faltas-resultado", "Reporte_Alumnos_Faltas");
+  exportarPantallaRealAPDF("faltas-resultado", "Reporte_Alumnos_Faltas");
 }
 </script>
 </body>
