@@ -75,6 +75,10 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 /* Títulos sección */
 .sec-title{background:var(--marron);color:white;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:bold;margin-bottom:8px;display:flex;align-items:center;gap:8px}
 
+/* Botones de acción general */
+.btn-accion {background:var(--marron);color:white;border:none;border-radius:8px;padding:10px 14px;font-size:12px;font-weight:bold;cursor:pointer;width:100%;font-family:Arial}
+.btn-naranja {background:var(--naranja)}
+
 /* Lista alumnos */
 .alum-lista{display:flex;flex-direction:column;gap:4px}
 .alum-item{border-radius:8px;padding:8px 10px;border-left:4px solid;display:flex;justify-content:space-between;align-items:center;box-shadow: 0 1px 3px rgba(0,0,0,0.02)}
@@ -86,23 +90,12 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 .alum-nombre {font-weight: bold;color: #3A1800;font-size: 11px !important}
 .alum-det {font-size: 11px !important;color: #777 !important;font-weight: normal !important;margin-top: 2px}
 .alum-hora {font-size: 11px !important;color: var(--marron-clr);font-weight: bold}
-#dd-lista{background:#fff;padding:10px}
+#dd-lista{background:#fff;padding:10px;border-radius:8px}
   
 /* Tabs internos */
 .mini-tabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
 .mini-tab{padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:none;font-family:Arial;background:var(--naranja-clr);color:var(--marron);font-weight:bold}
 .mini-tab.active{background:var(--marron);color:white}
-
-/* Tabla reportes */
-.tabla{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;font-size:11px}
-.tabla th{background:var(--marron);color:white;padding:7px;text-align:left}
-.tabla td{padding:6px 7px;border-bottom:1px solid #F4D3B8}
-.tabla tr:nth-child(even) td{background:var(--crema)}
-.badge{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold}
-.b-puntual{background:var(--verde-clr);color:var(--verde)}
-.b-tarde{background:var(--amarillo-clr);color:#F57F17}
-.b-ausente{background:var(--rojo-clr);color:var(--rojo)}
-.b-justif{background:var(--azul-clr);color:var(--azul)}
 
 /* Buscador */
 .buscador {width: 100%;border: 2px solid var(--naranja-clr);border-radius: 10px;font-family: Arial;margin-bottom: 8px;font-size: 16px !important;padding: 12px 10px !important;height: auto !important}
@@ -118,6 +111,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 </head>
 <body>
 
+<!-- COMPONENTE LOGIN -->
 <div id="login">
   <div class="login-card">
     <div class="login-logo">🏫</div>
@@ -129,6 +123,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
   </div>
 </div>
 
+<!-- COMPONENTE PRINCIPAL -->
 <div id="portal">
   <div class="p-header">
     <div class="p-header-left">
@@ -145,66 +140,55 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <span id="hora-actual">--:--</span>
   </div>
 
+  <!-- NAVEGACIÓN PRINCIPAL -->
   <div class="nav-tabs">
-    <button class="nav-tab" onclick="irSeccion('hoy')">📊 Hoy</button>
+    <button class="nav-tab active" onclick="irSeccion('hoy')">📊 Hoy</button>
     <button class="nav-tab" onclick="irSeccion('detalledia')">📋 Detalle día</button>
     <button class="nav-tab" onclick="irSeccion('detalle')">📋 Detalle</button>
-    <button class="nav-tab" onclick="irSeccion('reportes')">📅 Reportes</button>
-    <button class="nav-tab" onclick="irSeccion('tardanzas')">⏰ Tardanzas</button>
-    <button class="nav-tab" onclick="irSeccion('diasSinEscaneo')">🚫 Sin escaneo</button>
-    <button class="nav-tab" onclick="irSeccion('registro')">✏️ Registro</button>
-    <button class="nav-tab" onclick="irSeccion('mensual')">📅 Mensual</button>
-    <button class="nav-tab" onclick="irSeccion('semanal')">📊 Semanal</button>
-    <button class="nav-tab" onclick="irSeccion('faltas')">⚠️ Faltas</button>
-    <button class="nav-tab" onclick="irSeccion('alumno')">🔎 Alumno</button>
-    <button class="nav-tab" onclick="irSeccion('justif')">📝 Justif.</button>    
-    <button class="nav-tab active" onclick="irSeccion('kiosco')">📷 Kiosco</button>
-    <button class="nav-tab" onclick="irSeccion('configuracion')">⚙️ Configuración</button>
+    <button class="nav-tab" onclick="irSeccion('kiosco')">📷 Kiosco</button>
   </div>
 
   <div class="p-content">
 
-    <!-- HOY -->
-    <div class="seccion" id="sec-hoy">
+    <!-- SECCIÓN: HOY -->
+    <div class="seccion activa" id="sec-hoy">
       <div id="hoy-loading" class="loading">⏳ Cargando datos de hoy...</div>
-      <div id="tablaHoy">
-        <div id="hoy-contenido" style="display:none">
-          <div class="grid-4">
-            <div class="stat-card c-verde"><div class="num" id="h-presentes">0</div><div class="lbl">Presentes</div></div>
-            <div class="stat-card c-rojo"><div class="num" id="h-ausentes">0</div><div class="lbl">Ausentes</div></div>
-            <div class="stat-card c-amarillo"><div class="num" id="h-tardanzas">0</div><div class="lbl">Tardanzas</div></div>
-            <div class="stat-card c-azul"><div class="num" id="h-justif">0</div><div class="lbl">Justif.</div></div>
-          </div>
-          <div class="stat-card c-marron" style="margin-bottom:10px"><div class="num" id="h-pct">0%</div><div class="lbl">% Asistencia del día</div></div>
-          <div class="sec-title">❌ Ausentes de hoy</div>
-          <div class="alum-lista" id="lista-ausentes-hoy"></div>
-          <div style="margin-top:10px">
-            <button class="btn-accion" onclick="cargarHoy()">🔄 Actualizar</button>
-          </div>
+      <div id="hoy-contenido" style="display:none">
+        <div class="grid-4">
+          <div class="stat-card c-verde"><div class="num" id="h-presentes">0</div><div class="lbl">Presentes</div></div>
+          <div class="stat-card c-rojo"><div class="num" id="h-ausentes">0</div><div class="lbl">Ausentes</div></div>
+          <div class="stat-card c-amarillo"><div class="num" id="h-tardanzas">0</div><div class="lbl">Tardanzas</div></div>
+          <div class="stat-card c-azul"><div class="num" id="h-justif">0</div><div class="lbl">Justif.</div></div>
+        </div>
+        <div class="stat-card c-marron" style="margin-bottom:10px"><div class="num" id="h-pct">0%</div><div class="lbl">% Asistencia del día</div></div>
+        <div class="sec-title">❌ Ausentes de hoy</div>
+        <div class="alum-lista" id="lista-ausentes-hoy"></div>
+        <div style="margin-top:14px">
+          <button class="btn-accion" onclick="cargarHoy()">🔄 Actualizar datos</button>
         </div>
       </div>
     </div>
 
-    <!-- DETALLE DÍA -->
+    <!-- SECCIÓN: DETALLE DÍA -->
     <div class="seccion" id="sec-detalledia">
       <div class="sec-title">📋 Detalle completo del día</div>
       <div class="grid-2" style="margin-bottom:8px">
         <div>
-          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Fecha:</label>
+          <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Seleccione Fecha:</label>
           <input type="date" id="dd-fecha" class="buscador" style="margin-bottom:0">
         </div>
         <div style="display:flex;align-items:flex-end">
-          <button class="btn-accion" onclick="cargarDetalleDia()" style="margin-bottom:0">🔍 Ver detalle</button>
+          <button class="btn-accion" onclick="cargarDetalleDia()" style="margin-bottom:0; height:46px">🔍 Ver detalle</button>
         </div>
       </div>
-      <div id="dd-loading" class="loading" style="display:none">⏳ Cargando...</div>
+      <div id="dd-loading" class="loading" style="display:none">⏳ Buscando registros en la fecha...</div>
       <div id="dd-resumen" style="margin-bottom:8px"></div>
-      <div id="dd-lista"></div>
+      <div id="dd-lista" class="alum-lista"></div>
     </div>
       
-    <!-- DETALLE GENERAL (CON CONTADOR DINÁMICO) -->
+    <!-- SECCIÓN: DETALLE GENERAL (CON CONTADOR DINÁMICO) -->
     <div class="seccion" id="sec-detalle">
-      <input class="buscador" id="buscador" placeholder="🔍 Buscar alumno..." oninput="filtrarDetalle()">
+      <input class="buscador" id="buscador" placeholder="🔍 Buscar por nombre o DNI..." oninput="filtrarDetalle()">
       <div class="mini-tabs">
         <button class="mini-tab active" onclick="filtrarEstado('TODOS', this)">Todos</button>
         <button class="mini-tab" onclick="filtrarEstado('PRESENTE', this)">✅ Presentes</button>
@@ -212,15 +196,16 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
         <button class="mini-tab" onclick="filtrarEstado('TARDE', this)">⏰ Tarde</button>
         <button class="mini-tab" onclick="filtrarEstado('JUSTIFICADO', this)">📝 Justif.</button>
       </div>      
-      <!-- CASILLA DE CONTADOR NUEVA -->
+      
       <div id="contador-filtro" style="background: var(--marron); color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-bottom: 8px; display: inline-block;">
         Estudiantes listados: 0
       </div>
-      <div id="detalle-loading" class="loading">⏳ Cargando...</div>
-      <div class="alum-lista" id="lista-detalle" style="max-height:500px"></div>
+      
+      <div id="detalle-loading" class="loading" style="display:none">⏳ Cargando base de datos completa...</div>
+      <div class="alum-lista" id="lista-detalle"></div>
     </div>
 
-    <!-- KIOSCO EMBED -->
+    <!-- SECCIÓN: KIOSCO -->
     <div class="seccion" id="sec-kiosco">
       <div class="sec-title">📷 Kiosco QR</div>
       <div class="grid-2" style="margin-bottom:8px">
@@ -241,17 +226,21 @@ var datosHoy    = null;
 var datosDet    = [];
 var filtroEstado = "TODOS";
 
+// CORREGIDO: Removido el error 'Security=' que causaba el colapso global del script
 function actualizarReloj() {
   var ahora = new Date();
   document.getElementById("fecha-hoy").textContent = ahora.toLocaleDateString("es-PE", {weekday:"long",day:"2-digit",month:"long",year:"numeric"});
-  document.getElementById("hora-actual").textContent = Security=ahora.toLocaleTimeString("es-PE", {hour:"2-digit",minute:"2-digit"});
+  document.getElementById("hora-actual").textContent = ahora.toLocaleTimeString("es-PE", {hour:"2-digit",minute:"2-digit"});
 }
 setInterval(actualizarReloj, 1000);
 
 window.onload = function() {
   actualizarReloj();
   try {
-    if (localStorage.getItem(PIN_KEY) === "OK") { mostrarPortal(); return; }
+    if (localStorage.getItem(PIN_KEY) === "OK") { 
+      mostrarPortal(); 
+      return; 
+    }
   } catch(e) {}
   document.getElementById("pin-input").focus();
 };
@@ -276,7 +265,7 @@ function validarPin() {
       }
     })
     .catch(function(){
-      document.getElementById("login-error").textContent = "Sin conexión";
+      document.getElementById("login-error").textContent = "Sin conexión con el servidor";
     });
 }
 
@@ -285,7 +274,6 @@ function mostrarPortal() {
   document.getElementById("portal").style.display = "flex";
   irSeccion("hoy");
   cargarHoy();
-  setInterval(function(){ if(tabActual==='hoy') cargarHoy(); }, 120000);
 }
 
 function cerrarSesion() {
@@ -307,11 +295,14 @@ function irSeccion(id) {
     }
   });
   
+  if (id === "hoy") cargarHoy();
   if (id === "detalle") cargarDetalle();
 }
 
 function cargarHoy() {
   document.getElementById("hoy-loading").style.display = "block";
+  document.getElementById("hoy-contenido").style.display = "none";
+  
   fetch(AS_URL + "?accion=obtenerHoy")
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -330,14 +321,52 @@ function cargarHoy() {
           return "<div class='alum-item rojo'><div class='alum-nombre'>" + al.nombre + " <span class='alum-det'>(" + al.grado + ")</span></div></div>";
         }).join("");
       } else {
-        listaA.innerHTML = "<div class='loading'>No hay ausentes registrados hoy.</div>";
+        listaA.innerHTML = "<div class='loading'>🎉 No hay ausentes el día de hoy.</div>";
       }
+    })
+    .catch(function(){
+      document.getElementById("hoy-loading").innerHTML = "❌ Error al conectar datos de hoy.";
+    });
+}
+
+function cargarDetalleDia() {
+  var fechaSel = document.getElementById("dd-fecha").value;
+  if(!fechaSel) { alert("Por favor seleccione una fecha primero."); return; }
+  
+  document.getElementById("dd-loading").style.display = "block";
+  document.getElementById("dd-lista").innerHTML = "";
+  
+  fetch(AS_URL + "?accion=obtenerDetalleDia&fecha=" + fechaSel)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("dd-loading").style.display = "none";
+      if(!d || d.length === 0) {
+        document.getElementById("dd-lista").innerHTML = "<div class='loading'>No hay registros guardados para esta fecha.</div>";
+        return;
+      }
+      
+      document.getElementById("dd-lista").innerHTML = d.map(function(a){
+        var clase = "verde";
+        var est = (a.estado || "").toUpperCase();
+        if(est.indexOf("AUSENTE")>=0 || est.indexOf("❌")>=0) clase="rojo";
+        else if(est.indexOf("TARDE")>=0 || est.indexOf("⏰")>=0 || est.indexOf("⚠️")>=0) clase="amarillo";
+        else if(est.indexOf("JUSTIF")>=0 || est.indexOf("📝")>=0) clase="azul";
+        
+        return "<div class='alum-item " + clase + "'>" +
+               "<div><div class='alum-nombre'>" + a.nombre + "</div><div class='alum-det'>Grado: " + (a.grado || '-') + "</div></div>" +
+               "<div class='alum-hora'>" + (a.hora || a.estado || '--:--') + "</div>" +
+               "</div>";
+      }).join("");
+    })
+    .catch(function(){
+      document.getElementById("dd-loading").innerHTML = "❌ Error al buscar registros de este día.";
     });
 }
 
 function cargarDetalle() {
   document.getElementById("detalle-loading").style.display = "block";
   document.getElementById("lista-detalle").innerHTML = "";
+  
   fetch(AS_URL + "?accion=obtenerDetalle")
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -346,7 +375,7 @@ function cargarDetalle() {
       filtrarEstado(filtroEstado, null);
     })
     .catch(function(err){
-      document.getElementById("detalle-loading").innerHTML = "❌ Error al cargar los datos.";
+      document.getElementById("detalle-loading").innerHTML = "❌ Error al cargar la base de alumnos.";
     });
 }
 
@@ -366,24 +395,23 @@ function filtrarEstado(est, btn) {
   var cajaContador = document.getElementById("contador-filtro");
 
   var filtrados = datosDet.filter(function(a){
-    var coincideBusqueda = (a.nombre || "").toUpperCase().indexOf(buscador) >= 0 || (a.dni || "").indexOf(buscador) >= 0;
+    var nombreAl = (a.nombre || "").toUpperCase();
+    var dniAl = (a.dni || a.id || "").toString();
+    var coincideBusqueda = nombreAl.indexOf(buscador) >= 0 || dniAl.indexOf(buscador) >= 0;
+    
     var estadoAlumno = (a.estado || "").toUpperCase().trim();
     var coincideEstado = false;
 
     if(est === "TODOS"){
       coincideEstado = true;
-    }
-    else if(est === "PRESENTE"){
+    } else if(est === "PRESENTE"){
       coincideEstado = estadoAlumno.indexOf("PUNTUAL") >= 0 || estadoAlumno.indexOf("PRESENTE") >= 0 || estadoAlumno.indexOf("✅") >= 0;
-    }
-    else if(est === "TARDE"){
+    } else if(est === "TARDE"){
       coincideEstado = estadoAlumno.indexOf("TARDE") >= 0 || estadoAlumno.indexOf("⚠️") >= 0 || estadoAlumno.indexOf("⏰") >= 0;
-    }
-    else if(est === "AUSENTE"){
+    } else if(est === "AUSENTE"){
       coincideEstado = estadoAlumno.indexOf("AUSENTE") >= 0 || estadoAlumno.indexOf("❌") >= 0;
-    }
-    else if(est === "JUSTIFICADO"){
-      coincideEstado = estadoAlumno.indexOf("JUSTIFICADO") >= 0 || estadoAlumno.indexOf("JUSTIF") >= 0 || estadoAlumno.indexOf("📝") >= 0 || estadoAlumno.indexOf("📄") >= 0;
+    } else if(est === "JUSTIFICADO"){
+      coincideEstado = estadoAlumno.indexOf("JUSTIFICADO") >= 0 || estadoAlumno.indexOf("JUSTIF") >= 0 || estadoAlumno.indexOf("📝") >= 0;
     }
     return coincideBusqueda && coincideEstado;
   });
@@ -393,7 +421,7 @@ function filtrarEstado(est, btn) {
   }
 
   if(filtrados.length === 0){
-    cont.innerHTML = "<div class='loading'>No se encontraron registros coincidentes.</div>";
+    cont.innerHTML = "<div class='loading'>No se encontraron alumnos bajo este filtro/búsqueda.</div>";
     return;
   }
 
@@ -408,7 +436,7 @@ function filtrarEstado(est, btn) {
     return "<div class='alum-item " + clase + "'><div>" +
            "<div class='alum-nombre'>" + a.nombre + "</div>" +
            "<div class='alum-det'>DNI: " + (a.dni || a.id || "") + " | Grado: " + (a.grado || "") + "</div>" +
-           "</div><div class='alum-hora'>" + (a.estado || "SIN ESTADO") + "</div></div>";
+           "</div><div class='alum-hora'>" + (a.estado || "SIN REPORTE") + "</div></div>";
   }).join("");
 }
 
