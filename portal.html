@@ -1031,49 +1031,63 @@ function dseAgregar() { console.log("Agregando día sin escaneo"); }
 
 // ── EXPORTACIÓN PDF ────────────────────────────────────────────────
 function exportarPDFDia(){
-  var elemento = document.getElementById("tablaHoy");
-  if(!elemento){ alert("No se encontró el reporte"); return; }
+  var elementoOriginal = document.getElementById("tablaHoy");
+  if(!elementoOriginal){ alert("No se encontró el reporte"); return; }
   
-  // Guardamos los estilos originales de la lista para no alterar la pantalla del usuario
-  var listaAus = document.getElementById("lista-ausentes-hoy");
-  var originalHeight = listaAus ? listaAus.style.maxHeight : "";
-  var originalOverflow = listaAus ? listaAus.style.overflow : "";
+  // CLONACIÓN LIMPIA: Duplicamos el elemento en memoria
+  var clon = elementoOriginal.cloneNode(true);
   
-  // Forzamos a que la lista se estire por completo antes de tomar la foto para el PDF
+  // Limpiamos los límites de altura y scrolls del clon y sus listas internas
+  clon.style.height = "auto";
+  clon.style.maxHeight = "none";
+  clon.style.overflow = "visible";
+  
+  var listaAus = clon.querySelector("#lista-ausentes-hoy");
   if(listaAus) {
+    listaAus.style.height = "auto";
     listaAus.style.maxHeight = "none";
     listaAus.style.overflow = "visible";
   }
+
+  // Estilo temporal para que el clon sea visible para la librería pero no para el usuario
+  clon.style.position = "absolute";
+  clon.style.top = "-9999px";
+  clon.style.left = "-9999px";
+  clon.style.width = "750px"; // Ancho fijo estándar para simular una hoja de impresión
+  document.body.appendChild(clon);
   
   var opciones = {
-    margin:       [0.5, 0.4, 0.5, 0.4], // Margen superior, izquierdo, inferior, derecho
+    margin:       [0.5, 0.4, 0.5, 0.4],
     filename:     'Reporte_Hoy.pdf',
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { scale: 2, logging: false, useCORS: true },
     jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
-    // EVITA CORTE DE TARJETAS POR LA MITAD: Salta de página automáticamente si una tarjeta no cabe entera
     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], avoid: '.alum-item' }
   };
   
-  html2pdf().set(opciones).from(elemento).save().then(function(){
-    // Devolvemos la pantalla del celular a su estado normal con scroll interno
-    if(listaAus) {
-      listaAus.style.maxHeight = originalHeight;
-      listaAus.style.overflow = originalOverflow;
-    }
+  // Generamos el PDF desde el clon libre de restricciones
+  html2pdf().set(opciones).from(clon).save().then(function(){
+    // Eliminamos el clon de la memoria de inmediato
+    document.body.removeChild(clon);
   });
 }
   
 function exportarPDFDetalleDia(){
-  var elemento = document.getElementById("dd-lista");
-  if(!elemento){ alert("No hay datos para exportar"); return; }
+  var elementoOriginal = document.getElementById("dd-lista");
+  if(!elementoOriginal || elementoOriginal.children.length === 0){ alert("No hay datos para exportar"); return; }
   
-  var originalHeight = elemento.style.maxHeight;
-  var originalOverflow = elemento.style.overflow;
+  // CLONACIÓN LIMPIA: Duplicamos la lista en memoria
+  var clon = elementoOriginal.cloneNode(true);
   
-  // Forzamos expansión total para capturar todos los alumnos
-  elemento.style.maxHeight = "none";
-  elemento.style.overflow = "visible";
+  // Liberamos por completo el contenedor clonado
+  clon.style.height = "auto";
+  clon.style.maxHeight = "none";
+  clon.style.overflow = "visible";
+  clon.style.position = "absolute";
+  clon.style.top = "-9999px";
+  clon.style.left = "-9999px";
+  clon.style.width = "750px";
+  document.body.appendChild(clon);
   
   var opciones = {
     margin:       [0.4, 0.4, 0.4, 0.4],
@@ -1081,13 +1095,11 @@ function exportarPDFDetalleDia(){
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { scale: 2, scrollY: 0, useCORS: true },
     jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
-    // Configuración estricta anti-cortes para tablas o filas de alumnos
     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], avoid: '.alum-item' }
   };
   
-  html2pdf().set(opciones).from(elemento).save().then(function(){
-    elemento.style.maxHeight = originalHeight;
-    elemento.style.overflow = originalOverflow;
+  html2pdf().set(opciones).from(clon).save().then(function(){
+    document.body.removeChild(clon);
   });
 }
 </script>
