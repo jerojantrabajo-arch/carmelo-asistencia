@@ -1021,270 +1021,82 @@ function abrirKiosco(disp) {
 // ── FUNCIONES OPERATIVAS REALES CONECTADAS AL SERVIDOR ─────────────────────────────────────
 
 // 1. CARGAR TARDANZAS DEL MES (Con ranking de alumnos)
-function cargarTardanzas() {
-  var loading = document.getElementById("tardanzas-loading");
-  var contenedor = document.getElementById("lista-tardanzas");
-  if(loading) loading.style.display = "block";
-  contenedor.innerHTML = "";
-
-  fetch(AS_URL + "?accion=verTardanzas")
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(loading) loading.style.display = "none";
-      var lista = d.tardanzas || d || [];
-      if(lista.length === 0){
-        contenedor.innerHTML = "<div class='loading'>No hay tardanzas registradas este mes.</div>";
-        return;
-      }
-      contenedor.innerHTML = lista.map(function(t){
-        return "<div class='alum-item amarillo'>" +
-                 "<div><div class='alum-nombre'>👤 " + t.nombre + "</div>" +
-                 "<div class='alum-det'>" + (t.grado || "") + " · DNI: " + t.dni + "</div></div>" +
-                 "<div class='alum-hora'>⚠️ " + (t.cantidad || 1) + " TARD.</div>" +
-               "</div>";
-      }).join("");
-    }).catch(function(){
-      if(loading) loading.style.display = "none";
-      contenedor.innerHTML = "<div class='loading'>❌ Error al cargar tardanzas.</div>";
-    });
-}
-
-// 2. REGISTRO MANUAL — BUSCAR ALUMNO
-function buscarAlumnoReg() {
-  var busq = document.getElementById("reg-buscar").value.trim().toUpperCase();
-  var contenedor = document.getElementById("reg-resultados");
-  if(busq.length < 2) { contenedor.innerHTML = ""; return; }
-
-  // Filtra sobre la lista global cargada previamente
-  var filtrados = listaAlumnos.filter(function(a){
-    return (a.nombre || "").toUpperCase().includes(busq) || String(a.dni || "").includes(busq);
-  }).slice(0, 5);
-
-  if(filtrados.length === 0){
-    contenedor.innerHTML = "<div class='loading'>No se encontraron alumnos.</div>";
+function cargarReportes() {
+  var fechaDesde = document.getElementById("fecha-desde").value;
+  var fechaHasta = document.getElementById("fecha-hasta").value;
+  var contenedor = document.getElementById("lista-reportes");
+  var loading = document.getElementById("reportes-loading");
+  
+  if (!fechaDesde || !fechaHasta) {
+    alert("⚠️ Por favor, seleccione ambas fechas (Desde y Hasta) antes de buscar.");
     return;
   }
-
-  contenedor.innerHTML = filtrados.map(function(a){
-    return "<div class='alum-item azul' style='margin-bottom:6px;'>" +
-             "<div><div class='alum-nombre'>" + a.nombre + "</div>" +
-             "<div class='alum-det'>DNI: " + a.dni + " · " + (a.grado || "") + "</div></div>" +
-             "<div style='display:flex; gap:4px;'>" +
-               "<button class='mini-tab' style='background:var(--verde);color:white;padding:4px 8px;font-size:10px' onclick='marcarAsistenciaManual(\""+a.dni+"\",\"PUNTUAL\")'>✅ P</button>" +
-               "<button class='mini-tab' style='background:#F57F17;color:white;padding:4px 8px;font-size:10px' onclick='marcarAsistenciaManual(\""+a.dni+"\",\"TARDE\")'>⏰ T</button>" +
-             "</div>" +
-           "</div>";
-  }).join("");
-}
-
-// Acción complementaria para el botón de marcar manual
-function marcarAsistenciaManual(dni, estado) {
-  var msg = document.getElementById("reg-msg");
-  msg.style.background = "#FFF9C4"; msg.textContent = "Procesando registro...";
-  fetch(AS_URL + "?accion=marcarManual&dni=" + dni + "&estado=" + estado)
-    .then(function(r){ return r.json(); })
-    .then(function(res){
-      if(res.success){
-        msg.style.background = "#D4EDDA"; msg.style.color = "#1E6B2E";
-        msg.textContent = "🎉 Registrado correctamente como " + estado;
-        document.getElementById("reg-buscar").value = "";
-        document.getElementById("reg-resultados").innerHTML = "";
-      } else {
-        msg.style.background = "#FDECEA"; msg.style.color = "#B71C1C";
-        msg.textContent = "Error: " + res.mensaje;
-      }
-    }).catch(function(){ msg.textContent = "Error de conexión."; });
-}
-
-// 3. REPORTE MENSUAL GENERAL
-function cargarMensual() {
-  var mes = document.getElementById("men-mes").value;
-  var anio = document.getElementById("men-anio").value;
-  var contenedor = document.getElementById("mensual-resultado");
-  var loading = document.getElementById("mensual-loading");
   
-  if(loading) loading.style.display = "block";
+  // Convertimos el formato de fecha de HTML (AAAA-MM-DD) al formato de tu Sheets (DD/MM/AAAA)
+  var pDesde = fechaDesde.split('-');
+  var fDesde = pDesde[2] + "/" + pDesde[1] + "/" + pDesde[0];
+  
+  var pHasta = fechaHasta.split('-');
+  var fHasta = pHasta[2] + "/" + pHasta[1] + "/" + pHasta[0];
+  
+  // Mostramos el mensaje de carga
+  if (loading) loading.style.display = "block";
   contenedor.innerHTML = "";
-
-  fetch(AS_URL + "?accion=reporteMensual&mes=" + mes + "&anio=" + anio)
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(loading) loading.style.display = "none";
-      var registros = d.mensual || d || [];
-      if(registros.length === 0){
-        contenedor.innerHTML = "<div class='loading'>No hay datos consolidados para este mes.</div>";
+  
+  // Construimos la petición hacia tu Google Apps Script
+  var url = AS_URL + "?accion=reporteFechas&desde=" + encodeURIComponent(fDesde) + "&hasta=" + encodeURIComponent(fHasta);
+  
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (loading) loading.style.display = "none";
+      
+      // Guardamos los datos en memoria por si se desea exportar a PDF posteriormente
+      window._diasReportes = d.reportes || d || [];
+      
+      if (window._diasReportes.length === 0) {
+        contenedor.innerHTML = "<div class='loading'>⚠️ No se encontraron registros de asistencia en este rango de fechas.</div>";
         return;
       }
-      var html = "<table class='tabla'><thead><tr><th>Alumno</th><th>Puntuales</th><th>Tardanzas</th><th>Faltas</th></tr></thead><tbody>";
-      registros.forEach(function(a){
+      
+      // Dibujamos la tabla estructurada con los datos devueltos por el servidor
+      var html = "<table class='tabla'>" +
+                 "<thead>" +
+                   "<tr>" +
+                     "<th>Fecha</th>" +
+                     "<th>Alumno / Grado</th>" +
+                     "<th>Estado</th>" +
+                     "<th>Hora</th>" +
+                   "</tr>" +
+                 "</thead>" +
+                 "<tbody>";
+                 
+      window._diasReportes.forEach(function(r) {
+        var est = (r.estado || "AUSENTE").toUpperCase();
+        var badgeClase = "b-ausente";
+        
+        if (est.includes("PUNTUAL") || est.includes("✅")) badgeClase = "b-puntual";
+        else if (est.includes("TARDE") || est.includes("⚠️")) badgeClase = "b-tarde";
+        else if (est.includes("JUSTIFICADO") || est.includes("📄")) badgeClase = "b-justif";
+        
         html += "<tr>" +
-                  "<td style='font-weight:bold'>" + a.nombre + "<br><span style='font-size:9px;color:#777'>" + (a.grado || "") + "</span></td>" +
-                  "<td style='color:var(--verde);font-weight:bold'>" + (a.puntuales || 0) + "</td>" +
-                  "<td style='color:#F57F17;font-weight:bold'>" + (a.tardanzas || 0) + "</td>" +
-                  "<td style='color:var(--rojo);font-weight:bold'>" + (a.faltas || 0) + "</td>" +
+                  "<td style='white-space:nowrap; font-weight:bold; color:var(--marron);'>" + (r.fecha || "--/--") + "</td>" +
+                  "<td>" +
+                    "<div style='font-weight:bold;'>" + r.nombre + "</div>" +
+                    "<div style='font-size:9px; color:#666;'>" + (r.grado || r.seccion || "") + "</div>" +
+                  "</td>" +
+                  "<td><span class='badge " + badgeClase + "'>" + (r.estado || "AUSENTE") + "</span></td>" +
+                  "<td style='font-weight:bold;'>" + (r.hora || "--:--") + "</td>" +
                 "</tr>";
       });
+      
       html += "</tbody></table>";
       contenedor.innerHTML = html;
-    }).catch(function(){ 
-      if(loading) loading.style.display = "none";
-      contenedor.innerHTML = "<div class='loading'>❌ Error al conectar con el reporte mensual.</div>";
-    });
-}
-
-// 4. REPORTE SEMANAL
-function cargarSemanal() {
-  var contenedor = document.getElementById("semanal-resultado");
-  var loading = document.getElementById("semanal-loading");
-  if(loading) loading.style.display = "block";
-  contenedor.innerHTML = "";
-
-  fetch(AS_URL + "?accion=reporteSemanal")
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(loading) loading.style.display = "none";
-      var lineas = d.semanal || d || [];
-      if(lineas.length === 0){
-        contenedor.innerHTML = "<div class='loading'>No hay datos esta semana.</div>";
-        return;
-      }
-      var html = "<table class='tabla'><thead><tr><th>Día</th><th>Puntuales</th><th>Tardanzas</th><th>Ausentes</th></tr></thead><tbody>";
-      lineas.forEach(function(dia){
-        html += "<tr>" +
-                  "<td style='font-weight:bold;color:var(--marron)'>" + dia.dia + "</td>" +
-                  "<td>" + (dia.puntuales || 0) + "</td>" +
-                  "<td>" + (dia.tardanzas || 0) + "</td>" +
-                  "<td style='color:var(--rojo)'>" + (dia.ausentes || 0) + "</td>" +
-                "</tr>";
-      });
-      html += "</tbody></table>";
-      contenedor.innerHTML = html;
-    }).catch(function(){
-      if(loading) loading.style.display = "none";
-      contenedor.innerHTML = "<div class='loading'>❌ Error de red semanal.</div>";
-    });
-}
-
-// 5. ALUMNOS CRÍTICOS (3+ FALTAS)
-function cargarFaltas() {
-  var mes = document.getElementById("fal-mes").value;
-  var anio = document.getElementById("fal-anio").value;
-  var contenedor = document.getElementById("faltas-resultado");
-  var loading = document.getElementById("faltas-loading");
-  if(loading) loading.style.display = "block";
-  contenedor.innerHTML = "";
-
-  fetch(AS_URL + "?accion=alumnosCriticos&mes=" + mes + "&anio=" + anio)
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(loading) loading.style.display = "none";
-      var lista = d.criticos || d || [];
-      if(lista.length === 0){
-        contenedor.innerHTML = "<div class='loading' style='color:var(--verde)'>✅ Ningún alumno supera las 3 faltas en este periodo.</div>";
-        return;
-      }
-      contenedor.innerHTML = lista.map(function(a){
-        return "<div class='alum-item rojo'>" +
-                 "<div><div class='alum-nombre'>⚠️ " + a.nombre + "</div>" +
-                 "<div class='alum-det'>" + (a.grado || "") + " · DNI: " + a.dni + "</div></div>" +
-                 "<div style='font-size:12px;color:var(--rojo);font-weight:bold;'>" + a.faltas + " FALTAS</div>" +
-               "</div>";
-      }).join("");
-    }).catch(function(){
-      if(loading) loading.style.display = "none";
-      contenedor.innerHTML = "<div class='loading'>❌ Error al procesar faltas.</div>";
-    });
-}
-
-// 6. HISTORIAL INDIVIDUAL DE UN ALUMNO
-function buscarAlumnoHist() {
-  var busq = document.getElementById("alum-buscar").value.trim().toUpperCase();
-  var sugerencias = document.getElementById("alum-sugerencias");
-  var historial = document.getElementById("alum-historial");
-  if(busq.length < 2) { sugerencias.innerHTML = ""; historial.innerHTML = ""; return; }
-
-  var filtrados = listaAlumnos.filter(function(a){
-    return (a.nombre || "").toUpperCase().includes(busq) || String(a.dni || "").includes(busq);
-  }).slice(0, 4);
-
-  sugerencias.innerHTML = filtrados.map(function(a){
-    return "<div class='alum-item verde' style='cursor:pointer' onclick='cargarHistorialCompleto(\""+a.dni+"\",\""+a.nombre+"\")'>" +
-             "<span>👤 " + a.nombre + "</span><b>Ver Kardex →</b>" +
-           "</div>";
-  }).join("");
-}
-
-function cargarHistorialCompleto(dni, nombre) {
-  document.getElementById("alum-sugerencias").innerHTML = "";
-  var historial = document.getElementById("alum-historial");
-  historial.innerHTML = "<div class='loading'>⏳ Compilando Kardex para " + nombre + "...</div>";
-
-  fetch(AS_URL + "?accion=kardexAlumno&dni=" + dni)
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      var asis = d.historial || d || [];
-      if(asis.length === 0){
-        historial.innerHTML = "<div class='loading'>El alumno no registra asistencias.</div>";
-        return;
-      }
-      var html = "<h4 style='font-size:12px;color:var(--marron);margin:8px 0;'>" + nombre + "</h4>" +
-                 "<table class='tabla'><thead><tr><th>Fecha</th><th>Asistencia</th><th>Hora</th></tr></thead><tbody>";
-      asis.forEach(function(h){
-        html += "<tr>" +
-                  "<td>" + h.fecha + "</td>" +
-                  "<td>" + h.estado + "</td>" +
-                  "<td>" + (h.hora || "--:--") + "</td>" +
-                "</tr>";
-      });
-      html += "</tbody></table>";
-      historial.innerHTML = html;
-    }).catch(function(){ historial.innerHTML = "<div class='loading'>Error al traer el historial.</div>"; });
-}
-
-// 7. CALENDARIO DÍAS SUSPENDIDOS (Días sin escaneo)
-function cargarDiasRegistrados() {
-  var contenedor = document.getElementById("dse-lista");
-  contenedor.innerHTML = "<div class='loading'>Cargando días sin escaneo...</div>";
-  fetch(AS_URL + "?accion=verDiasSinEscaneo")
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      var lista = d.dias || d || [];
-      if(lista.length === 0){
-        contenedor.innerHTML = "<div style='font-size:11px;text-align:center;color:#777'>No hay feriados o días sin escaneo guardados.</div>";
-        return;
-      }
-      contenedor.innerHTML = lista.map(function(dia){
-        return "<div class='alum-item azul' style='margin-bottom:4px'>" +
-                 "<div><div class='alum-nombre'>📅 " + dia.fecha + "</div>" +
-                 "<div class='alum-det'><b>Motivo:</b> " + dia.motivo + "</div></div>" +
-               "</div>";
-      }).join("");
-    }).catch(function(){ contenedor.innerHTML = "<div class='loading'>Error.</div>"; });
-}
-
-// Funciones de navegación del calendario técnico
-function calCambiarMes(v) {
-  calMes += v;
-  if (calMes > 11) { calMes = 0; calAnio++; }
-  if (calMes < 0) { calMes = 11; calAnio--; }
-  document.getElementById("cal-mes-label").textContent = MESES[calMes] + " " + calAnio;
-  // (Nota: Esta función se conecta con la rutina de dibujo interna de celdas de tu calendario original)
-}
-
-function dseAgregar() {
-  var f = document.getElementById("dse-fecha").value;
-  var m = document.getElementById("dse-motivo").value.trim();
-  var msg = document.getElementById("dse-msg");
-  if(!f || !m){ alert("Seleccione fecha y escriba un motivo"); return; }
-  msg.textContent = "Registrando feriado...";
-  fetch(AS_URL + "?accion=addDiaSinEscaneo&fecha=" + f + "&motivo=" + encodeURIComponent(m))
-    .then(function(r){ return r.json(); })
-    .then(function(res){
-      if(res.success){
-        msg.textContent = "📅 Día guardado.";
-        document.getElementById("dse-motivo").value = "";
-        cargarDiasRegistrados();
-      }
+    })
+    .catch(function(err) {
+      console.error(err);
+      if (loading) loading.style.display = "none";
+      contenedor.innerHTML = "<div class='loading' style='color:var(--rojo); font-weight:bold;'>❌ Error de conexión al consultar el rango de fechas.</div>";
     });
 }
 
