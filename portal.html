@@ -221,6 +221,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion btn-naranja" onclick="exportarPDFDetalleDia()" style="margin-top:6px">📄 Exportar PDF</button>
     </div>
       
+    <!-- DETALLE GENERAL (CON CONTADOR DINÁMICO) -->
     <div class="seccion" id="sec-detalle">
       <input class="buscador" id="buscador" placeholder="🔍 Buscar alumno..." oninput="filtrarDetalle()">
       <div class="mini-tabs">
@@ -229,6 +230,10 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
         <button class="mini-tab" onclick="filtrarEstado('AUSENTE', this)">❌ Ausentes</button>
         <button class="mini-tab" onclick="filtrarEstado('TARDE', this)">⏰ Tarde</button>
         <button class="mini-tab" onclick="filtrarEstado('JUSTIFICADO', this)">📝 Justif.</button>
+      </div>      
+      <!-- CASILLA DE CONTADOR NUEVA -->
+      <div id="contador-filtro" style="background: var(--marron); color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-bottom: 8px; display: inline-block;">
+        Total estudiantes en este filtro: 0
       </div>
       <div id="detalle-loading" class="loading">⏳ Cargando...</div>
       <div class="alum-lista" id="lista-detalle" style="max-height:500px"></div>
@@ -548,7 +553,7 @@ function filtrarDetalle() {
   filtrarEstado(filtroEstado, null);
 }
 
-// LÓGICA DE FILTRADO CORREGIDA (Ignora variaciones Unicode de Emojis)
+// LÓGICA DE FILTRADO CON CONTADOR INCORPORADO
 function filtrarEstado(est, btn) {
   if(btn) {
     document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
@@ -558,6 +563,7 @@ function filtrarEstado(est, btn) {
 
   var buscador = document.getElementById("buscador").value.toUpperCase();
   var cont = document.getElementById("lista-detalle");
+  var cajaContador = document.getElementById("contador-filtro");
 
   var filtrados = datosDet.filter(function(a){
     var coincideBusqueda = (a.nombre || "").toUpperCase().indexOf(buscador) >= 0 || (a.dni || "").indexOf(buscador) >= 0;
@@ -581,6 +587,11 @@ function filtrarEstado(est, btn) {
     }
     return coincideBusqueda && coincideEstado;
   });
+
+  // ACTUALIZAR LA CASILLA DEL CONTADOR CON EL NÚMERO DE ESTUDIANTES
+  if (cajaContador) {
+    cajaContador.textContent = "Total estudiantes en este filtro: " + filtrados.length;
+  }
 
   if(filtrados.length === 0){
     cont.innerHTML = "<div class='loading'>No se encontraron registros coincidentes.</div>";
