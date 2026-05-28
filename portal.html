@@ -292,7 +292,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <div class="seccion" id="sec-detalle">
       <input class="buscador" id="buscador" placeholder="🔍 Buscar alumno..." oninput="filtrarEstado(filtroEstado)">
       <div class="mini-tabs">
-        <button class="mini-tab active" onclick="filtrarEstado('TODOS', this)">Todos</button>
+        <button class="mini-tab active" id="btn-tab-todos" onclick="filtrarEstado('TODOS', this)">Todos</button>
         <button class="mini-tab" onclick="filtrarEstado('PUNTUAL', this)">✅ Puntuales</button>
         <button class="mini-tab" onclick="filtrarEstado('AUSENTE', this)">❌ Ausentes</button>
         <button class="mini-tab" onclick="filtrarEstado('TARDE', this)">⏰ Tarde</button>
@@ -919,16 +919,23 @@ function cargarDetalleDia() {
   
 function cargarDetalle() {
   document.getElementById("detalle-loading").style.display = "block";
+  document.getElementById("cant-filtrados").textContent = "0";
+  
+  // Fecha de hoy
   var hoy = new Date();
-  var dd = (hoy.getDate()<10?"0":"") + hoy.getDate();
-  var mm = (hoy.getMonth()+1<10?"0":"") + (hoy.getMonth()+1);
+  var dd = (hoy.getDate() < 10 ? "0" : "") + hoy.getDate();
+  var mm = (hoy.getMonth() + 1 < 10 ? "0" : "") + (hoy.getMonth() + 1);
   var fecha = dd + "/" + mm + "/" + hoy.getFullYear();
+  
   fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(fecha))
     .then(function(r){ return r.json(); })
     .then(function(d){
       document.getElementById("detalle-loading").style.display = "none";
       datosDet = d.registros || [];
-      filtrarEstado("TODOS");
+      
+      // Forzar la activación inicial de la pestaña TODOS y refrescar contadores
+      var btnTodos = document.getElementById("btn-tab-todos");
+      filtrarEstado("TODOS", btnTodos);
     })
     .catch(function(){
       document.getElementById("detalle-loading").style.display = "none";
@@ -936,7 +943,6 @@ function cargarDetalle() {
 }
 
 function filtrarDetalle() {
-  // Redirige al filtro dinámico general para que se actualice la casilla correctamente
   filtrarEstado(filtroEstado);
 }
   
@@ -945,13 +951,22 @@ function filtrarEstado(est, btn) {
     document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
     btn.classList.add("active");
   }
-  filtroEstado = est;  
+  filtroEstado = est;
+  
   var b = document.getElementById("buscador").value.toUpperCase();
-  var cont = document.getElementById("lista-detalle");  
+  var cont = document.getElementById("lista-detalle");
+  
+  // Si no hay datos cargados aún, salimos para evitar errores
+  if (!datosDet) {
+    document.getElementById("cant-filtrados").textContent = "0";
+    return;
+  }
+  
   var filtrados = datosDet.filter(function(a){
     var coincideBusqueda = (a.nombre || "").toUpperCase().indexOf(b) >= 0;
     var estadoAlumno = (a.estado || "").toUpperCase();
-    var coincideEstado = false;    
+    var coincideEstado = false;
+    
     if(est === "TODOS"){
       coincideEstado = true;
     } else if(est === "PUNTUAL"){
@@ -965,68 +980,24 @@ function filtrarEstado(est, btn) {
     }
     return coincideBusqueda && coincideEstado;
   });
-  // Actualiza la casilla con la cantidad exacta en tiempo real
+
+  // Actualizar la casilla con la cantidad exacta de forma inmediata
   document.getElementById("cant-filtrados").textContent = filtrados.length;
+
   if(filtrados.length === 0){
     cont.innerHTML = "<div class='loading'>No se encontraron alumnos.</div>";
     return;
   }
+
   cont.innerHTML = filtrados.map(function(a){
-    var clase = "verde";
-    if((a.estado || "").indexOf("AUSENTE") >= 0){
-      clase = "rojo";
-    } else if((a.estado || "").indexOf("TARDE") >= 0){
-      clase = "amarillo";
-    } else if((a.estado || "").indexOf("JUSTIFICADO") >= 0){
-      clase = "azul";
-    }
-    return "<div class='alum-item " + clase + "'>" +
-      "<div>" +
-      "<div class='alum-nombre'>" + a.nombre + "</div>" +
-      "<div class='alum-det'>DNI: " + (a.dni || a.id || "") + " | Estado: " + (a.estado || "SIN ESTADO") + "</div>" +
-      "</div>" +
-      "</div>";
-  }).join("");
-}
-  
-function filtrarEstado(est, btn) {
-  document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
-  if(btn) btn.classList.add("active");
-  filtroEstado = est;
-  
-  var b = document.getElementById("buscador").value.toUpperCase();
-  var cont = document.getElementById("lista-detalle");
-  var filtrados = datosDet.filter(function(a){
-    var coincideBusqueda = (a.nombre || "").toUpperCase().indexOf(b) >= 0;
     var estadoAlumno = (a.estado || "").toUpperCase();
-    var coincideEstado = false;
+    var clase = "verde"; // Por defecto para PUNTUAL o vacío
     
-    if(est === "TODOS"){
-      coincideEstado = true;
-    } else if(est === "PRESENTE"){
-      coincideEstado = estadoAlumno.includes("PUNTUAL") || estadoAlumno.includes("✅");
-    } else if(est === "TARDE"){
-      coincideEstado = estadoAlumno.includes("TARDE") || estadoAlumno.includes("⚠️");
-    } else if(est === "AUSENTE"){
-      coincideEstado = estadoAlumno.includes("AUSENTE") || estadoAlumno.includes("❌");
-    } else if(est === "JUSTIFICADO"){
-      coincideEstado = estadoAlumno.includes("JUSTIFICADO") || estadoAlumno.includes("JUSTIF") || estadoAlumno.includes("📄");
-    }
-    return coincideBusqueda && coincideEstado;
-  });
-
-  if(filtrados.length === 0){
-    cont.innerHTML = "<div class='loading'>No se encontraron alumnos.</div>";
-    return;
-  }
-
-  cont.innerHTML = filtrados.map(function(a){
-    var clase = "verde";
-    if((a.estado || "").indexOf("AUSENTE") >= 0){
+    if(estadoAlumno.indexOf("AUSENTE") >= 0 || estadoAlumno.indexOf("❌") >= 0){
       clase = "rojo";
-    } else if((a.estado || "").indexOf("TARDE") >= 0){
+    } else if(estadoAlumno.indexOf("TARDE") >= 0 || estadoAlumno.indexOf("⚠️") >= 0){
       clase = "amarillo";
-    } else if((a.estado || "").indexOf("JUSTIFICADO") >= 0){
+    } else if(estadoAlumno.indexOf("JUSTIFICADO") >= 0 || estadoAlumno.indexOf("JUSTIF") >= 0 || estadoAlumno.indexOf("📄") >= 0){
       clase = "azul";
     }
 
