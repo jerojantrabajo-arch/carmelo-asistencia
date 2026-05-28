@@ -290,13 +290,16 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     </div>
       
     <div class="seccion" id="sec-detalle">
-      <input class="buscador" id="buscador" placeholder="🔍 Buscar alumno..." oninput="filtrarDetalle()">
+      <input class="buscador" id="buscador" placeholder="🔍 Buscar alumno..." oninput="filtrarEstado(filtroEstado)">
       <div class="mini-tabs">
         <button class="mini-tab active" onclick="filtrarEstado('TODOS', this)">Todos</button>
-        <button class="mini-tab" onclick="filtrarEstado('PRESENTE', this)">✅ Presentes</button>
+        <button class="mini-tab" onclick="filtrarEstado('PUNTUAL', this)">✅ Puntuales</button>
         <button class="mini-tab" onclick="filtrarEstado('AUSENTE', this)">❌ Ausentes</button>
         <button class="mini-tab" onclick="filtrarEstado('TARDE', this)">⏰ Tarde</button>
         <button class="mini-tab" onclick="filtrarEstado('JUSTIFICADO', this)">📝 Justif.</button>
+      </div>      
+      <div id="detalle-contador" style="background: var(--marron-osc); color: white; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-bottom: 8px; text-align: center;">
+        Estudiantes encontrados: <span id="cant-filtrados">0</span>
       </div>
       <div id="detalle-loading" class="loading">⏳ Cargando...</div>
       <div class="alum-lista" id="lista-detalle" style="max-height:500px"></div>
@@ -933,13 +936,56 @@ function cargarDetalle() {
 }
 
 function filtrarDetalle() {
+  // Redirige al filtro dinámico general para que se actualice la casilla correctamente
+  filtrarEstado(filtroEstado);
+}
+  
+function filtrarEstado(est, btn) {
+  if(btn) {
+    document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
+    btn.classList.add("active");
+  }
+  filtroEstado = est;  
   var b = document.getElementById("buscador").value.toUpperCase();
-  var cont = document.getElementById("lista-detalle");
+  var cont = document.getElementById("lista-detalle");  
   var filtrados = datosDet.filter(function(a){
-    return (a.nombre || "").toUpperCase().indexOf(b) >= 0;
+    var coincideBusqueda = (a.nombre || "").toUpperCase().indexOf(b) >= 0;
+    var estadoAlumno = (a.estado || "").toUpperCase();
+    var coincideEstado = false;    
+    if(est === "TODOS"){
+      coincideEstado = true;
+    } else if(est === "PUNTUAL"){
+      coincideEstado = estadoAlumno.includes("PUNTUAL") || estadoAlumno.includes("✅");
+    } else if(est === "TARDE"){
+      coincideEstado = estadoAlumno.includes("TARDE") || estadoAlumno.includes("⚠️");
+    } else if(est === "AUSENTE"){
+      coincideEstado = estadoAlumno.includes("AUSENTE") || estadoAlumno.includes("❌");
+    } else if(est === "JUSTIFICADO"){
+      coincideEstado = estadoAlumno.includes("JUSTIFICADO") || estadoAlumno.includes("JUSTIF") || estadoAlumno.includes("📄");
+    }
+    return coincideBusqueda && coincideEstado;
   });
+  // Actualiza la casilla con la cantidad exacta en tiempo real
+  document.getElementById("cant-filtrados").textContent = filtrados.length;
+  if(filtrados.length === 0){
+    cont.innerHTML = "<div class='loading'>No se encontraron alumnos.</div>";
+    return;
+  }
   cont.innerHTML = filtrados.map(function(a){
-    return "<div class='alum-item verde'><div class='alum-nombre'>" + a.nombre + "</div><div class='alum-det'>DNI: " + (a.dni||a.id) + "</div></div>";
+    var clase = "verde";
+    if((a.estado || "").indexOf("AUSENTE") >= 0){
+      clase = "rojo";
+    } else if((a.estado || "").indexOf("TARDE") >= 0){
+      clase = "amarillo";
+    } else if((a.estado || "").indexOf("JUSTIFICADO") >= 0){
+      clase = "azul";
+    }
+    return "<div class='alum-item " + clase + "'>" +
+      "<div>" +
+      "<div class='alum-nombre'>" + a.nombre + "</div>" +
+      "<div class='alum-det'>DNI: " + (a.dni || a.id || "") + " | Estado: " + (a.estado || "SIN ESTADO") + "</div>" +
+      "</div>" +
+      "</div>";
   }).join("");
 }
   
