@@ -1033,31 +1033,58 @@ function dseAgregar() { console.log("Agregando día sin escaneo"); }
 function exportarPDFDia(){
   var elemento = document.getElementById("tablaHoy");
   if(!elemento){ alert("No se encontró el reporte"); return; }
+  
+  // Guardamos los estilos originales de la lista para no alterar la pantalla del usuario
+  var listaAus = document.getElementById("lista-ausentes-hoy");
+  var originalHeight = listaAus ? listaAus.style.maxHeight : "";
+  var originalOverflow = listaAus ? listaAus.style.overflow : "";
+  
+  // Forzamos a que la lista se estire por completo antes de tomar la foto para el PDF
+  if(listaAus) {
+    listaAus.style.maxHeight = "none";
+    listaAus.style.overflow = "visible";
+  }
+  
   var opciones = {
-    margin: 0.5,
-    filename: 'Reporte_Hoy.pdf',
-    image: { type: 'jpeg', quality: 1 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    margin:       [0.5, 0.4, 0.5, 0.4], // Margen superior, izquierdo, inferior, derecho
+    filename:     'Reporte_Hoy.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, logging: false, useCORS: true },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+    // EVITA CORTE DE TARJETAS POR LA MITAD: Salta de página automáticamente si una tarjeta no cabe entera
+    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], avoid: '.alum-item' }
   };
-  html2pdf().set(opciones).from(elemento).save();
+  
+  html2pdf().set(opciones).from(elemento).save().then(function(){
+    // Devolvemos la pantalla del celular a su estado normal con scroll interno
+    if(listaAus) {
+      listaAus.style.maxHeight = originalHeight;
+      listaAus.style.overflow = originalOverflow;
+    }
+  });
 }
   
 function exportarPDFDetalleDia(){
   var elemento = document.getElementById("dd-lista");
   if(!elemento){ alert("No hay datos para exportar"); return; }
+  
   var originalHeight = elemento.style.maxHeight;
   var originalOverflow = elemento.style.overflow;
+  
+  // Forzamos expansión total para capturar todos los alumnos
   elemento.style.maxHeight = "none";
   elemento.style.overflow = "visible";
+  
   var opciones = {
-    margin: 0.3,
-    filename: 'Reporte_Detalle_Dia.pdf',
-    image: { type: 'jpeg', quality: 1 },
-    html2canvas: { scale: 2, scrollY: 0 },
-    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    margin:       [0.4, 0.4, 0.4, 0.4],
+    filename:     'Reporte_Detalle_Dia.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, scrollY: 0, useCORS: true },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+    // Configuración estricta anti-cortes para tablas o filas de alumnos
+    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], avoid: '.alum-item' }
   };
+  
   html2pdf().set(opciones).from(elemento).save().then(function(){
     elemento.style.maxHeight = originalHeight;
     elemento.style.overflow = originalOverflow;
