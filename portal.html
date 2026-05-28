@@ -233,102 +233,45 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 
   <div class="p-content">
 
-  <div class="seccion" id="sec-hoy">
-    <div id="hoy-loading" class="loading">
-      ⏳ Cargando datos de hoy...
-    </div>
-
-    <div id="tablaHoy">
-
-      <div id="hoy-contenido" style="display:none">
-
-        <div class="grid-4">
-          <div class="stat-card c-verde">
-            <div class="num" id="h-presentes">0</div>
-            <div class="lbl">Presentes</div>
+    <div class="seccion" id="sec-hoy">
+      <div id="hoy-loading" class="loading">⏳ Cargando datos de hoy...</div>
+      <div id="tablaHoy">
+        <div id="hoy-contenido" style="display:none">
+          <div class="grid-4">
+            <div class="stat-card c-verde">
+              <div class="num" id="h-presentes">0</div>
+              <div class="lbl">Presentes</div>
+            </div>
+            <div class="stat-card c-rojo">
+              <div class="num" id="h-ausentes">0</div>
+              <div class="lbl">Ausentes</div>
+            </div>
+            <div class="stat-card c-amarillo">
+              <div class="num" id="h-tardanzas">0</div>
+              <div class="lbl">Tardanzas</div>
+            </div>
+            <div class="stat-card c-azul">
+              <div class="num" id="h-justif">0</div>
+              <div class="lbl">Justif.</div>
+            </div>
           </div>
 
-          <div class="stat-card c-rojo">
-            <div class="num" id="h-ausentes">0</div>
-            <div class="lbl">Ausentes</div>
+          <div class="stat-card c-marron" style="margin-bottom:10px">
+            <div class="num" id="h-pct">0%</div>
+            <div class="lbl">% Asistencia del día</div>
           </div>
 
-          <div class="stat-card c-amarillo">
-            <div class="num" id="h-tardanzas">0</div>
-            <div class="lbl">Tardanzas</div>
-          </div>
+          <div class="sec-title">❌ Ausentes de hoy</div>
+          <div class="alum-lista" id="lista-ausentes-hoy"></div>
 
-          <div class="stat-card c-azul">
-            <div class="num" id="h-justif">0</div>
-            <div class="lbl">Justif.</div>
+          <div style="margin-top:10px">
+            <button class="btn-accion" onclick="cargarHoy()">🔄 Actualizar</button>
+            <button class="btn-accion btn-naranja" onclick="exportarPDFDia()">📄 Exportar PDF</button>
           </div>
         </div>
-
-        <div class="stat-card c-marron" style="margin-bottom:10px">
-          <div class="num" id="h-pct">0%</div>
-          <div class="lbl">% Asistencia del día</div>
-        </div>
-
-        <div class="sec-title">❌ Ausentes de hoy</div>
-
-        <div class="alum-lista" id="lista-ausentes-hoy"></div>
-
-        <div style="margin-top:10px">
-          <button class="btn-accion" onclick="cargarHoy()">
-            🔄 Actualizar
-          </button>
-
-          <button class="btn-accion btn-naranja"
-            onclick="exportarPDFDia()">
-            📄 Exportar PDF
-          </button>
-        </div>
-
       </div>
     </div>
-  </div>
 
-  <div class="seccion" id="sec-detalledia">
-
-    <div class="sec-title">📋 Detalle completo del día</div>
-
-    <div class="grid-2" style="margin-bottom:8px">
-
-      <div>
-        <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">
-          Fecha:
-        </label>
-
-        <input type="date" id="dd-fecha" class="buscador" style="margin-bottom:0">
-      </div>
-
-      <div style="display:flex;align-items:flex-end">
-        <button class="btn-accion"
-          onclick="cargarDetalleDia()"
-          style="margin-bottom:0">
-          🔍 Ver detalle
-        </button>
-      </div>
-
-    </div>
-
-    <div id="dd-loading" class="loading" style="display:none">
-      ⏳ Cargando...
-    </div>
-
-    <div id="dd-resumen" style="margin-bottom:8px"></div>
-
-    <div id="dd-lista"></div>
-
-    <button class="btn-accion btn-naranja"
-      onclick="exportarPDFDetalleDia()"
-      style="margin-top:6px">
-      📄 Exportar PDF
-    </button>
-
-  </div>
-</div>
-      
     <div class="seccion" id="sec-detalledia">
       <div class="sec-title">📋 Detalle completo del día</div>
       <div class="grid-2" style="margin-bottom:8px">
@@ -655,7 +598,6 @@ function mostrarPortal() {
   setInterval(function(){
     if(tabActual==='hoy') cargarHoy();
   }, 120000);
-  
 }
 
 function cerrarSesion() {
@@ -933,27 +875,22 @@ function toggleMotivoCampos() {
 
 // ── KIOSCO QR ─────────────────────────────────────────────────────
 function abrirKiosco(disp) {
-  var urlKiosco =
-    "https://jerojantrabajo-arch.github.io/carmelo-asistencia/index.html?dispositivo=" + disp;
+  var urlKiosco = "https://jerojantrabajo-arch.github.io/carmelo-asistencia/index.html?dispositivo=" + disp;
   location.replace(urlKiosco);
 }
 
-// ── MÁS FUNCIONES STUB (Para evitar errores de llamadas en UI) ────
+// ── DETALLE DEL DÍA ────────────────────────────────────────────────
 function cargarDetalleDia() {
-  var inputFecha = document.getElementById("dd-fecha").value; // Ejemplo: 2026-05-26
-  
-  // Convertimos de 2026-05-26 a 26/05/2026
+  var inputFecha = document.getElementById("dd-fecha").value;
   var partes = inputFecha.split('-');
   var f = partes[2] + "/" + partes[1] + "/" + partes[0]; 
   
   var cont = document.getElementById("dd-lista");
   cont.innerHTML = "<div class='loading'>🔍 Consultando asistencia para " + f + "...</div>";
   
-  // Usamos encodeURIComponent por si la fecha tiene "/"
   fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(f))
     .then(function(r){ return r.json(); })
     .then(function(d){
-      // --- CAMBIO AQUÍ: Ahora buscamos 'registros' ---
       var lista = d.registros || []; 
       
       if(lista.length === 0) { 
@@ -979,15 +916,12 @@ function cargarDetalleDia() {
   
 function cargarDetalle() {
   document.getElementById("detalle-loading").style.display = "block";
-  // Fecha de hoy
   var hoy = new Date();
   var dd = (hoy.getDate()<10?"0":"") + hoy.getDate();
   var mm = (hoy.getMonth()+1<10?"0":"") + (hoy.getMonth()+1);
   var fecha = dd + "/" + mm + "/" + hoy.getFullYear();
   fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(fecha))
-    .then(function(r){
-      return r.json();
-    })
+    .then(function(r){ return r.json(); })
     .then(function(d){
       document.getElementById("detalle-loading").style.display = "none";
       datosDet = d.registros || [];
@@ -997,6 +931,7 @@ function cargarDetalle() {
       document.getElementById("detalle-loading").style.display = "none";
     });
 }
+
 function filtrarDetalle() {
   var b = document.getElementById("buscador").value.toUpperCase();
   var cont = document.getElementById("lista-detalle");
@@ -1009,50 +944,33 @@ function filtrarDetalle() {
 }
   
 function filtrarEstado(est, btn) {
-  document.querySelectorAll(".mini-tab").forEach(function(t){
-    t.classList.remove("active");
-  });
+  document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
   if(btn) btn.classList.add("active");
   filtroEstado = est;
-  console.log(datosDet);
+  
   var b = document.getElementById("buscador").value.toUpperCase();
   var cont = document.getElementById("lista-detalle");
   var filtrados = datosDet.filter(function(a){
-    // FILTRO POR NOMBRE
-    var coincideBusqueda =
-      (a.nombre || "").toUpperCase().indexOf(b) >= 0;
-    // FILTRO POR ESTADO
+    var coincideBusqueda = (a.nombre || "").toUpperCase().indexOf(b) >= 0;
     var estadoAlumno = (a.estado || "").toUpperCase();
     var coincideEstado = false;
+    
     if(est === "TODOS"){
       coincideEstado = true;
+    } else if(est === "PRESENTE"){
+      coincideEstado = estadoAlumno.includes("PUNTUAL") || estadoAlumno.includes("✅");
+    } else if(est === "TARDE"){
+      coincideEstado = estadoAlumno.includes("TARDE") || estadoAlumno.includes("⚠️");
+    } else if(est === "AUSENTE"){
+      coincideEstado = estadoAlumno.includes("AUSENTE") || estadoAlumno.includes("❌");
+    } else if(est === "JUSTIFICADO"){
+      coincideEstado = estadoAlumno.includes("JUSTIFICADO") || estadoAlumno.includes("JUSTIF") || estadoAlumno.includes("📄");
     }
-    else if(est === "PRESENTE"){
-  coincideEstado =
-    estadoAlumno.includes("PUNTUAL") ||
-    estadoAlumno.includes("✅");
-}
-else if(est === "TARDE"){
-  coincideEstado =
-    estadoAlumno.includes("TARDE") ||
-    estadoAlumno.includes("⚠️");
-}
-else if(est === "AUSENTE"){
-  coincideEstado =
-    estadoAlumno.includes("AUSENTE") ||
-    estadoAlumno.includes("❌");
-}
-else if(est === "JUSTIFICADO"){
-  coincideEstado =
-    estadoAlumno.includes("JUSTIFICADO") ||
-    estadoAlumno.includes("JUSTIF") ||
-    estadoAlumno.includes("📄");
-}
-return coincideBusqueda && coincideEstado;
+    return coincideBusqueda && coincideEstado;
   });
+
   if(filtrados.length === 0){
-    cont.innerHTML =
-      "<div class='loading'>No se encontraron alumnos.</div>";
+    cont.innerHTML = "<div class='loading'>No se encontraron alumnos.</div>";
     return;
   }
 
@@ -1060,25 +978,22 @@ return coincideBusqueda && coincideEstado;
     var clase = "verde";
     if((a.estado || "").indexOf("AUSENTE") >= 0){
       clase = "rojo";
-    }
-    else if((a.estado || "").indexOf("TARDE") >= 0){
+    } else if((a.estado || "").indexOf("TARDE") >= 0){
       clase = "amarillo";
-    }
-    else if((a.estado || "").indexOf("JUSTIFICADO") >= 0){
+    } else if((a.estado || "").indexOf("JUSTIFICADO") >= 0){
       clase = "azul";
     }
 
     return "<div class='alum-item " + clase + "'>" +
       "<div>" +
       "<div class='alum-nombre'>" + a.nombre + "</div>" +
-      "<div class='alum-det'>" +
-      "DNI: " + (a.dni || a.id || "") +
-      " | Estado: " + (a.estado || "SIN ESTADO") +
-      "</div>" +
+      "<div class='alum-det'>DNI: " + (a.dni || a.id || "") + " | Estado: " + (a.estado || "SIN ESTADO") + "</div>" +
       "</div>" +
       "</div>";
   }).join("");
 }
+
+// ── FUNCIONES STUB DE RESPALDO UI ──────────────────────────────────
 function cargarReportes() { console.log("Reportes invocados"); }
 function cargarTardanzas() { document.getElementById("tardanzas-loading").style.display="none"; }
 function cargarDiasRegistrados() { console.log("Días sin escaneo invocados"); }
@@ -1089,6 +1004,8 @@ function cargarFaltas() { console.log("Reporte faltas invocado"); }
 function buscarAlumnoHist() { console.log("Buscando historial"); }
 function calCambiarMes(v) { console.log("Cambio de mes calendario"); }
 function dseAgregar() { console.log("Agregando día sin escaneo"); }
+
+// ── EXPORTACIÓN PDF ────────────────────────────────────────────────
 function exportarPDFDia(){
   var elemento = document.getElementById("tablaHoy");
   if(!elemento){
@@ -1100,29 +1017,20 @@ function exportarPDFDia(){
     filename: 'Reporte_Hoy.pdf',
     image: { type: 'jpeg', quality: 1 },
     html2canvas: { scale: 2 },
-    jsPDF: {
-      unit: 'in',
-      format: 'a4',
-      orientation: 'portrait'
-    }
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
   };
   html2pdf().set(opciones).from(elemento).save();
 }
   
- function exportarPDFDetalleDia(){
-
+function exportarPDFDetalleDia(){
   var elemento = document.getElementById("dd-lista");
-
   if(!elemento){
     alert("No hay datos para exportar");
     return;
   }
-
-  // Guardamos estilos originales
   var originalHeight = elemento.style.maxHeight;
   var originalOverflow = elemento.style.overflow;
 
-  // Expandimos TODO el contenido
   elemento.style.maxHeight = "none";
   elemento.style.overflow = "visible";
 
@@ -1130,33 +1038,16 @@ function exportarPDFDia(){
     margin: 0.3,
     filename: 'Reporte_Detalle_Dia.pdf',
     image: { type: 'jpeg', quality: 1 },
-    html2canvas: {
-      scale: 2,
-      scrollY: 0
-    },
-    jsPDF: {
-      unit: 'in',
-      format: 'a4',
-      orientation: 'portrait'
-    },
+    html2canvas: { scale: 2, scrollY: 0 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
   };
 
-  html2pdf()
-    .set(opciones)
-    .from(elemento)
-    .save()
-    .then(function(){
-
-      // Restauramos estilos
-      elemento.style.maxHeight = originalHeight;
-      elemento.style.overflow = originalOverflow;
-
-    });
-
+  html2pdf().set(opciones).from(elemento).save().then(function(){
+    elemento.style.maxHeight = originalHeight;
+    elemento.style.overflow = originalOverflow;
+  });
 }
-  
 </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
 </html>
