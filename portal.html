@@ -627,14 +627,41 @@ function irSeccion(id) {
 function cargarHoy() {
   document.getElementById("hoy-loading").style.display = "block";
   document.getElementById("hoy-contenido").style.display = "none";
+  
+  // 1. Conseguimos los números del dashboard
   fetch(AS_URL + "?accion=dashboard")
     .then(function(r){ return r.json(); })
     .then(function(d){
       datosHoy = d;
+      
+      // Fecha de hoy formateada para pedir los nombres al servidor
+      var hoy = new Date();
+      var dd = (hoy.getDate() < 10 ? "0" : "") + hoy.getDate();
+      var mm = (hoy.getMonth() + 1 < 10 ? "0" : "") + (hoy.getMonth() + 1);
+      var fechaFmt = dd + "/" + mm + "/" + hoy.getFullYear();
+      
+      // 2. Extraemos los nombres reales directamente del detalle del día
+      return fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(fechaFmt));
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(det){
+      // Filtramos en tiempo real solo a los alumnos que tengan marca de AUSENTE o el ícono ❌
+      if(det && det.registros) {
+        datosHoy.listaAusentes = det.registros.filter(function(a){
+          var est = (a.estado || "").toUpperCase();
+          return est.includes("AUSENTE") || est.includes("❌");
+        });
+      }
+      // Renderizamos la vista final con números y nombres acoplados
       renderHoy();
     })
     .catch(function(){
-      document.getElementById("hoy-loading").textContent = "Error al cargar — verifique conexión";
+      // Si algo falla en la doble petición, intentamos pintar lo que tengamos en memoria
+      if(datosHoy) {
+        renderHoy();
+      } else {
+        document.getElementById("hoy-loading").textContent = "Error al cargar — verifique conexión";
+      }
     });
 }
 
