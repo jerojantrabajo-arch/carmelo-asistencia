@@ -1030,88 +1030,93 @@ function calCambiarMes(v) { console.log("Cambio de mes calendario"); }
 function dseAgregar() { console.log("Agregando día sin escaneo"); }
 
 // ── EXPORTACIÓN PDF ────────────────────────────────────────────────
-function exportarPDFDia(){
-  var elementoOriginal = document.getElementById("tablaHoy");
-  if(!elementoOriginal){ alert("No se encontró el reporte"); return; }
-  
-  // CLONACIÓN SEGURA: Duplicamos el elemento en memoria
-  var clon = elementoOriginal.cloneNode(true);
-  
-  // Forzamos al clon y a sus listas a expandirse completamente
-  clon.style.height = "auto";
-  clon.style.maxHeight = "none";
-  clon.style.overflow = "visible";
-  clon.style.display = "block";
-  
-  var listaAus = clon.querySelector("#lista-ausentes-hoy");
-  if(listaAus) {
-    listaAus.style.height = "auto";
-    listaAus.style.maxHeight = "none";
-    listaAus.style.overflow = "visible";
-    listaAus.style.display = "flex"; // Mantiene el diseño de lista vertical
-  }
+// ── EXPORTACIÓN UNIFICADA ANTI-BLANCO Y ANTI-CORTE ──────────────────
 
-  // Capa invisible pero 100% real para el navegador (evita el PDF en blanco)
-  clon.style.position = "fixed";
-  clon.style.top = "0";
-  clon.style.left = "0";
-  clon.style.width = "750px"; // Ancho de página óptimo
-  clon.style.opacity = "0";    // Invisible para el usuario
-  clon.style.zIndex = "-9999"; // Detrás de todo
+function exportarElementoAPDF(idElemento, nombreArchivo) {
+  var elementoOriginal = document.getElementById(idElemento);
+  if(!elementoOriginal) { 
+    alert("No se encontraron datos para exportar."); 
+    return; 
+  }
   
-  document.body.appendChild(clon);
-  
-  var opciones = {
-    margin:       [0.5, 0.4, 0.5, 0.4],
-    filename:     'Reporte_Hoy.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, logging: false, useCORS: true, letterRendering: true },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
-    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], avoid: '.alum-item' }
-  };
-  
-  // Le damos un respiro mínimo de 100ms para asegurar el renderizado antes de capturar
-  setTimeout(function(){
-    html2pdf().set(opciones).from(clon).save().then(function(){
-      document.body.removeChild(clon);
-    });
-  }, 100);
-}
-  
-function exportarPDFDetalleDia(){
-  var elementoOriginal = document.getElementById("dd-lista");
-  if(!elementoOriginal || elementoOriginal.children.length === 0){ alert("No hay datos para exportar"); return; }
-  
+  // Clonamos el elemento en memoria para no alterar lo que ve el usuario
   var clon = elementoOriginal.cloneNode(true);
   
+  // Eliminamos cualquier restricción de altura o scroll en el clon y sus hijos
   clon.style.height = "auto";
   clon.style.maxHeight = "none";
   clon.style.overflow = "visible";
   clon.style.display = "block";
+  clon.style.background = "white"; // Asegura fondo blanco limpio
+  clon.style.color = "#333";
   
+  // Expandir selectores de listas internas si existen dentro del clon
+  var listasInternas = clon.querySelectorAll(".alum-lista, #dd-lista, #lista-reportes, #lista-tardanzas, #mensual-resultado, #semanal-resultado, #faltas-resultado");
+  listasInternas.forEach(function(lista) {
+    lista.style.height = "auto";
+    lista.style.maxHeight = "none";
+    lista.style.overflow = "visible";
+    lista.style.display = "block";
+  });
+
+  // Capa invisible pero real para forzar al navegador a dibujar el contenido
   clon.style.position = "fixed";
   clon.style.top = "0";
   clon.style.left = "0";
-  clon.style.width = "750px";
+  clon.style.width = "750px"; 
   clon.style.opacity = "0";
   clon.style.zIndex = "-9999";
   
   document.body.appendChild(clon);
   
   var opciones = {
-    margin:       [0.4, 0.4, 0.4, 0.4],
-    filename:     'Reporte_Detalle_Dia.pdf',
+    margin:       [0.5, 0.4, 0.5, 0.4],
+    filename:     nombreArchivo + '.pdf',
     image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, scrollY: 0, useCORS: true, letterRendering: true },
+    html2canvas:  { scale: 2, logging: false, useCORS: true, letterRendering: true, scrollY: 0 },
     jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
-    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], avoid: '.alum-item' }
+    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], avoid: ['.alum-item', 'tr', '.stat-card'] }
   };
   
+  // Pausa de 150ms para garantizar que el navegador dibuje tablas, nombres y gráficos
   setTimeout(function(){
     html2pdf().set(opciones).from(clon).save().then(function(){
       document.body.removeChild(clon);
+    }).catch(function(err){
+      console.error("Error al generar PDF:", err);
+      document.body.removeChild(clon);
     });
-  }, 100);
+  }, 150);
+}
+
+// Vinculación de los botones de la interfaz con el motor unificado:
+
+function exportarPDFDia(){
+  exportarElementoAPDF("tablaHoy", "Reporte_Hoy");
+}
+  
+function exportarPDFDetalleDia(){
+  exportarElementoAPDF("dd-lista", "Reporte_Detalle_Dia");
+}
+
+function exportarPDFPorFechas() {
+  exportarElementoAPDF("lista-reportes", "Reporte_Por_Fechas");
+}
+
+function exportarPDFTardanzas() {
+  exportarElementoAPDF("lista-tardanzas", "Reporte_Tardanzas_Mes");
+}
+
+function exportarPDFMensual() {
+  exportarElementoAPDF("mensual-resultado", "Reporte_Mensual");
+}
+
+function exportarPDFSemanal() {
+  exportarElementoAPDF("semanal-resultado", "Reporte_Semanal");
+}
+
+function exportarPDFFaltas() {
+  exportarElementoAPDF("faltas-resultado", "Reporte_Alumnos_Faltas");
 }
 </script>
 </body>
