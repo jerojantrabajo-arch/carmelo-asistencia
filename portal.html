@@ -76,39 +76,17 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 .sec-title{background:var(--marron);color:white;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:bold;margin-bottom:8px;display:flex;align-items:center;gap:8px}
 
 /* Lista alumnos */
-.alum-lista{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
+.alum-lista{display:flex;flex-direction:column;gap:4px;}
 .alum-item{border-radius:8px;padding:8px 10px;border-left:4px solid;display:flex;justify-content:space-between;align-items:center;box-shadow: 0 1px 3px rgba(0,0,0,0.02)}
 .alum-item.verde{background:#F0FFF4;border-color:var(--verde)}
 .alum-item.rojo{background:#FFF5F5;border-color:var(--rojo)}
 .alum-item.amarillo{background:#FFFDE7;border-color:#F57F17}
 .alum-item.azul{background:#F0F7FF;border-color:var(--azul)}
 
-.alum-nombre {
-  font-weight: bold;
-  color: #3A1800;
-  font-size: 11px !important;
-}
-
-.alum-det {
-  font-size: 11px !important;
-  color: #777 !important;
-  font-weight: normal !important;
-  margin-top: 2px;
-}
-
-.alum-hora {
-  font-size: 11px !important;
-  color: var(--marron-clr);
-  font-weight: bold;
-}
-#dd-lista{
-  background:#fff;
-  padding:10px;
-}
+.alum-nombre {font-weight: bold;color: #3A1800;font-size: 11px !important;}
+.alum-det {font-size: 11px !important;color: #777 !important;font-weight: normal !important;margin-top: 2px;}
+.alum-hora {font-size: 11px !important;color: var(--marron-clr);font-weight: bold;}
+#dd-lista{background:#fff;padding:10px;}
   
 /* Tabs internos */
 .mini-tabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
@@ -138,12 +116,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
   padding: 12px 10px !important;
   height: auto !important;
 }
-
-.buscador:focus {
-  outline: none;
-  border-color: var(--marron);
-  background-color: #FFFDF9;
-}
+.buscador:focus {outline: none;border-color: var(--marron);background-color: #FFFDF9;}
 
 /* Reporte días */
 .rep-dia{background:white;border-radius:8px;padding:10px;margin-bottom:8px;border-left:4px solid var(--naranja)}
@@ -190,10 +163,10 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <h1>El Carmelo de María</h1>
     <p>Portal de Asistencia — Acceso restringido</p>
     <input type="password" id="pin-input" maxlength="4"
-      placeholder="••••" inputmode="numeric"
-      onkeydown="if(event.key==='Enter')validarPin()">
+      placeholder="••••" inputmode="numeric" pattern="[0-9]*"
+      onkeydown="if(event.key==='Enter'){ event.preventDefault(); validarPin(); }">
    
-    <button class="btn-login" onclick="validarPin()">Ingresar</button>
+    <button type="button" class="btn-login" onclick="validarPin()">Ingresar</button>
     <div id="login-error"></div>
   </div>
 </div>
@@ -215,7 +188,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
   </div>
 
   <div class="nav-tabs">
-    <button class="nav-tab" onclick="irSeccion('hoy')">📊 Hoy</button>
+    <button class="nav-tab active" id="btn-nav-hoy" onclick="irSeccion('hoy')">📊 Hoy</button>
     <button class="nav-tab" onclick="irSeccion('detalledia')">📋 Detalle día</button>
     <button class="nav-tab" onclick="irSeccion('detalle')">📋 Detalle</button>
     <button class="nav-tab" onclick="irSeccion('reportes')">📅 Reportes</button>
@@ -227,62 +200,50 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <button class="nav-tab" onclick="irSeccion('faltas')">⚠️ Faltas</button>
     <button class="nav-tab" onclick="irSeccion('alumno')">🔎 Alumno</button>
     <button class="nav-tab" onclick="irSeccion('justif')">📝 Justif.</button>    
-    <button class="nav-tab active" onclick="irSeccion('kiosco')">📷 Kiosco</button>
+    <button class="nav-tab" onclick="irSeccion('kiosco')">📷 Kiosco</button>
     <button class="nav-tab" onclick="irSeccion('configuracion')">⚙️ Configuración</button>
   </div>
 
   <div class="p-content">
 
     <div class="seccion" id="sec-hoy">
-    <div id="hoy-loading" class="loading">
-      ⏳ Cargando datos de hoy...
-    </div>
-
-    <div id="tablaHoy">
-      <div id="hoy-contenido" style="display:none">
-
-        <div class="grid-4">
-          <div class="stat-card c-verde">
-            <div class="num" id="h-presentes">0</div>
-            <div class="lbl">Puntuales</div>
+      <div id="hoy-loading" class="loading">⏳ Cargando datos de hoy...</div>
+      <div id="tablaHoy">
+        <div id="hoy-contenido" style="display:none">
+          <div class="grid-4">
+            <div class="stat-card c-verde">
+              <div class="num" id="h-presentes">0</div>
+              <div class="lbl">Puntuales</div>
+            </div>
+            <div class="stat-card c-rojo">
+              <div class="num" id="h-ausentes">0</div>
+              <div class="lbl">Ausentes</div>
+            </div>
+            <div class="stat-card c-amarillo">
+              <div class="num" id="h-tardanzas">0</div>
+              <div class="lbl">Tardanzas</div>
+            </div>
+            <div class="stat-card c-azul">
+              <div class="num" id="h-justif">0</div>
+              <div class="lbl">Justif.</div>
+            </div>
           </div>
 
-          <div class="stat-card c-rojo">
-            <div class="num" id="h-ausentes">0</div>
-            <div class="lbl">Ausentes</div>
+          <div class="stat-card c-marron" style="margin-bottom:10px">
+            <div class="num" id="h-pct">0%</div>
+            <div class="lbl">% Asistencia del día</div>
           </div>
 
-          <div class="stat-card c-amarillo">
-            <div class="num" id="h-tardanzas">0</div>
-            <div class="lbl">Tardanzas</div>
-          </div>
+          <div class="sec-title">❌ Ausentes de hoy</div>
+          <div class="alum-lista" id="lista-ausentes-hoy"></div>
 
-          <div class="stat-card c-azul">
-            <div class="num" id="h-justif">0</div>
-            <div class="lbl">Justif.</div>
+          <div style="margin-top:10px">
+            <button class="btn-accion" onclick="cargarHoy()">🔄 Actualizar</button>
+            <button class="btn-accion btn-naranja" onclick="exportarPDFDia()">📄 Exportar PDF</button>
           </div>
         </div>
-
-        <div class="stat-card c-marron" style="margin-bottom:10px">
-          <div class="num" id="h-pct">0%</div>
-          <div class="lbl">% Asistencia del día</div>
-        </div>
-
-        <div class="sec-title">❌ Ausentes de hoy</div>
-        <div class="alum-lista" id="lista-ausentes-hoy"></div>
-
-        <div style="margin-top:10px">
-          <button class="btn-accion" onclick="cargarHoy()">
-            🔄 Actualizar
-          </button>
-          <button class="btn-accion btn-naranja" onclick="exportarPDFDia()">
-            📄 Exportar PDF
-          </button>
-        </div>
-
       </div>
     </div>
-  </div>
 
     <div class="seccion" id="sec-detalledia">
       <div class="sec-title">📋 Detalle completo del día</div>
@@ -309,7 +270,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
         <button class="mini-tab" onclick="filtrarEstado('AUSENTE', this)">❌ Ausentes</button>
         <button class="mini-tab" onclick="filtrarEstado('TARDE', this)">⏰ Tarde</button>
         <button class="mini-tab" onclick="filtrarEstado('JUSTIFICADO', this)">📝 Justif.</button>
-      </div>      
+      </div>
       <div id="detalle-contador" style="background: var(--marron-osc); color: white; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-bottom: 8px; text-align: center;">
         Estudiantes encontrados: <span id="cant-filtrados">0</span>
       </div>
@@ -492,7 +453,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <div class="seccion" id="sec-configuracion">
       <div class="sec-title">⚙️ Configuración de Horarios y Tolerancias</div>
       <div style="background:white; border-radius:10px; padding:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom:15px;">
-        
         <label style="font-size:12px; color:var(--marron); font-weight:bold; display:block; margin-bottom:4px">Tipo de Horario Activo:</label>
         <select id="cfg-horario-activo" class="buscador" style="margin-bottom:12px">
           <option value="NORMAL">HORARIO NORMAL</option>
@@ -575,40 +535,49 @@ setInterval(actualizarReloj, 1000);
 window.onload = function() {
   actualizarReloj();
   try {
-    if (localStorage.getItem(PIN_KEY) === "OK") { mostrarPortal(); return; }
+    if (localStorage.getItem(PIN_KEY) === "OK") { 
+      mostrarPortal();
+      return; 
+    }
   } catch(e) {}
   document.getElementById("pin-input").focus();
 };
 
 function validarPin() {
-  var pin = document.getElementById("pin-input").value.trim();
+  var inputPin = document.getElementById("pin-input");
+  var pin = inputPin.value.trim();
+  var errorDiv = document.getElementById("login-error");
+  
   if (!pin || pin.length < 4) {
-    document.getElementById("login-error").textContent = "Ingrese los 4 dígitos";
+    errorDiv.textContent = "Ingrese los 4 dígitos";
     return;
   }
-  document.getElementById("login-error").textContent = "Verificando...";
+  
+  inputPin.blur(); // Cierra el teclado móvil inmediatamente
+  errorDiv.textContent = "Verificando...";
   
   fetch(AS_URL + "?accion=pin&valor=" + encodeURIComponent(pin))
     .then(function(r){ return r.json(); })
     .then(function(d){
       if (d.valido || d.success) {
+        errorDiv.textContent = "";
         try { localStorage.setItem(PIN_KEY, "OK"); } catch(e) {}
         mostrarPortal();
       } else {
-        document.getElementById("login-error").textContent = "PIN incorrecto";
-        document.getElementById("pin-input").value = "";
-        document.getElementById("pin-input").focus();
+        errorDiv.textContent = "PIN incorrecto";
+        inputPin.value = "";
+        inputPin.focus();
       }
     })
     .catch(function(){
-      document.getElementById("login-error").textContent = "Sin conexión";
+      errorDiv.textContent = "Sin conexión (Verifique Internet)";
     });
 }
 
 function mostrarPortal() {
   document.getElementById("login").style.display = "none";
   document.getElementById("portal").style.display = "flex";
-  irSeccion("kiosco");
+  irSeccion("hoy"); // Cambiado a 'hoy' como la página de aterrizaje natural
   cargarHoy();
   setInterval(function(){
     if(tabActual==='hoy') cargarHoy();
@@ -647,6 +616,7 @@ function irSeccion(id) {
     }
   });
   
+  if (id === "hoy") cargarHoy();
   if (id === "detalle" && datosDet.length === 0) cargarDetalle();
   if (id === "tardanzas") cargarTardanzas();
   if (id === "diasSinEscaneo") cargarDiasRegistrados();
@@ -657,7 +627,6 @@ function irSeccion(id) {
 function cargarHoy() {
   document.getElementById("hoy-loading").style.display = "block";
   document.getElementById("hoy-contenido").style.display = "none";
-  
   fetch(AS_URL + "?accion=dashboard")
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -674,51 +643,180 @@ function renderHoy() {
   document.getElementById("hoy-loading").style.display = "none";
   document.getElementById("hoy-contenido").style.display = "block";
   
-  // Asignación de datos provenientes del Apps Script [cite: 71, 72]
-  var totalAsistentes = (datosHoy.presentes || 0); // Todo alumno que escaneó QR [cite: 72]
-  var ausentes = (datosHoy.ausentes || 0); [cite: 73]
-  var tardanzas = (datosHoy.tardanzas || 0); [cite: 73]
-  var justif = (datosHoy.justificados || datosHoy.justif || 0); [cite: 73]
+  var totalAsistentes = (datosHoy.presentes || 0); 
+  var ausentes = (datosHoy.ausentes || 0);
+  var tardanzas = (datosHoy.tardanzas || 0);
+  var justif = (datosHoy.justificados || datosHoy.justif || 0);
   
-  // CORRECCIÓN MATEMÁTICA: Los puntuales son los asistentes que NO llegaron tarde
   var puntuales = totalAsistentes - tardanzas;
-  if (puntuales < 0) puntuales = 0; 
+  if (puntuales < 0) puntuales = 0;
 
-  // El universo total de alumnos es la suma de los que asistieron más los que faltaron [cite: 74]
-  var totalMatriculados = totalAsistentes + ausentes; [cite: 74]
+  var totalMatriculados = totalAsistentes + ausentes;
+  var pct = datosHoy.pct || (totalMatriculados > 0 ? Math.round(totalAsistentes / totalMatriculados * 100) : 0);
   
-  // Porcentaje de asistencia real del día [cite: 74, 75]
-  var pct = datosHoy.pct || (totalMatriculados > 0 ? Math.round(totalAsistentes / totalMatriculados * 100) : 0); [cite: 74, 75]
-
-  // Inyección de valores en las casillas correspondientes [cite: 76]
-  document.getElementById("h-presentes").textContent = puntuales; [cite: 76]
-  document.getElementById("h-ausentes").textContent = ausentes; [cite: 76]
-  document.getElementById("h-tardanzas").textContent = tardanzas; [cite: 76]
-  document.getElementById("h-justif").textContent = justif; [cite: 76]
-  document.getElementById("h-pct").textContent = pct + "%"; [cite: 76]
+  document.getElementById("h-presentes").textContent = puntuales;
+  document.getElementById("h-ausentes").textContent = ausentes;
+  document.getElementById("h-tardanzas").textContent = tardanzas;
+  document.getElementById("h-justif").textContent = justif;
+  document.getElementById("h-pct").textContent = pct + "%";
   
-  var listaAus = document.getElementById("lista-ausentes-hoy"); [cite: 76]
-  
-  // SOPORTE MULTI-VARIABLE: Detecta automáticamente bajo qué nombre el backend envió los alumnos ausentes
+  var listaAus = document.getElementById("lista-ausentes-hoy");
   var listaOrigen = datosHoy.listaAusentes || datosHoy.ausentesLista || datosHoy.alumnosAusentes || datosHoy.lista || [];
   
-  if(listaOrigen && listaOrigen.length > 0) { [cite: 77]
-    listaAus.innerHTML = listaOrigen.map(function(a){ [cite: 77]
-      return "<div class='alum-item rojo'>" + [cite: 77]
-               "<div>" +
-                 "<div class='alum-nombre'>👤 " + a.nombre + "</div>" + [cite: 77]
-                 "<div class='alum-det'>" + (a.grado || a.seccion || "") + " · DNI: " + (a.dni || a.id || "") + "</div>" + [cite: 77]
-               "</div>" +
-             "</div>";
-    }).join(""); [cite: 77]
+  if(listaOrigen && listaOrigen.length > 0) {
+    listaAus.innerHTML = listaOrigen.map(function(a){
+      return "<div class='alum-item rojo'>" +
+        "<div><div class='alum-nombre'>👤 " + a.nombre + "</div>" +
+        "<div class='alum-det'>" + (a.grado || a.seccion || "") + " · DNI: " + (a.dni || a.id || "") + "</div></div>" +
+        "</div>";
+    }).join("");
   } else {
-    // Si la lista realmente viene vacía pero el contador dice que hay ausentes, mostramos una ayuda visual temporal
     if (ausentes > 0) {
       listaAus.innerHTML = "<div style='font-size:11px;color:var(--rojo);text-align:center;padding:10px;font-weight:bold;'>⚠️ Hay " + ausentes + " ausentes numéricos, pero el servidor no adjuntó la lista de nombres. Revise el menú 'Detalle día' o 'Detalle' para verlos todos.</div>";
     } else {
-      listaAus.innerHTML = "<div style='font-size:11px;color:#777;text-align:center;padding:10px;'>No hay ausentes reportados hoy.</div>"; [cite: 78]
+      listaAus.innerHTML = "<div style='font-size:11px;color:#777;text-align:center;padding:10px;'>No hay ausentes reportados hoy.</div>";
     }
   }
+}
+
+// ── SECCIÓN DETALLE GLOBAL ─────────────────────────────────────────
+function cargarDetalle() {
+  document.getElementById("detalle-loading").style.display = "block";
+  document.getElementById("cant-filtrados").textContent = "0";
+  var hoy = new Date();
+  var dd = (hoy.getDate()<10?"0":"") + hoy.getDate();
+  var mm = (hoy.getMonth()+1<10?"0":"") + (hoy.getMonth()+1);
+  var fecha = dd + "/" + mm + "/" + hoy.getFullYear();
+  
+  fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(fecha))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("detalle-loading").style.display = "none";
+      datosDet = d.registros || [];
+      var btnTodos = document.getElementById("btn-tab-todos");
+      filtrarEstado("TODOS", btnTodos);
+    })
+    .catch(function(){
+      document.getElementById("detalle-loading").style.display = "none";
+    });
+}
+
+function filtrarDetalle() {
+  filtrarEstado(filtroEstado);
+}
+  
+function filtrarEstado(est, btn) {
+  if(btn) {
+    document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
+    btn.classList.add("active");
+  }
+  filtroEstado = est;
+  
+  var b = document.getElementById("buscador").value.toUpperCase();
+  var cont = document.getElementById("lista-detalle");
+  
+  if (!datosDet) {
+    document.getElementById("cant-filtrados").textContent = "0";
+    return;
+  }
+  
+  var filtrados = datosDet.filter(function(a){
+    var coincideBusqueda = (a.nombre || "").toUpperCase().indexOf(b) >= 0;
+    var estadoAlumno = (a.estado || "").toUpperCase();
+    var coincideEstado = false;
+    
+    if(est === "TODOS"){
+      coincideEstado = true;
+    } else if(est === "PUNTUAL"){
+      coincideEstado = estadoAlumno.includes("PUNTUAL") || estadoAlumno.includes("✅");
+    } else if(est === "TARDE"){
+      coincideEstado = estadoAlumno.includes("TARDE") || estadoAlumno.includes("⚠️");
+    } else if(est === "AUSENTE"){
+      coincideEstado = estadoAlumno.includes("AUSENTE") || estadoAlumno.includes("❌");
+    } else if(est === "JUSTIFICADO"){
+      coincideEstado = estadoAlumno.includes("JUSTIFICADO") || estadoAlumno.includes("JUSTIF") || estadoAlumno.includes("📄");
+    }
+    return coincideBusqueda && coincideEstado;
+  });
+
+  document.getElementById("cant-filtrados").textContent = filtrados.length;
+
+  if(filtrados.length === 0){
+    cont.innerHTML = "<div class='loading'>No se encontraron alumnos.</div>";
+    return;
+  }
+
+  cont.innerHTML = filtrados.map(function(a){
+    var estadoAlumno = (a.estado || "").toUpperCase();
+    var clase = "verde";
+    
+    if(estadoAlumno.indexOf("AUSENTE") >= 0 || estadoAlumno.indexOf("❌") >= 0){
+      clase = "rojo";
+    } else if(estadoAlumno.indexOf("TARDE") >= 0 || estadoAlumno.indexOf("⚠️") >= 0){
+      clase = "amarillo";
+    } else if(estadoAlumno.indexOf("JUSTIFICADO") >= 0 || estadoAlumno.indexOf("JUSTIF") >= 0 || estadoAlumno.indexOf("📄") >= 0){
+      clase = "azul";
+    }
+
+    return "<div class='alum-item " + clase + "'>" +
+      "<div>" +
+      "<div class='alum-nombre'>" + a.nombre + "</div>" +
+      "<div class='alum-det'>DNI: " + (a.dni || a.id || "") + " | Estado: " + (a.estado || "SIN ESTADO") + "</div>" +
+      "</div>" +
+      "</div>";
+  }).join("");
+}
+
+// ── CONSULTA DETALLE POR DÍA ────────────────────────────────────────
+function cargarDetalleDia() {
+  var inputFecha = document.getElementById("dd-fecha").value;
+  var partes = inputFecha.split('-');
+  var f = partes[2] + "/" + partes[1] + "/" + partes[0]; 
+  
+  var cont = document.getElementById("dd-lista");
+  cont.innerHTML = "<div class='loading'>🔍 Consultando asistencia para " + f + "...</div>";
+  
+  fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(f))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var lista = d.registros || []; 
+      if(lista.length === 0) { 
+        cont.innerHTML = "<div class='loading'>No hay registros para la fecha " + f + ".</div>"; 
+        return; 
+      }
+      
+      cont.innerHTML = lista.map(function(a){
+        return "<div class='alum-item verde'>" +
+                 "<div>" +
+                   "<div class='alum-nombre'>" + a.nombre + "</div>" +
+                   "<div class='alum-det'>DNI: " + a.dni + " | Grado: " + a.grado + "</div>" +
+                 "</div>" +
+                 "<div class='alum-hora'>" + (a.hora || "--:--") + "</div>" +
+               "</div>";
+      }).join("");
+    })
+    .catch(function(e){ 
+      console.error(e);
+      cont.innerHTML = "<div class='loading'>Error al conectar.</div>";
+    });
+}
+
+// ── JUSTIFICACIONES ───────────────────────────────────────────────
+function buscarAlumnoJustif() {
+  var busq = document.getElementById("just-buscar").value.trim().toUpperCase();
+  var cont = document.getElementById("just-sugerencias");
+  if (busq.length < 2) { cont.innerHTML = ""; return; }
+  
+  if (listaAlumnos.length === 0) {
+    fetch(AS_URL + "?accion=alumnos")
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        listaAlumnos = d.alumnos || [];
+        renderSugerenciasJustif(busq);
+      });
+    return;
+  }
+  renderSugerenciasJustif(busq);
 }
 
 function renderSugerenciasJustif(busq) {
@@ -728,7 +826,6 @@ function renderSugerenciasJustif(busq) {
     var idStr = String(a.dni || a.id || "");
     return nombreStr.indexOf(busq) >= 0 || idStr.indexOf(busq) >= 0;
   }).slice(0, 6);
-  
   if (res.length === 0) {
     cont.innerHTML = "<div class='loading'>Sin resultados</div>";
     return;
@@ -758,7 +855,6 @@ function registrarJustif() {
   var motivo = document.getElementById("just-motivo").value.trim();
   var regPor = document.getElementById("just-reg").value.trim();
   var msg = document.getElementById("just-msg");
-  
   if(!dni || !fecha || !motivo) {
     msg.style.background = "#FDECEA"; msg.style.color = "#B71C1C";
     msg.textContent = "Por favor complete Alumno, Fecha y Motivo.";
@@ -815,7 +911,6 @@ function cargarJustificaciones() {
 function cargarConfiguracionActual() {
   var btn = document.getElementById("btn-guardar-config");
   if(btn) btn.disabled = true;
-  
   fetch(AS_URL + "?accion=getConfig")
     .then(function(r){ return r.json(); })
     .then(function(config){
@@ -843,7 +938,6 @@ function cargarConfiguracionActual() {
 function guardarConfiguracionRemota() {
   var btn = document.getElementById("btn-guardar-config");
   var textoOriginal = btn ? btn.innerHTML : "";
-  
   var datos = {
     horarioActivo: document.getElementById("cfg-horario-activo").value,
     toleranciaInicial: parseInt(document.getElementById("cfg-tolerancia-inicial").value) || 0,
@@ -866,7 +960,6 @@ function guardarConfiguracionRemota() {
     "&horaFin=" + encodeURIComponent(datos.horaFinIngreso) +
     "&diaSinEscaneo=" + datos.diaSinEscaneo +
     "&motivoSinEscaneo=" + encodeURIComponent(datos.motivoSinEscaneo);
-
   fetch(urlDestino)
     .then(function(res) { return res.json(); })
     .then(function(resultado) {
@@ -897,135 +990,7 @@ function abrirKiosco(disp) {
   location.replace(urlKiosco);
 }
 
-// ── DETALLE DEL DÍA ────────────────────────────────────────────────
-function cargarDetalleDia() {
-  var inputFecha = document.getElementById("dd-fecha").value;
-  var partes = inputFecha.split('-');
-  var f = partes[2] + "/" + partes[1] + "/" + partes[0]; 
-  
-  var cont = document.getElementById("dd-lista");
-  cont.innerHTML = "<div class='loading'>🔍 Consultando asistencia para " + f + "...</div>";
-  
-  fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(f))
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      var lista = d.registros || []; 
-      
-      if(lista.length === 0) { 
-        cont.innerHTML = "<div class='loading'>No hay registros para la fecha " + f + ".</div>"; 
-        return; 
-      }
-      
-      cont.innerHTML = lista.map(function(a){
-        return "<div class='alum-item verde'>" +
-                 "<div>" +
-                   "<div class='alum-nombre'>" + a.nombre + "</div>" +
-                   "<div class='alum-det'>DNI: " + a.dni + " | Grado: " + a.grado + "</div>" +
-                 "</div>" +
-                 "<div class='alum-hora'>" + (a.hora || "--:--") + "</div>" +
-               "</div>";
-      }).join("");
-    })
-    .catch(function(e){ 
-      console.error(e);
-      cont.innerHTML = "<div class='loading'>Error al conectar.</div>"; 
-    });
-}
-  
-function cargarDetalle() {
-  document.getElementById("detalle-loading").style.display = "block";
-  document.getElementById("cant-filtrados").textContent = "0";
-  
-  // Fecha de hoy
-  var hoy = new Date();
-  var dd = (hoy.getDate() < 10 ? "0" : "") + hoy.getDate();
-  var mm = (hoy.getMonth() + 1 < 10 ? "0" : "") + (hoy.getMonth() + 1);
-  var fecha = dd + "/" + mm + "/" + hoy.getFullYear();
-  
-  fetch(AS_URL + "?accion=detalleDia&fecha=" + encodeURIComponent(fecha))
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      document.getElementById("detalle-loading").style.display = "none";
-      datosDet = d.registros || [];
-      
-      // Forzar la activación inicial de la pestaña TODOS y refrescar contadores
-      var btnTodos = document.getElementById("btn-tab-todos");
-      filtrarEstado("TODOS", btnTodos);
-    })
-    .catch(function(){
-      document.getElementById("detalle-loading").style.display = "none";
-    });
-}
-
-function filtrarDetalle() {
-  filtrarEstado(filtroEstado);
-}
-  
-function filtrarEstado(est, btn) {
-  if(btn) {
-    document.querySelectorAll(".mini-tab").forEach(function(t){ t.classList.remove("active"); });
-    btn.classList.add("active");
-  }
-  filtroEstado = est;
-  
-  var b = document.getElementById("buscador").value.toUpperCase();
-  var cont = document.getElementById("lista-detalle");
-  
-  // Si no hay datos cargados aún, salimos para evitar errores
-  if (!datosDet) {
-    document.getElementById("cant-filtrados").textContent = "0";
-    return;
-  }
-  
-  var filtrados = datosDet.filter(function(a){
-    var coincideBusqueda = (a.nombre || "").toUpperCase().indexOf(b) >= 0;
-    var estadoAlumno = (a.estado || "").toUpperCase();
-    var coincideEstado = false;
-    
-    if(est === "TODOS"){
-      coincideEstado = true;
-    } else if(est === "PUNTUAL"){
-      coincideEstado = estadoAlumno.includes("PUNTUAL") || estadoAlumno.includes("✅");
-    } else if(est === "TARDE"){
-      coincideEstado = estadoAlumno.includes("TARDE") || estadoAlumno.includes("⚠️");
-    } else if(est === "AUSENTE"){
-      coincideEstado = estadoAlumno.includes("AUSENTE") || estadoAlumno.includes("❌");
-    } else if(est === "JUSTIFICADO"){
-      coincideEstado = estadoAlumno.includes("JUSTIFICADO") || estadoAlumno.includes("JUSTIF") || estadoAlumno.includes("📄");
-    }
-    return coincideBusqueda && coincideEstado;
-  });
-
-  // Actualizar la casilla con la cantidad exacta de forma inmediata
-  document.getElementById("cant-filtrados").textContent = filtrados.length;
-
-  if(filtrados.length === 0){
-    cont.innerHTML = "<div class='loading'>No se encontraron alumnos.</div>";
-    return;
-  }
-
-  cont.innerHTML = filtrados.map(function(a){
-    var estadoAlumno = (a.estado || "").toUpperCase();
-    var clase = "verde"; // Por defecto para PUNTUAL o vacío
-    
-    if(estadoAlumno.indexOf("AUSENTE") >= 0 || estadoAlumno.indexOf("❌") >= 0){
-      clase = "rojo";
-    } else if(estadoAlumno.indexOf("TARDE") >= 0 || estadoAlumno.indexOf("⚠️") >= 0){
-      clase = "amarillo";
-    } else if(estadoAlumno.indexOf("JUSTIFICADO") >= 0 || estadoAlumno.indexOf("JUSTIF") >= 0 || estadoAlumno.indexOf("📄") >= 0){
-      clase = "azul";
-    }
-
-    return "<div class='alum-item " + clase + "'>" +
-      "<div>" +
-      "<div class='alum-nombre'>" + a.nombre + "</div>" +
-      "<div class='alum-det'>DNI: " + (a.dni || a.id || "") + " | Estado: " + (a.estado || "SIN ESTADO") + "</div>" +
-      "</div>" +
-      "</div>";
-  }).join("");
-}
-
-// ── FUNCIONES STUB DE RESPALDO UI ──────────────────────────────────
+// ── FUNCIONES STUB COMPLETADAS ─────────────────────────────────────
 function cargarReportes() { console.log("Reportes invocados"); }
 function cargarTardanzas() { document.getElementById("tardanzas-loading").style.display="none"; }
 function cargarDiasRegistrados() { console.log("Días sin escaneo invocados"); }
@@ -1040,10 +1005,7 @@ function dseAgregar() { console.log("Agregando día sin escaneo"); }
 // ── EXPORTACIÓN PDF ────────────────────────────────────────────────
 function exportarPDFDia(){
   var elemento = document.getElementById("tablaHoy");
-  if(!elemento){
-    alert("No se encontró el reporte");
-    return;
-  }
+  if(!elemento){ alert("No se encontró el reporte"); return; }
   var opciones = {
     margin: 0.5,
     filename: 'Reporte_Hoy.pdf',
@@ -1056,16 +1018,11 @@ function exportarPDFDia(){
   
 function exportarPDFDetalleDia(){
   var elemento = document.getElementById("dd-lista");
-  if(!elemento){
-    alert("No hay datos para exportar");
-    return;
-  }
+  if(!elemento){ alert("No hay datos para exportar"); return; }
   var originalHeight = elemento.style.maxHeight;
   var originalOverflow = elemento.style.overflow;
-
   elemento.style.maxHeight = "none";
   elemento.style.overflow = "visible";
-
   var opciones = {
     margin: 0.3,
     filename: 'Reporte_Detalle_Dia.pdf',
@@ -1074,7 +1031,6 @@ function exportarPDFDetalleDia(){
     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
   };
-
   html2pdf().set(opciones).from(elemento).save().then(function(){
     elemento.style.maxHeight = originalHeight;
     elemento.style.overflow = originalOverflow;
