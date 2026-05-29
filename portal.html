@@ -516,10 +516,10 @@ function renderHoy() {
   document.getElementById("hoy-loading").style.display   = "none";
   document.getElementById("hoy-contenido").style.display = "block";
 
-  var presentes = (datosHoy.presentes || 0);
-  var ausentes  = (datosHoy.ausentes  || 0);
-  var tardanzas = (datosHoy.tardanzas || 0);
-  var justif    = (datosHoy.justificados || 0);
+  var presentes = Number(datosHoy.presentes || 0);
+  var ausentes  = Number(datosHoy.ausentes || 0);
+  var tardanzas = Number(datosHoy.tardanzas || 0);
+  var justif    = Number(datosHoy.justif || 0);
   var total     = presentes + ausentes;
   var pct       = total > 0 ? Math.round(presentes / total * 100) : 0;
 
@@ -529,15 +529,22 @@ function renderHoy() {
   document.getElementById("h-justif").textContent    = justif;
   document.getElementById("h-pct").textContent       = pct + "%";
 
-  var lista = datosHoy.listaAusentes || [];
-  var html  = lista.length === 0
+  // Filtrar solo ausentes
+  var lista = (datosHoy.registros || []).filter(function(a){
+    return a.estado === "AUSENTE";
+  });
+  
+  var html = lista.length === 0
     ? "<div class='vacio'>Sin ausentes registrados</div>"
     : lista.map(function(a){
         return "<div class='alum-item rojo'>" +
-          "<div><div class='alum-nombre'>❌ " + a.nombre + "</div>" +
-          "<div class='alum-det'>" + a.grado + "</div></div>" +
+          "<div>" +
+          "<div class='alum-nombre'>❌ " + a.nombre + "</div>" +
+          "<div class='alum-det'>" + (a.grado || "") + "</div>" +
+          "</div>" +
           "</div>";
       }).join("");
+  
   document.getElementById("lista-ausentes-hoy").innerHTML = html;
 }
 
