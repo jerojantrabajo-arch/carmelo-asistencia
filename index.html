@@ -451,9 +451,17 @@ function validarPin() {
     .then(function(r){ return r.json(); })
     .then(function(data){
       if (data.valido) {
-        try { localStorage.setItem(PIN_KEY, "OK"); } catch(e) {}
+
+        try {
+          localStorage.setItem(PIN_KEY, "OK");
+        } catch(e) {}
+      
         sonidoOK();
-        mostrarKiosco();
+      
+        // REDIRECCIONAR AL PORTAL ADMIN
+        window.location.href =
+          AS_URL + "?accion=portal";
+      
       } else {
         sonidoError();
         document.getElementById("pin-error").textContent = "PIN incorrecto";
