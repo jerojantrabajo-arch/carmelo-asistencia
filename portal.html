@@ -446,7 +446,7 @@ window.onload = function() {
   document.getElementById("pin-input").focus();
 };
 
-function validarPin() {
+window.validarPin = function() {
   var pin = document.getElementById("pin-input").value.trim();
   if (!pin || pin.length < 4) {
     document.getElementById("login-error").textContent = "Ingrese los 4 dígitos";
@@ -468,7 +468,7 @@ function validarPin() {
     .catch(function(){
       document.getElementById("login-error").textContent = "Sin conexión";
     });
-}
+};
 
 function mostrarPortal() {
   document.getElementById("login").style.display  = "none";
