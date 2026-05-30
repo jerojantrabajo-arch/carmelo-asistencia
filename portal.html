@@ -1470,7 +1470,10 @@ function exportarPDFFaltas() {
             head: [["#","Alumno","Grado","Faltas","Nivel"]],
             body: lista.map(function(a,i){
               return [i+1, a.nombre, a.grado, a.count,
-                      a.count >= 6 ? "CRÍTICO" : (a.count >= 3 ? "ATENCIÓN" : "NORMAL")];
+                      a.count >= 6 ? "CRÍTICO" :
+                      a.count >= 3 ? "ATENCIÓN" :
+                      a.count >= 1 ? "NORMAL" :
+                      "EXCELENTE"];
             }),
             styles: { fontSize:8, cellPadding:2 },
             headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
