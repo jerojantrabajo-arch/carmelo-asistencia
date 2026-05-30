@@ -350,7 +350,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 
     <!-- ══ SECCIÓN: ALUMNOS CON FALTAS ══ -->
     <div class="seccion" id="sec-faltas">
-      <div class="sec-title">⚠️ Alumnos con 3+ faltas</div>
+      <div class="sec-title">⚠️ Faltas acumuladas del mes</div>
       <div class="grid-2" style="margin-bottom:10px">
         <div>
           <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Mes:</label>
@@ -577,7 +577,7 @@ function renderDetalle() {
   var busq = (document.getElementById("buscador").value || "").toUpperCase();
   var lista = datosDet.filter(function(a){
     var matchEstado = filtroEstado === "TODOS" ||
-      (filtroEstado === "PRESENTE" && (a.estado === "PUNTUAL" || a.estado === "INGRESO ANTICIPADO")) ||
+      (filtroEstado === "PRESENTE" && a.estado === "PUNTUAL") ||
       a.estado === filtroEstado;
     var matchNombre = a.nombre.toUpperCase().indexOf(busq) >= 0 || a.id.indexOf(busq) >= 0;
     return matchEstado && matchNombre;
@@ -594,7 +594,7 @@ function renderDetalle() {
     var badge = a.estado === "AUSENTE"  ? "b-ausente" :
                 a.estado === "TARDE"    ? "b-tarde" :
                 a.estado === "JUSTIFICADO" ? "b-justif" :
-                a.estado === "INGRESO ANTICIPADO" ? "b-anticip" : "b-puntual";
+                "b-puntual";
     return "<div class='alum-item " + cls + "'>" +
       "<div><div class='alum-nombre'>" + a.nombre + "</div>" +
       "<div class='alum-det'>" + a.grado + " · " + a.id + "</div></div>" +
@@ -1429,7 +1429,7 @@ function exportarPDFFaltas() {
     .then(function(r){ return r.json(); })
     .then(function(d){
       var lista = d.alumnos || [];
-      if (lista.length === 0) { ocultarMsgPDF(); alert("Sin alumnos con 3+ faltas"); return; }
+      if (lista.length === 0) { ocultarMsgPDF(); alert("Sin datos de faltas este mes"); return; }
       
       cargarLibreriasPDF(function() {
         var top10   = lista.slice(0,15);
