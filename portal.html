@@ -991,7 +991,11 @@ function verHistorialAlumno(id, nombre) {
   fetch(AS_URL + "?accion=historialAlumno&id=" + encodeURIComponent(id))
     .then(function(r){ return r.json(); })
     .then(function(d){
+      console.log("HISTORIAL ALUMNO:", d);
+      alert("Registros encontrados: " + (d.registros ? d.registros.length : 0));
+    
       var registros = d.registros || [];
+    
       if (registros.length === 0) {
         document.getElementById("alum-historial").innerHTML = "<div class='vacio'>Sin registros</div>";
         return;
