@@ -866,6 +866,7 @@ function cargarMensual() {
         "<div class='stat-card c-azul'><div class='num'>" + (d.diasHabiles||0) + "</div><div class='lbl'>Días hábiles</div></div>" +
         "<div class='stat-card c-verde'><div class='num'>" + (d.presentes||0) + "</div><div class='lbl'>Asistencias</div></div>" +
         "<div class='stat-card c-amarillo'><div class='num'>" + (d.tardanzas||0) + "</div><div class='lbl'>Tardanzas</div></div>" +
+        "<div class='stat-card c-azul'><div class='num'>" + (d.justificados||0) + "</div><div class='lbl'>Justificados</div></div>" +
         "<div class='stat-card c-rojo'><div class='num'>" + (d.ausentes||0) + "</div><div class='lbl'>Ausencias</div></div>" +
         "<div class='stat-card c-marron'><div class='num'>" + (d.pct||0) + "%</div><div class='lbl'>% Asistencia</div></div>" +
         "</div></div>";
@@ -990,9 +991,6 @@ function verHistorialAlumno(id, nombre) {
   fetch(AS_URL + "?accion=historialAlumno&id=" + encodeURIComponent(id))
     .then(function(r){ return r.json(); })
     .then(function(d){
-      console.log("HISTORIAL ALUMNO:", d);
-      alert("Registros encontrados: " + (d.registros ? d.registros.length : 0));
-    
       var registros = d.registros || [];
     
       if (registros.length === 0) {
