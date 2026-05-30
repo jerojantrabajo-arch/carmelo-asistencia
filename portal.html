@@ -1454,7 +1454,7 @@ function exportarPDFFaltas() {
           doc.rect(14,y,182,14,"F");
           doc.setFontSize(10); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
           doc.setFont("helvetica","bold");
-          doc.text("Total alumnos con 3+ faltas: " + lista.length, 105, y+9, {align:"center"});
+          doc.text("Total alumnos evaluados: " + lista.length, 105, y+9, {align:"center"});
           y += 18;
 
           // Gráfico
@@ -1470,7 +1470,7 @@ function exportarPDFFaltas() {
             head: [["#","Alumno","Grado","Faltas","Nivel"]],
             body: lista.map(function(a,i){
               return [i+1, a.nombre, a.grado, a.count,
-                      a.count>=6 ? "⚠️ CRÍTICO" : "Atención"];
+                      a.count >= 6 ? "CRÍTICO" : (a.count >= 3 ? "ATENCIÓN" : "NORMAL")];
             }),
             styles: { fontSize:8, cellPadding:2 },
             headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
