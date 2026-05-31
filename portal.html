@@ -188,6 +188,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <button class="nav-tab" onclick="irSeccion('registro')">✏️ Registro</button>
     <button class="nav-tab" onclick="irSeccion('mensual')">📅 Mensual</button>
     <button class="nav-tab" onclick="irSeccion('semanal')">📊 Semanal</button>
+    <button class="nav-tab" onclick="irSeccion('tendencia')">📈 Tendencia</button>
     <button class="nav-tab" onclick="irSeccion('grado')">🏫 Por grado</button>
     <button class="nav-tab" onclick="irSeccion('faltas')">⚠️ Faltas</button>
     <button class="nav-tab" onclick="irSeccion('alumno')">🔎 Alumno</button>
@@ -364,6 +365,18 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <div id="semanal-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="semanal-resultado"></div>
       <button class="btn-accion btn-naranja" onclick="exportarPDFSemanal()" style="margin-top:6px">📄 Exportar PDF</button>
+    </div>
+
+    <div class="seccion" id="sec-tendencia">
+      <div class="sec-title">📈 Tendencia anual de asistencia</div>    
+      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Año:</label>
+      <select id="ten-anio" class="buscador">
+        <option value="2026" selected>2026</option>
+        <option value="2025">2025</option>
+      </select>    
+      <button class="btn-accion" onclick="cargarTendencia()">📈 Ver tendencia</button>    
+      <div id="tendencia-loading" class="loading" style="display:none">⏳ Cargando...</div>
+      <div id="tendencia-resultado"></div>
     </div>
 
  <!-- NUEVO MODULO POR GRADO -->
@@ -553,9 +566,11 @@ function irSeccion(id) {
   });
   document.getElementById("sec-" + id).classList.add("activa");
   event && event.target && event.target.classList.add("active");
+
   if (id === "detalle") cargarDetalle();
   if (id === "grado") cargarReporteGrado();
   if (id === "ranking") cargarRankingTardanzas();
+  if (id === "tendencia") cargarTendencia();
 }
 
 // ── SECCIÓN HOY ───────────────────────────────────────────────────
@@ -1158,6 +1173,64 @@ function cargarReporteGrado() {
 });
 }
 
+function cargarTendencia() {
+  var anio = document.getElementById("ten-anio").value;
+
+  document.getElementById("tendencia-loading").style.display = "block";
+  document.getElementById("tendencia-resultado").innerHTML = "";
+
+  fetch(AS_URL + "?accion=tendenciaAsistencia&anio=" + anio)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+
+      document.getElementById("tendencia-loading").style.display = "none";
+
+      var meses = d.meses || [];
+
+      if (meses.length === 0) {
+        document.getElementById("tendencia-resultado").innerHTML =
+          "<div class='vacio'>Sin datos</div>";
+        return;
+      }
+
+      window._datosTendencia = d;
+
+      var html =
+        "<table class='tabla'>" +
+        "<thead><tr>" +
+        "<th>Mes</th>" +
+        "<th>Presentes</th>" +
+        "<th>Tardanzas</th>" +
+        "<th>Ausentes</th>" +
+        "<th>Justif.</th>" +
+        "<th>%</th>" +
+        "</tr></thead><tbody>";
+
+      meses.forEach(function(m){
+        html +=
+          "<tr>" +
+          "<td>" + m.nombre + "</td>" +
+          "<td>" + m.presentes + "</td>" +
+          "<td>" + m.tardanzas + "</td>" +
+          "<td>" + m.ausentes + "</td>" +
+          "<td>" + m.justificados + "</td>" +
+          "<td><b>" + m.pct + "%</b></td>" +
+          "</tr>";
+      });
+
+      html += "</tbody></table>";
+
+      document.getElementById("tendencia-resultado").innerHTML = html;
+    })
+    .catch(function(error){
+      console.error("ERROR TENDENCIA:", error);
+
+      document.getElementById("tendencia-loading").style.display = "none";
+
+      document.getElementById("tendencia-resultado").innerHTML =
+        "<div class='vacio'>Error al cargar tendencia</div>";
+    });
+}  
   
 function renderSugerencias(busq) {
   var res = listaAlumnos.filter(function(a){
