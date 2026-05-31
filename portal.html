@@ -395,7 +395,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Tipo:</label>
       <select id="just-tipo" class="buscador">
         <option value="FALTA_JUSTIFICADA">Falta justificada</option>
-        <option value="TARDANZA_JUSTIFICADA">Tardanza justificada</option>
       </select>
       <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Motivo:</label>
       <input type="text" id="just-motivo" class="buscador" placeholder="Ej: Cita médica, emergencia familiar...">
@@ -577,7 +576,8 @@ function renderDetalle() {
   var busq = (document.getElementById("buscador").value || "").toUpperCase();
   var lista = datosDet.filter(function(a){
     var matchEstado = filtroEstado === "TODOS" ||
-      (filtroEstado === "PRESENTE" && a.estado === "PUNTUAL") ||
+      (filtroEstado === "PRESENTE" &&
+      (a.estado === "PUNTUAL" || a.estado === "TARDE" || a.estado === "JUSTIFICADO")) ||
       a.estado === filtroEstado;
     var matchNombre = a.nombre.toUpperCase().indexOf(busq) >= 0 || a.id.indexOf(busq) >= 0;
     return matchEstado && matchNombre;
