@@ -187,6 +187,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <button class="nav-tab" onclick="irSeccion('registro')">✏️ Registro</button>
     <button class="nav-tab" onclick="irSeccion('mensual')">📅 Mensual</button>
     <button class="nav-tab" onclick="irSeccion('semanal')">📊 Semanal</button>
+    <button class="nav-tab" onclick="irSeccion('grado')">🏫 Por grado</button>
     <button class="nav-tab" onclick="irSeccion('faltas')">⚠️ Faltas</button>
     <button class="nav-tab" onclick="irSeccion('alumno')">🔎 Alumno</button>
     <button class="nav-tab" onclick="irSeccion('justif')">📝 Justif.</button>
@@ -348,6 +349,43 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion btn-naranja" onclick="exportarPDFSemanal()" style="margin-top:6px">📄 Exportar PDF</button>
     </div>
 
+ <!-- NUEVO MODULO POR GRADO -->
+<div id="sec-grado" class="seccion">
+  <div class="card-titulo">🏫 Reporte por grado</div>
+  <div class="grid-2">
+    <div>
+      <label>Mes:</label>
+      <select id="grado-mes" class="buscador">
+        <option value="1">Enero</option>
+        <option value="2">Febrero</option>
+        <option value="3">Marzo</option>
+        <option value="4">Abril</option>
+        <option value="5" selected>Mayo</option>
+        <option value="6">Junio</option>
+        <option value="7">Julio</option>
+        <option value="8">Agosto</option>
+        <option value="9">Septiembre</option>
+        <option value="10">Octubre</option>
+        <option value="11">Noviembre</option>
+        <option value="12">Diciembre</option>
+      </select>
+    </div>
+    <div>
+      <label>Año:</label>
+      <select id="grado-anio" class="buscador">
+        <option value="2026" selected>2026</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn-accion btn-marron" onclick="cargarReporteGrado()">
+    🏫 Ver reporte
+  </button>
+  <div id="grado-loading" class="loading" style="display:none">
+    ⏳ Cargando...
+  </div>
+  <div id="grado-resultado"></div>
+</div>
+    
     <!-- ══ SECCIÓN: ALUMNOS CON FALTAS ══ -->
     <div class="seccion" id="sec-faltas">
       <div class="sec-title">⚠️ Faltas acumuladas del mes</div>
@@ -487,12 +525,16 @@ function cerrarSesion() {
 // ── NAVEGACIÓN ────────────────────────────────────────────────────
 function irSeccion(id) {
   tabActual = id;
-  document.querySelectorAll(".seccion").forEach(function(s){ s.classList.remove("activa"); });
-  document.querySelectorAll(".nav-tab").forEach(function(t){ t.classList.remove("active"); });
+  document.querySelectorAll(".seccion").forEach(function(s){
+    s.classList.remove("activa");
+  });
+  document.querySelectorAll(".nav-tab").forEach(function(t){
+    t.classList.remove("active");
+  });
   document.getElementById("sec-" + id).classList.add("activa");
   event && event.target && event.target.classList.add("active");
-
-  if (id === "detalle" && datosDet.length === 0) cargarDetalle();
+  if (id === "detalle") cargarDetalle();
+  if (id === "grado") cargarReporteGrado();
 }
 
 // ── SECCIÓN HOY ───────────────────────────────────────────────────
@@ -943,7 +985,7 @@ function cargarFaltas() {
       document.getElementById("faltas-resultado").innerHTML = "<div class='vacio'>Error al cargar</div>";
     });
 }
-
+  
 // ── HISTORIAL DE ALUMNO ───────────────────────────────────────────
 var alumnosCache2 = [];
 
@@ -966,6 +1008,62 @@ function buscarAlumnoHist() {
   renderSugerencias(busq);
 }
 
+function cargarReporteGrado() {
+  var mes  = document.getElementById("grado-mes").value;
+  var anio = document.getElementById("grado-anio").value;
+  document.getElementById("grado-loading").style.display = "block";
+  document.getElementById("grado-resultado").innerHTML = "";
+  fetch(
+    AS_URL +
+    "?accion=reportePorGrado" +
+    "&mes=" + mes +
+    "&anio=" + anio
+  )
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    document.getElementById("grado-loading").style.display = "none";
+    var lista = d.grados || [];
+    if (lista.length === 0) {
+      document.getElementById("grado-resultado").innerHTML =
+        "<div class='vacio'>Sin datos</div>";
+      return;
+    }
+    var html =
+      "<table class='tabla'>" +
+      "<thead>" +
+      "<tr>" +
+      "<th>Grado</th>" +
+      "<th>Alumnos</th>" +
+      "<th>Asist.</th>" +
+      "<th>Tard.</th>" +
+      "<th>Aus.</th>" +
+      "<th>Justif.</th>" +
+      "<th>%</th>" +
+      "</tr>" +
+      "</thead><tbody>";
+    lista.forEach(function(g){
+      html +=
+        "<tr>" +
+        "<td>" + g.grado + "</td>" +
+        "<td>" + g.totalAlumnos + "</td>" +
+        "<td>" + g.presentes + "</td>" +
+        "<td>" + g.tardanzas + "</td>" +
+        "<td>" + g.ausentes + "</td>" +
+        "<td>" + g.justificados + "</td>" +
+        "<td><b>" + g.pct + "%</b></td>" +
+        "</tr>";
+    });
+    html += "</tbody></table>";
+    document.getElementById("grado-resultado").innerHTML = html;
+  })
+  .catch(function(){
+    document.getElementById("grado-loading").style.display = "none";
+    document.getElementById("grado-resultado").innerHTML =
+      "<div class='vacio'>Error al cargar</div>";
+  });
+}
+
+  
 function renderSugerencias(busq) {
   var res = listaAlumnos.filter(function(a){
     return a.nombre.toUpperCase().indexOf(busq) >= 0 || a.id.indexOf(busq) >= 0;
