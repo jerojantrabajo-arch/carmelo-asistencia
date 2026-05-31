@@ -1295,12 +1295,16 @@ html +=
   var canvas = document.getElementById("graficoTendencia");
   if (!canvas) return;
 
-  var nombres = meses.map(function(m) {
+ var datos = meses.filter(function(m){
+    return m.pct > 0;
+  });
+  
+  var nombres = datos.map(function(m){
     return m.nombre;
   });
-
-  var porcentajes = meses.map(function(m) {
-    return Number(m.pct || 0);
+  
+  var porcentajes = datos.map(function(m){
+    return Number(m.pct);
   });
 
   if (chartTendencia) {
