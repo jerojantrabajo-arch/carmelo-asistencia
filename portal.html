@@ -183,6 +183,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <button class="nav-tab" onclick="irSeccion('detalle')">📋 Detalle</button>
     <button class="nav-tab" onclick="irSeccion('reportes')">📅 Reportes</button>
     <button class="nav-tab" onclick="irSeccion('tardanzas')">⏰ Tardanzas</button>
+    <button class="nav-tab" onclick="irSeccion('ranking')">🏆 Ranking</button>
     <button class="nav-tab" onclick="irSeccion('diasSinEscaneo')">🚫 Sin escaneo</button>
     <button class="nav-tab" onclick="irSeccion('registro')">✏️ Registro</button>
     <button class="nav-tab" onclick="irSeccion('mensual')">📅 Mensual</button>
@@ -260,6 +261,17 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion btn-naranja" onclick="exportarPDFTardanzas()" style="margin-top:6px">📄 Exportar PDF con gráfico</button>
     </div>
 
+    <div class="seccion" id="sec-ranking">
+        <div class="sec-title">🏆 Ranking de tardanzas</div>      
+        <button class="btn-accion" onclick="cargarRankingTardanzas()">
+          🏆 Ver ranking
+        </button>      
+        <div id="ranking-loading" class="loading" style="display:none">
+          ⏳ Cargando...
+        </div>      
+        <div id="ranking-resultado"></div>      
+      </div>
+    
     <!-- ══ SECCIÓN: DÍAS SIN ESCANEO ══ -->
     <div class="seccion" id="sec-diasSinEscaneo">
       <div class="sec-title">🚫 Días sin escaneo</div>
@@ -538,6 +550,7 @@ function irSeccion(id) {
   event && event.target && event.target.classList.add("active");
   if (id === "detalle") cargarDetalle();
   if (id === "grado") cargarReporteGrado();
+  if (id === "ranking") cargarRankingTardanzas();
 }
 
 // ── SECCIÓN HOY ───────────────────────────────────────────────────
@@ -719,6 +732,54 @@ function cargarTardanzas() {
     });
 }
 
+function cargarRankingTardanzas() {
+  document.getElementById("ranking-loading").style.display = "block";
+  document.getElementById("ranking-resultado").innerHTML = "";
+  fetch(AS_URL + "?accion=historialTardanzas")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("ranking-loading").style.display = "none";
+      var lista = d.tardanzas || [];
+      if (lista.length === 0) {
+        document.getElementById("ranking-resultado").innerHTML =
+          "<div class='vacio'>Sin tardanzas registradas</div>";
+        return;
+      }
+      window._rankingTardanzas = lista;
+      var html =
+        "<table class='tabla'>" +
+        "<thead>" +
+        "<tr>" +
+        "<th>Puesto</th>" +
+        "<th>Alumno</th>" +
+        "<th>Grado</th>" +
+        "<th>Tardanzas</th>" +
+        "</tr>" +
+        "</thead><tbody>";
+      lista.forEach(function(a, i){
+        var medalla =
+          i === 0 ? "🥇" :
+          i === 1 ? "🥈" :
+          i === 2 ? "🥉" :
+          (i + 1);
+        html +=
+          "<tr>" +
+          "<td>" + medalla + "</td>" +
+          "<td>" + a.nombre + "</td>" +
+          "<td>" + a.grado + "</td>" +
+          "<td><b>" + a.count + "</b></td>" +
+          "</tr>";
+      });
+      html += "</tbody></table>";
+      document.getElementById("ranking-resultado").innerHTML = html;
+    })
+    .catch(function(){
+      document.getElementById("ranking-loading").style.display = "none";
+      document.getElementById("ranking-resultado").innerHTML =
+        "<div class='vacio'>Error al cargar ranking</div>";
+    });
+}
+  
 // ── SECCIÓN DÍAS SIN ESCANEO ──────────────────────────────────────
 function cargarDiasRegistrados() {
   fetch(AS_URL + "?accion=diasSinEscaneo")
