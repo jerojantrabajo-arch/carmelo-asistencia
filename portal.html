@@ -1369,8 +1369,11 @@ function cargarDashboardEjecutivo() {
   fetch(AS_URL + "?accion=dashboardEjecutivo")
     .then(function(r){ return r.json(); })
     .then(function(d){
+  
+      console.log("DASHBOARD EJECUTIVO:", d);
+  
       document.getElementById("ejecutivo-loading").style.display = "none";
-
+  
       var hoy = d.hoy || {};
       var mensual = d.mensual || {};
       var meses = d.anual && d.anual.meses ? d.anual.meses : [];
