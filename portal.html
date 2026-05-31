@@ -1292,28 +1292,68 @@ function exportarPDFDia() {
 // ══════════════════════════════════════════════════════════════════
 function exportarPDFSemanal() {
   var datos = window._datosSemanal;
-  if (!datos) { alert("Primero carga el reporte semanal"); return; }
+
+  if (!datos) {
+    alert("Primero carga el reporte semanal");
+    return;
+  }
+
   cargarLibreriasPDF(function() {
-    var doc = new jspdf.jsPDF("p","mm","a4");
+
+    var doc = new jspdf.jsPDF("p", "mm", "a4");
+
     var titulo = "REPORTE SEMANAL DE ASISTENCIA";
-    var sub    = "Semana: " + (datos.lunesStr||"") + " al " + (datos.viernesStr||"");
+    var sub = "Semana: " + (datos.lunesStr || "") + " al " + (datos.viernesStr || "");
+
     var y = pdfHeader(doc, titulo, sub);
 
-    // Resumen
+    // Resumen semanal
     doc.autoTable({
       startY: y,
-      head: [["Días hábiles","Presentes","Tardanzas","Justificados","Ausentes","% Asistencia"]],
-      body: [[
-        datos.diasHabiles||0, datos.presentes||0, datos.tardanzas||0,
-        datos.justificados||0, datos.ausentes||0, (datos.pct||0)+"%"
+      head: [[
+        "Días hábiles",
+        "Presentes",
+        "Tardanzas",
+        "Ausentes",
+        "Justificados",
+        "% Asistencia"
       ]],
-      styles: { fontSize: 10, halign:"center", cellPadding: 4 },
-      headStyles: { fillColor: C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
-      bodyStyles: { fillColor: C_CREMA, textColor: C_MARRON, fontStyle:"bold", fontSize:12 }
+      body: [[
+        datos.diasHabiles || 0,
+        datos.presentes || 0,
+        datos.tardanzas || 0,
+        datos.ausentes || 0,
+        datos.justificados || 0,
+        (datos.pct || 0) + "%"
+      ]],
+      styles: {
+        fontSize: 10,
+        halign: "center",
+        cellPadding: 4
+      },
+      headStyles: {
+        fillColor: C_MARRON,
+        textColor: [255,255,255],
+        fontStyle: "bold"
+      },
+      bodyStyles: {
+        fillColor: C_CREMA,
+        textColor: C_MARRON,
+        fontStyle: "bold",
+        fontSize: 12
+      }
     });
 
     pdfFooter(doc);
-    doc.save("Reporte_Semanal_" + (datos.lunesStr||"").replace(/\//g,"-") + ".pdf");
+
+    doc.save(
+      "Reporte_Semanal_" +
+      (datos.lunesStr || "").replace(/\//g, "-") +
+      "_al_" +
+      (datos.viernesStr || "").replace(/\//g, "-") +
+      ".pdf"
+    );
+
   });
 }
 
