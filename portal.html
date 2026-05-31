@@ -757,11 +757,17 @@ function cargarRankingTardanzas() {
         "</tr>" +
         "</thead><tbody>";
       lista.forEach(function(a, i){
+        var puesto = i + 1;        
+        if (i > 0 && a.count === lista[i - 1].count) {
+          puesto = "";
+        } else {
+          puesto = i + 1;
+        }        
         var medalla =
-          i === 0 ? "🥇" :
-          i === 1 ? "🥈" :
-          i === 2 ? "🥉" :
-          (i + 1);
+          a.count === lista[0].count ? "🥇" :
+          puesto === 2 ? "🥈" :
+          puesto === 3 ? "🥉" :
+          puesto;
         html +=
           "<tr>" +
           "<td>" + medalla + "</td>" +
