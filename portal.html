@@ -157,14 +157,15 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       placeholder="••••" inputmode="numeric"
       onkeydown="if(event.key==='Enter')validarPin()">
     <button class="btn-login" onclick="validarPin()">Ingresar</button>
+
+      <div class="pin-link">
+        <a href="#" onclick="enviarPinTelegram();return false;">
+          ¿No llegó el PIN? Reenviar a Telegram
+        </a>
+      </div>
+    
     <div id="login-error"></div>
   </div>
-</div>
-
-<div class="pin-link">
-  <a href="#" onclick="enviarPinTelegram();return false;">
-    ¿No llegó el PIN? Reenviar a Telegram
-  </a>
 </div>
 
 <!-- ══ PORTAL ══ -->
