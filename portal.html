@@ -1445,6 +1445,19 @@ function cargarDashboardEjecutivo() {
 
       var pctAnual = cantidad > 0 ? Math.round(suma / cantidad) : 0;
 
+      var mejor = null;
+      var peor = null;
+      var tardanzasAcum = 0;
+      
+      meses.forEach(function(m){
+        if (m.pct > 0) {
+          if (!mejor || m.pct > mejor.pct) mejor = m;
+          if (!peor || m.pct < peor.pct) peor = m;
+        }
+      
+        tardanzasAcum += Number(m.tardanzas || 0);
+      });
+
       var html =
         "<div class='grid-4'>" +
 
@@ -1482,6 +1495,34 @@ function cargarDashboardEjecutivo() {
             "<div class='lbl'>Promedio anual</div>" +
           "</div>" +
 
+        "</div>" +
+
+        "<div class='grid-4'>" +
+        
+          "<div class='stat-card c-azul'>" +
+            "<div class='num'>--</div>" +
+            "<div class='lbl'>Total alumnos</div>" +
+          "</div>" +
+        
+          "<div class='stat-card c-verde'>" +
+            "<div class='num'>" + (mejor ? mejor.pct + "%" : "0%") + "</div>" +
+            "<div class='lbl'>Mejor mes" +
+              (mejor ? "<br>" + mejor.nombre : "") +
+            "</div>" +
+          "</div>" +
+        
+          "<div class='stat-card c-rojo'>" +
+            "<div class='num'>" + (peor ? peor.pct + "%" : "0%") + "</div>" +
+            "<div class='lbl'>Menor mes" +
+              (peor ? "<br>" + peor.nombre : "") +
+            "</div>" +
+          "</div>" +
+        
+          "<div class='stat-card c-naranja'>" +
+            "<div class='num'>" + tardanzasAcum + "</div>" +
+            "<div class='lbl'>Tardanzas acumuladas</div>" +
+          "</div>" +
+        
         "</div>";
 
       document.getElementById("ejecutivo-resultado").innerHTML =
