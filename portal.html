@@ -1722,18 +1722,25 @@ function exportarPDFRanking() {
         startY: y,
         head: [["Puesto", "Alumno", "Grado", "Tardanzas"]],
         body: lista.map(function(a, i) {
+
           var puesto = i + 1;
+        
           if (i > 0 && a.count === lista[i - 1].count) {
             puesto = "";
           }
-
+        
           var medalla =
-            a.count === lista[0].count ? "🥇" :
-            puesto === 2 ? "🥈" :
-            puesto === 3 ? "🥉" :
-            puesto;
-
-          return [medalla, a.nombre, a.grado, a.count];
+            a.count === lista[0].count
+              ? "EMPATE 1°"
+              : puesto;
+        
+          return [
+            medalla,
+            a.nombre,
+            a.grado,
+            a.count
+          ];
+        
         }),
         styles: { fontSize: 8, cellPadding: 2 },
         headStyles: { fillColor: C_MARRON, textColor: [255,255,255], fontStyle: "bold" },
