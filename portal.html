@@ -369,16 +369,27 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     </div>
 
     <div class="seccion" id="sec-tendencia">
-      <div class="sec-title">📈 Tendencia anual de asistencia</div>    
-      <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">Año:</label>
-      <select id="ten-anio" class="buscador">
-        <option value="2026" selected>2026</option>
-        <option value="2025">2025</option>
-      </select>    
-      <button class="btn-accion" onclick="cargarTendencia()">📈 Ver tendencia</button>    
-      <div id="tendencia-loading" class="loading" style="display:none">⏳ Cargando...</div>
-      <div id="tendencia-resultado"></div>
-    </div>
+        <div class="sec-title">📈 Tendencia anual de asistencia</div>      
+        <label style="font-size:11px;color:#555;font-weight:bold;display:block;margin-bottom:4px">
+          Año:
+        </label>      
+        <select id="ten-anio" class="buscador">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+        </select>      
+        <button class="btn-accion" onclick="cargarTendencia()">
+          📈 Ver tendencia
+        </button>      
+        <div id="tendencia-loading" class="loading" style="display:none">
+          ⏳ Cargando...
+        </div>      
+        <div id="tendencia-resultado"></div>      
+        <!-- NUEVO -->
+        <div class="card" style="margin-top:10px">
+          <div class="card-title">📊 Gráfico de tendencia mensual</div>
+          <canvas id="graficoTendencia" height="90"></canvas>
+        </div>      
+      </div>
 
  <!-- NUEVO MODULO POR GRADO -->
 <div id="sec-grado" class="seccion">
@@ -486,6 +497,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 var AS_URL = "https://script.google.com/macros/s/AKfycbzWrZxxcS0z1c1F40bkJW1RdIlydZLabnBB_ZOzX7z1z5aD6GfumQ-bavPaow9cvpbuiA/exec";
 var PIN_KEY  = "portal_pin_" + new Date().toLocaleDateString("es-PE");
 var tabActual = "hoy";
+var chartTendencia = null;
 
 // Datos en memoria
 var datosHoy    = null;
@@ -1179,6 +1191,7 @@ function cargarTendencia() {
 
   document.getElementById("tendencia-loading").style.display = "block";
   document.getElementById("tendencia-resultado").innerHTML = "";
+  dibujarGraficoTendencia(meses);
 
   fetch(AS_URL + "?accion=tendenciaAsistencia&anio=" + anio)
     .then(function(r){ return r.json(); })
@@ -1266,8 +1279,8 @@ html +=
       });
 
       html += "</tbody></table>";
-
       document.getElementById("tendencia-resultado").innerHTML = html;
+      dibujarGraficoTendencia(meses);
     })
     .catch(function(error){
       console.error("ERROR TENDENCIA:", error);
@@ -1278,6 +1291,57 @@ html +=
         "<div class='vacio'>Error al cargar tendencia</div>";
     });
 }  
+
+ function dibujarGraficoTendencia(meses) {
+  var canvas = document.getElementById("graficoTendencia");
+  if (!canvas) return;
+
+  var nombres = meses.map(function(m) {
+    return m.nombre;
+  });
+
+  var porcentajes = meses.map(function(m) {
+    return Number(m.pct || 0);
+  });
+
+  if (chartTendencia) {
+    chartTendencia.destroy();
+  }
+
+  chartTendencia = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels: nombres,
+      datasets: [{
+        label: "% de asistencia",
+        data: porcentajes,
+        borderWidth: 3,
+        tension: 0.35,
+        fill: false,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: {
+            callback: function(value) {
+              return value + "%";
+            }
+          }
+        }
+      }
+    }
+  });
+} 
   
 function renderSugerencias(busq) {
   var res = listaAlumnos.filter(function(a){
@@ -2323,5 +2387,6 @@ function ocultarMsgPDF() {
 }
 
 </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
