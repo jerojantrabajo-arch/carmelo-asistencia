@@ -380,6 +380,9 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
   <button class="btn-accion btn-marron" onclick="cargarReporteGrado()">
     🏫 Ver reporte
   </button>
+  <button class="btn-accion btn-naranja" onclick="exportarPDFGrado()" style="margin-top:6px">
+    📄 Exportar PDF por grado
+  </button>
   <div id="grado-loading" class="loading" style="display:none">
     ⏳ Cargando...
   </div>
@@ -1023,6 +1026,7 @@ function cargarReporteGrado() {
   .then(function(d){
     document.getElementById("grado-loading").style.display = "none";
     var lista = d.grados || [];
+    window._datosGrado = d;
     if (lista.length === 0) {
       document.getElementById("grado-resultado").innerHTML =
         "<div class='vacio'>Sin datos</div>";
@@ -1286,6 +1290,62 @@ function pdfHeader(doc, titulo, subtitulo) {
   return 42; // y inicial del contenido
 }
 
+function exportarPDFGrado() {
+  var datos = window._datosGrado;
+
+  if (!datos || !datos.grados || datos.grados.length === 0) {
+    alert("Primero carga el reporte por grado");
+    return;
+  }
+
+  cargarLibreriasPDF(function() {
+    var doc = new jspdf.jsPDF("p", "mm", "a4");
+
+    var mesNombre = MESES_PDF[parseInt(datos.mes)] + " " + datos.anio;
+    var y = pdfHeader(doc, "REPORTE POR GRADO / AULA", mesNombre);
+
+    doc.autoTable({
+      startY: y,
+      head: [[
+        "Grado",
+        "Alumnos",
+        "Asist.",
+        "Tard.",
+        "Aus.",
+        "Justif.",
+        "%",
+        "Estado"
+      ]],
+      body: datos.grados.map(function(g) {
+        var estado = g.pct >= 90 ? "EXCELENTE" :
+                     g.pct >= 80 ? "BUENO" :
+                     g.pct >= 70 ? "REGULAR" :
+                     "CRITICO";
+
+        return [
+          g.grado,
+          g.totalAlumnos,
+          g.presentes,
+          g.tardanzas,
+          g.ausentes,
+          g.justificados,
+          g.pct + "%",
+          estado
+        ];
+      }),
+      styles: { fontSize: 8, halign: "center", cellPadding: 2 },
+      headStyles: { fillColor: C_MARRON, textColor: [255,255,255], fontStyle: "bold" },
+      columnStyles: { 0: { halign: "left" } },
+      alternateRowStyles: { fillColor: C_CREMA }
+    });
+
+    pdfFooter(doc);
+
+    doc.save("Reporte_Por_Grado_" + mesNombre.replace(" ", "_") + ".pdf");
+  });
+}
+
+  
 function pdfFooter(doc) {
   var pages = doc.internal.getNumberOfPages();
   for (var i = 1; i <= pages; i++) {
