@@ -1191,7 +1191,6 @@ function cargarTendencia() {
 
   document.getElementById("tendencia-loading").style.display = "block";
   document.getElementById("tendencia-resultado").innerHTML = "";
-  dibujarGraficoTendencia(meses);
 
   fetch(AS_URL + "?accion=tendenciaAsistencia&anio=" + anio)
     .then(function(r){ return r.json(); })
