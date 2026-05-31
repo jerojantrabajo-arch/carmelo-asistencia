@@ -190,6 +190,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <button class="nav-tab" onclick="irSeccion('mensual')">📅 Mensual</button>
     <button class="nav-tab" onclick="irSeccion('semanal')">📊 Semanal</button>
     <button class="nav-tab" onclick="irSeccion('tendencia')">📈 Tendencia</button>
+    <button class="nav-tab" onclick="irSeccion('ejecutivo')">📊 Ejecutivo</button>
     <button class="nav-tab" onclick="irSeccion('grado')">🏫 Por grado</button>
     <button class="nav-tab" onclick="irSeccion('faltas')">⚠️ Faltas</button>
     <button class="nav-tab" onclick="irSeccion('alumno')">🔎 Alumno</button>
@@ -393,7 +394,18 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
           <canvas id="graficoTendencia" height="90"></canvas>
         </div>      
       </div>
-
+  
+    <div class="seccion" id="sec-ejecutivo">
+        <div class="sec-title">📊 Dashboard Ejecutivo</div>      
+        <button class="btn-accion" onclick="cargarDashboardEjecutivo()">
+          🔄 Actualizar dashboard
+        </button>      
+        <div id="ejecutivo-loading" class="loading" style="display:none">
+          ⏳ Cargando dashboard...
+        </div>      
+        <div id="ejecutivo-resultado"></div>
+      </div>
+    
  <!-- NUEVO MODULO POR GRADO -->
 <div id="sec-grado" class="seccion">
   <div class="card-titulo">🏫 Reporte por grado</div>
@@ -587,6 +599,7 @@ function irSeccion(id) {
   if (id === "grado") cargarReporteGrado();
   if (id === "ranking") cargarRankingTardanzas();
   if (id === "tendencia") cargarTendencia();
+  if (id === "ejecutivo") cargarDashboardEjecutivo();
 }
 
 // ── SECCIÓN HOY ───────────────────────────────────────────────────
@@ -1348,6 +1361,80 @@ html +=
     }
   });
 } 
+
+function cargarDashboardEjecutivo() {
+  document.getElementById("ejecutivo-loading").style.display = "block";
+  document.getElementById("ejecutivo-resultado").innerHTML = "";
+
+  fetch(AS_URL + "?accion=dashboardEjecutivo")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("ejecutivo-loading").style.display = "none";
+
+      var hoy = d.hoy || {};
+      var mensual = d.mensual || {};
+      var meses = d.anual && d.anual.meses ? d.anual.meses : [];
+
+      var suma = 0;
+      var cantidad = 0;
+
+      meses.forEach(function(m){
+        if (m.pct > 0) {
+          suma += m.pct;
+          cantidad++;
+        }
+      });
+
+      var pctAnual = cantidad > 0 ? Math.round(suma / cantidad) : 0;
+
+      var html =
+        "<div class='grid-4'>" +
+
+          "<div class='stat-card c-verde'>" +
+            "<div class='num'>" + (hoy.presentes || 0) + "</div>" +
+            "<div class='lbl'>Presentes hoy</div>" +
+          "</div>" +
+
+          "<div class='stat-card c-naranja'>" +
+            "<div class='num'>" + (hoy.tardanzas || 0) + "</div>" +
+            "<div class='lbl'>Tardanzas hoy</div>" +
+          "</div>" +
+
+          "<div class='stat-card c-rojo'>" +
+            "<div class='num'>" + (hoy.ausentes || 0) + "</div>" +
+            "<div class='lbl'>Ausentes hoy</div>" +
+          "</div>" +
+
+          "<div class='stat-card c-azul'>" +
+            "<div class='num'>" + (hoy.justificados || 0) + "</div>" +
+            "<div class='lbl'>Justificados hoy</div>" +
+          "</div>" +
+
+        "</div>" +
+
+        "<div class='grid-2'>" +
+
+          "<div class='stat-card c-azul'>" +
+            "<div class='num'>" + (mensual.pct || 0) + "%</div>" +
+            "<div class='lbl'>Asistencia mensual</div>" +
+          "</div>" +
+
+          "<div class='stat-card c-verde'>" +
+            "<div class='num'>" + pctAnual + "%</div>" +
+            "<div class='lbl'>Promedio anual</div>" +
+          "</div>" +
+
+        "</div>";
+
+      document.getElementById("ejecutivo-resultado").innerHTML = html;
+    })
+    .catch(function(error){
+      console.error("ERROR DASHBOARD EJECUTIVO:", error);
+      document.getElementById("ejecutivo-loading").style.display = "none";
+      document.getElementById("ejecutivo-resultado").innerHTML =
+        "<div class='vacio'>Error al cargar dashboard ejecutivo</div>";
+    });
+}
   
 function renderSugerencias(busq) {
   var res = listaAlumnos.filter(function(a){
