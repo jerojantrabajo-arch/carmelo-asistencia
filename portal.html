@@ -379,7 +379,10 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
         </select>      
         <button class="btn-accion" onclick="cargarTendencia()">
           📈 Ver tendencia
-        </button>      
+        </button>
+        <button class="btn-pdf" onclick="exportarPDFTendencia()">
+          📄 Exportar PDF
+        </button>
         <div id="tendencia-loading" class="loading" style="display:none">
           ⏳ Cargando...
         </div>      
@@ -2120,6 +2123,115 @@ function exportarPDFMensual() {
     });
 }
 
+function exportarPDFTendencia() {
+  var anio = document.getElementById("ten-anio").value;
+
+  mostrarMsgPDF("Generando PDF de tendencia...");
+
+  fetch(AS_URL + "?accion=tendenciaAsistencia&anio=" + anio)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      cargarLibreriasPDF(function() {
+
+        var meses = d.meses || [];
+        var datos = meses.filter(function(m){
+          return m.pct > 0;
+        });
+
+        if (datos.length === 0) {
+          ocultarMsgPDF();
+          alert("No hay datos para exportar.");
+          return;
+        }
+
+        var mejor = null;
+        var peor = null;
+        var suma = 0;
+
+        datos.forEach(function(m){
+          if (!mejor || m.pct > mejor.pct) mejor = m;
+          if (!peor || m.pct < peor.pct) peor = m;
+          suma += m.pct;
+        });
+
+        var promedio = Math.round(suma / datos.length);
+
+        var labels = datos.map(function(m){ return m.nombre; });
+        var valores = datos.map(function(m){ return Number(m.pct || 0); });
+
+        renderGraficoBase64("line", labels, [
+          {
+            label: "% de asistencia",
+            data: valores,
+            borderColor: "#0C447C",
+            backgroundColor: "rgba(12,68,124,0.15)",
+            borderWidth: 3,
+            tension: 0.35,
+            fill: true,
+            pointRadius: 5
+          }
+        ], { w:900, h:380, leyenda:true })
+        .then(function(imgGrafico){
+
+          var doc = new jspdf.jsPDF("p","mm","a4");
+          var y = pdfHeader(doc, "TENDENCIA ANUAL DE ASISTENCIA", "Año " + anio);
+
+          doc.autoTable({
+            startY: y,
+            head: [["Mejor mes", "Menor mes", "Promedio anual"]],
+            body: [[
+              mejor.nombre + " — " + mejor.pct + "%",
+              peor.nombre + " — " + peor.pct + "%",
+              promedio + "%"
+            ]],
+            styles: { fontSize:10, halign:"center", cellPadding:4 },
+            headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+            bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:12 }
+          });
+
+          y = doc.lastAutoTable.finalY + 8;
+
+          doc.setFontSize(10);
+          doc.setTextColor(C_MARRON[0], C_MARRON[1], C_MARRON[2]);
+          doc.setFont("helvetica", "bold");
+          doc.text("Gráfico de tendencia mensual", 14, y);
+          y += 5;
+
+          doc.addImage(imgGrafico, "PNG", 14, y, 182, 75);
+          y += 82;
+
+          doc.autoTable({
+            startY: y,
+            head: [["Mes", "Presentes", "Tardanzas", "Ausentes", "Justif.", "%"]],
+            body: meses.map(function(m){
+              return [
+                m.nombre,
+                m.presentes || 0,
+                m.tardanzas || 0,
+                m.ausentes || 0,
+                m.justificados || 0,
+                (m.pct || 0) + "%"
+              ];
+            }),
+            styles: { fontSize:8, cellPadding:2, halign:"center" },
+            headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
+            columnStyles: { 0: { halign:"left" } },
+            alternateRowStyles: { fillColor:C_CREMA }
+          });
+
+          pdfFooter(doc);
+          doc.save("Reporte_Tendencia_" + anio + ".pdf");
+          ocultarMsgPDF();
+
+        });
+      });
+    })
+    .catch(function(error){
+      console.error("ERROR PDF TENDENCIA:", error);
+      ocultarMsgPDF();
+      alert("Error al generar PDF de tendencia");
+    });
+}
 // ══════════════════════════════════════════════════════════════════
 // 4. PDF REPORTE DE FALTAS CON GRÁFICO
 // ══════════════════════════════════════════════════════════════════
