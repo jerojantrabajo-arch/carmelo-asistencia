@@ -642,7 +642,7 @@ function renderReportes(dias) {
       "<span class='rep-dia-stat b-puntual'>✅ " + d.presentes + " presentes</span>" +
       "<span class='rep-dia-stat b-ausente'>❌ " + d.ausentes + " ausentes</span>" +
       "<span class='rep-dia-stat b-tarde'>⏰ " + d.tardanzas + " tardanzas</span>" +
-      "<span class='rep-dia-stat b-justif'>📝 " + (d.justificados||0) + " justif.</span>" +
+      "<span class='rep-dia-stat b-justif'>📝 Justificados: " + (d.justificados||0) + "</span>" +
       "</div></div>";
   }).join("");
 }
@@ -1005,7 +1005,7 @@ function verHistorialAlumno(id, nombre) {
         "<div class='stat-card c-verde'><div class='num' style='font-size:18px'>" + (resumen.presentes||0) + "</div><div class='lbl'>Presentes</div></div>" +
         "<div class='stat-card c-rojo'><div class='num' style='font-size:18px'>" + (resumen.ausentes||0) + "</div><div class='lbl'>Ausentes</div></div>" +
         "<div class='stat-card c-amarillo'><div class='num' style='font-size:18px'>" + (resumen.tardanzas||0) + "</div><div class='lbl'>Tardanzas</div></div>" +
-        "<div class='stat-card c-azul'><div class='num' style='font-size:18px'>" + (resumen.justificados||0) + "</div><div class='lbl'>Justif.</div></div>" +
+        "<div class='stat-card c-azul'><div class='num' style='font-size:18px'>" + (resumen.justificados||0) + "</div><div class='lbl'>Justificados</div></div>" +
         "</div>" +
         "<table class='tabla'><thead><tr><th>Fecha</th><th>Estado</th><th>Hora</th></tr></thead><tbody>" +
         registros.slice(0,30).map(function(r){
