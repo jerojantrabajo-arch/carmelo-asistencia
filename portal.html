@@ -1291,6 +1291,7 @@ function pdfHeader(doc, titulo, subtitulo) {
 }
 
 function exportarPDFGrado() {
+
   var datos = window._datosGrado;
 
   if (!datos || !datos.grados || datos.grados.length === 0) {
@@ -1299,50 +1300,172 @@ function exportarPDFGrado() {
   }
 
   cargarLibreriasPDF(function() {
-    var doc = new jspdf.jsPDF("p", "mm", "a4");
 
-    var mesNombre = MESES_PDF[parseInt(datos.mes)] + " " + datos.anio;
-    var y = pdfHeader(doc, "REPORTE POR GRADO / AULA", mesNombre);
+    var lista = datos.grados;
 
-    doc.autoTable({
-      startY: y,
-      head: [[
-        "Grado",
-        "Alumnos",
-        "Asist.",
-        "Tard.",
-        "Aus.",
-        "Justif.",
-        "%",
-        "Estado"
-      ]],
-      body: datos.grados.map(function(g) {
-        var estado = g.pct >= 90 ? "EXCELENTE" :
-                     g.pct >= 80 ? "BUENO" :
-                     g.pct >= 70 ? "REGULAR" :
-                     "CRITICO";
+    // ===== RESUMEN =====
 
-        return [
-          g.grado,
-          g.totalAlumnos,
-          g.presentes,
-          g.tardanzas,
-          g.ausentes,
-          g.justificados,
-          g.pct + "%",
-          estado
-        ];
-      }),
-      styles: { fontSize: 8, halign: "center", cellPadding: 2 },
-      headStyles: { fillColor: C_MARRON, textColor: [255,255,255], fontStyle: "bold" },
-      columnStyles: { 0: { halign: "left" } },
-      alternateRowStyles: { fillColor: C_CREMA }
+    var mejor = lista[0];
+    var peor = lista[0];
+    var masTarde = lista[0];
+
+    lista.forEach(function(g){
+
+      if (g.pct > mejor.pct) mejor = g;
+      if (g.pct < peor.pct)  peor = g;
+
+      if (g.tardanzas > masTarde.tardanzas) {
+        masTarde = g;
+      }
+
     });
 
-    pdfFooter(doc);
+    // ===== GRAFICO =====
 
-    doc.save("Reporte_Por_Grado_" + mesNombre.replace(" ", "_") + ".pdf");
+    renderGraficoBase64(
+      "bar",
+      lista.map(function(x){ return x.grado; }),
+      [{
+        label:"% Asistencia",
+        data: lista.map(function(x){ return x.pct; }),
+        backgroundColor:"rgba(30,107,46,0.85)"
+      }],
+      {
+        w:900,
+        h:380,
+        leyenda:false
+      }
+    )
+    .then(function(imgGrafico){
+
+      var doc = new jspdf.jsPDF("p","mm","a4");
+
+      var mesNombre =
+        MESES_PDF[parseInt(datos.mes)] +
+        " " +
+        datos.anio;
+
+      var y =
+        pdfHeader(
+          doc,
+          "REPORTE POR GRADO / AULA",
+          mesNombre
+        );
+
+      // ===== RESUMEN EJECUTIVO =====
+
+      doc.autoTable({
+        startY:y,
+        head:[["Indicador","Resultado"]],
+        body:[
+          ["Mejor asistencia", mejor.grado + " (" + mejor.pct + "%)"],
+          ["Menor asistencia", peor.grado + " (" + peor.pct + "%)"],
+          ["Más tardanzas", masTarde.grado + " (" + masTarde.tardanzas + ")"]
+        ],
+        styles:{
+          fontSize:10,
+          cellPadding:3
+        },
+        headStyles:{
+          fillColor:C_MARRON,
+          textColor:[255,255,255]
+        }
+      });
+
+      y = doc.lastAutoTable.finalY + 6;
+
+      // ===== GRAFICO =====
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica","bold");
+      doc.text(
+        "Porcentaje de asistencia por aula",
+        14,
+        y
+      );
+
+      y += 4;
+
+      doc.addImage(
+        imgGrafico,
+        "PNG",
+        14,
+        y,
+        182,
+        70
+      );
+
+      y += 76;
+
+      // ===== TABLA =====
+
+      doc.autoTable({
+        startY:y,
+        head:[[
+          "Grado",
+          "Alumnos",
+          "Asist.",
+          "Tard.",
+          "Aus.",
+          "Justif.",
+          "%",
+          "Estado"
+        ]],
+
+        body:lista.map(function(g){
+
+          var estado =
+            g.pct >= 90 ? "EXCELENTE" :
+            g.pct >= 80 ? "BUENO" :
+            g.pct >= 70 ? "REGULAR" :
+            "CRITICO";
+
+          return [
+            g.grado,
+            g.totalAlumnos,
+            g.presentes,
+            g.tardanzas,
+            g.ausentes,
+            g.justificados,
+            g.pct + "%",
+            estado
+          ];
+
+        }),
+
+        styles:{
+          fontSize:8,
+          halign:"center",
+          cellPadding:2
+        },
+
+        headStyles:{
+          fillColor:C_MARRON,
+          textColor:[255,255,255],
+          fontStyle:"bold"
+        },
+
+        alternateRowStyles:{
+          fillColor:C_CREMA
+        },
+
+        columnStyles:{
+          0:{halign:"left"}
+        }
+      });
+
+      pdfFooter(doc);
+
+      doc.save(
+        "Reporte_Por_Grado_" +
+        mesNombre.replace(" ","_") +
+        ".pdf"
+      );
+
+    });
+
   });
+
 }
 
   
