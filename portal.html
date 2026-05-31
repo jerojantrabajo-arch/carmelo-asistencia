@@ -1682,7 +1682,9 @@ function exportarPDFRanking() {
 
     renderGraficoBase64(
       "bar",
-      top10.map(function(a){ return a.nombre.split(" ")[0]; }),
+      top10.map(function(a){
+        return a.nombre.substring(0,15);
+      }),
       [{
         label: "Tardanzas",
         data: top10.map(function(a){ return a.count || 0; }),
@@ -1726,9 +1728,9 @@ function exportarPDFRanking() {
           }
 
           var medalla =
-            a.count === lista[0].count ? "1" :
-            puesto === 2 ? "2" :
-            puesto === 3 ? "3" :
+            a.count === lista[0].count ? "🥇" :
+            puesto === 2 ? "🥈" :
+            puesto === 3 ? "🥉" :
             puesto;
 
           return [medalla, a.nombre, a.grado, a.count];
