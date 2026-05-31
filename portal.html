@@ -161,6 +161,12 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
   </div>
 </div>
 
+<div class="pin-link">
+  <a href="#" onclick="enviarPinTelegram();return false;">
+    ¿No llegó el PIN? Reenviar a Telegram
+  </a>
+</div>
+
 <!-- ══ PORTAL ══ -->
 <div id="portal">
   <div class="p-header">
@@ -513,6 +519,7 @@ var AS_URL = "https://script.google.com/macros/s/AKfycbzWrZxxcS0z1c1F40bkJW1RdIl
 var PIN_KEY  = "portal_pin_" + new Date().toLocaleDateString("es-PE");
 var tabActual = "hoy";
 var chartTendencia = null;
+var chartEjecutivo = null;
 
 // Datos en memoria
 var datosHoy    = null;
@@ -1362,6 +1369,53 @@ html +=
   });
 } 
 
+function dibujarGraficoEjecutivo(meses) {
+
+  var canvas = document.getElementById("graficoEjecutivo");
+  if (!canvas) return;
+
+  var datos = meses.filter(function(m){
+    return m.pct > 0;
+  });
+
+  var labels = datos.map(function(m){
+    return m.nombre;
+  });
+
+  var valores = datos.map(function(m){
+    return Number(m.pct);
+  });
+
+  if (chartEjecutivo) {
+    chartEjecutivo.destroy();
+  }
+
+  chartEjecutivo = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "% asistencia",
+        data: valores,
+        borderWidth: 3,
+        tension: 0.35,
+        fill: true,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100
+        }
+      }
+    }
+  });
+}
+  
+  
 function cargarDashboardEjecutivo() {
   document.getElementById("ejecutivo-loading").style.display = "block";
   document.getElementById("ejecutivo-resultado").innerHTML = "";
@@ -1429,7 +1483,14 @@ function cargarDashboardEjecutivo() {
 
         "</div>";
 
-      document.getElementById("ejecutivo-resultado").innerHTML = html;
+      document.getElementById("ejecutivo-resultado").innerHTML =
+        html +
+        "<div class='card' style='margin-top:10px'>" +
+          "<div class='card-title'>📈 Tendencia anual</div>" +
+          "<canvas id='graficoEjecutivo' height='90'></canvas>" +
+        "</div>";
+      
+      dibujarGraficoEjecutivo(meses);
     })
     .catch(function(error){
       console.error("ERROR DASHBOARD EJECUTIVO:", error);
