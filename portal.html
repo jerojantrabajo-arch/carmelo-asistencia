@@ -269,7 +269,12 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
         <div id="ranking-loading" class="loading" style="display:none">
           ⏳ Cargando...
         </div>      
-        <div id="ranking-resultado"></div>      
+        <div id="ranking-resultado"></div>  
+        <button class="btn-accion btn-naranja"
+                onclick="exportarPDFRanking()"
+                style="margin-top:6px">
+          📄 Exportar PDF Ranking
+        </button>
       </div>
     
     <!-- ══ SECCIÓN: DÍAS SIN ESCANEO ══ -->
@@ -1654,6 +1659,95 @@ function exportarPDFDia() {
   });
 }
 
+function exportarPDFRanking() {
+  var lista = window._rankingTardanzas || [];
+
+  if (!lista || lista.length === 0) {
+    alert("Primero carga el ranking de tardanzas");
+    return;
+  }
+
+  cargarLibreriasPDF(function() {
+    var top10 = lista.slice(0, 10);
+
+    var totalAlumnos = lista.length;
+    var totalTardanzas = lista.reduce(function(s, a) {
+      return s + Number(a.count || 0);
+    }, 0);
+
+    var maxTardanzas = lista[0].count || 0;
+    var lideres = lista.filter(function(a) {
+      return a.count === maxTardanzas;
+    });
+
+    renderGraficoBase64(
+      "bar",
+      top10.map(function(a){ return a.nombre.split(" ")[0]; }),
+      [{
+        label: "Tardanzas",
+        data: top10.map(function(a){ return a.count || 0; }),
+        backgroundColor: "rgba(245,127,23,0.85)"
+      }],
+      { w: 900, h: 380, leyenda: false }
+    ).then(function(imgGrafico) {
+      var doc = new jspdf.jsPDF("p", "mm", "a4");
+      var y = pdfHeader(doc, "RANKING DE TARDANZAS", "Mayo 2026");
+
+      doc.autoTable({
+        startY: y,
+        head: [["Indicador", "Resultado"]],
+        body: [
+          ["Total alumnos con tardanzas", totalAlumnos],
+          ["Total tardanzas registradas", totalTardanzas],
+          ["Mayor tardanza", maxTardanzas],
+          ["Alumno(s) con mayor tardanza", lideres.map(function(a){ return a.nombre; }).join(", ")]
+        ],
+        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: C_MARRON, textColor: [255,255,255] }
+      });
+
+      y = doc.lastAutoTable.finalY + 6;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("Top 10 alumnos con más tardanzas", 14, y);
+      y += 4;
+
+      doc.addImage(imgGrafico, "PNG", 14, y, 182, 70);
+      y += 76;
+
+      doc.autoTable({
+        startY: y,
+        head: [["Puesto", "Alumno", "Grado", "Tardanzas"]],
+        body: lista.map(function(a, i) {
+          var puesto = i + 1;
+          if (i > 0 && a.count === lista[i - 1].count) {
+            puesto = "";
+          }
+
+          var medalla =
+            a.count === lista[0].count ? "1" :
+            puesto === 2 ? "2" :
+            puesto === 3 ? "3" :
+            puesto;
+
+          return [medalla, a.nombre, a.grado, a.count];
+        }),
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: C_MARRON, textColor: [255,255,255], fontStyle: "bold" },
+        alternateRowStyles: { fillColor: C_CREMA },
+        columnStyles: {
+          0: { halign: "center" },
+          3: { halign: "center", fontStyle: "bold" }
+        }
+      });
+
+      pdfFooter(doc);
+      doc.save("Ranking_Tardanzas_Mayo_2026.pdf");
+    });
+  });
+}
+  
 // ══════════════════════════════════════════════════════════════════
 // 2. PDF REPORTE SEMANAL (sin gráfico)
 // ══════════════════════════════════════════════════════════════════
