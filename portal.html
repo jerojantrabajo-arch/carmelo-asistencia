@@ -1021,6 +1021,7 @@ function cargarReporteGrado() {
   )
   .then(function(r){ return r.json(); })
   .then(function(d){
+    console.log("REPORTE POR GRADO:", d);
     document.getElementById("grado-loading").style.display = "none";
     var lista = d.grados || [];
     if (lista.length === 0) {
@@ -1056,11 +1057,12 @@ function cargarReporteGrado() {
     html += "</tbody></table>";
     document.getElementById("grado-resultado").innerHTML = html;
   })
-  .catch(function(){
-    document.getElementById("grado-loading").style.display = "none";
-    document.getElementById("grado-resultado").innerHTML =
-      "<div class='vacio'>Error al cargar</div>";
-  });
+  .catch(function(error){
+  console.error("ERROR REPORTE POR GRADO:", error);
+  document.getElementById("grado-loading").style.display = "none";
+  document.getElementById("grado-resultado").innerHTML =
+    "<div class='vacio'>Error al cargar reporte por grado</div>";
+});
 }
 
   
