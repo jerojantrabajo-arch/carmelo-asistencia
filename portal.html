@@ -2155,6 +2155,9 @@ function exportarPDFTendencia() {
         });
 
         var promedio = Math.round(suma / datos.length);
+        var variacion = datos.length >= 2
+          ? datos[datos.length - 1].pct - datos[0].pct
+          : 0;
 
         var labels = datos.map(function(m){ return m.nombre; });
         var valores = datos.map(function(m){ return Number(m.pct || 0); });
@@ -2194,10 +2197,23 @@ function exportarPDFTendencia() {
           doc.setFontSize(10);
           doc.setTextColor(C_MARRON[0], C_MARRON[1], C_MARRON[2]);
           doc.setFont("helvetica", "bold");
+          
+          doc.text(
+            "Variación del periodo: " +
+            (variacion >= 0 ? "+" : "") +
+            variacion +
+            " puntos porcentuales",
+            14,
+            y
+          );
+          
+          y += 8;
+          
           doc.text("Gráfico de tendencia mensual", 14, y);
+          
           y += 5;
 
-          doc.addImage(imgGrafico, "PNG", 14, y, 182, 75);
+          doc.addImage(imgGrafico, "PNG", 20, y, 170, 55);
           y += 82;
 
           doc.autoTable({
