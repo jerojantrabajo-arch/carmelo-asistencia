@@ -1334,72 +1334,75 @@ function exportarPDFMensual() {
         var labels = dias.map(function(x){ return x.fecha.substring(0,5); });
 
         renderGraficoBase64("bar", labels, [
-          { label:"Anticipados", data: dias.map(function(x){ return x.anticipados||0; }),
-            backgroundColor:"rgba(46,125,50,0.7)" },
-          { label:"Puntuales",   data: dias.map(function(x){ return x.puntuales||0; }),
+          { label:"Puntuales", data: dias.map(function(x){ return x.puntuales||0; }),
             backgroundColor:"rgba(30,107,46,0.9)" },
-          { label:"Tardanzas",   data: dias.map(function(x){ return x.tardanzas||0; }),
+          { label:"Tardanzas", data: dias.map(function(x){ return x.tardanzas||0; }),
             backgroundColor:"rgba(245,127,23,0.8)" },
-          { label:"Ausentes",    data: dias.map(function(x){ return x.ausentes||0; }),
-            backgroundColor:"rgba(183,28,28,0.8)" }
+          { label:"Ausentes", data: dias.map(function(x){ return x.ausentes||0; }),
+            backgroundColor:"rgba(183,28,28,0.8)" },
+          { label:"Justificados", data: dias.map(function(x){ return x.justificados||0; }),
+            backgroundColor:"rgba(12,68,124,0.8)" }
         ], { w:900, h:380, leyenda:true })
         .then(function(imgBarras) {
-          // Gráfico torta totales
-          var totAnticip  = dias.reduce(function(s,x){ return s+(x.anticipados||0);},0);
-          var totPuntual  = dias.reduce(function(s,x){ return s+(x.puntuales||0);},0);
-          var totTarde    = dias.reduce(function(s,x){ return s+(x.tardanzas||0);},0);
-          var totAusente  = dias.reduce(function(s,x){ return s+(x.ausentes||0);},0);
-          var totJustif   = dias.reduce(function(s,x){ return s+(x.justificados||0);},0);
+
+          var totPuntual = dias.reduce(function(s,x){ return s+(x.puntuales||0);},0);
+          var totTarde   = dias.reduce(function(s,x){ return s+(x.tardanzas||0);},0);
+          var totAusente = dias.reduce(function(s,x){ return s+(x.ausentes||0);},0);
+          var totJustif  = dias.reduce(function(s,x){ return s+(x.justificados||0);},0);
 
           return renderGraficoBase64("doughnut",
-            ["Anticipados","Puntuales","Tardanzas","Ausentes","Justificados"],
-            [{ data:[totAnticip,totPuntual,totTarde,totAusente,totJustif],
-               backgroundColor:["#2E7D32","#1E6B2E","#F57F17","#B71C1C","#0C447C"] }],
+            ["Puntuales","Tardanzas","Ausentes","Justificados"],
+            [{ data:[totPuntual,totTarde,totAusente,totJustif],
+               backgroundColor:["#1E6B2E","#F57F17","#B71C1C","#0C447C"] }],
             { w:500, h:400, leyenda:true }
           ).then(function(imgTorta) {
             var doc = new jspdf.jsPDF("p","mm","a4");
             var mesNombre = MESES_PDF[parseInt(mes)] + " " + anio;
             var y = pdfHeader(doc, "REPORTE MENSUAL DE ASISTENCIA", mesNombre);
 
-            // Resumen numérico
             doc.autoTable({
               startY: y,
-              head: [["Anticipados","Puntuales","Tardanzas","Ausentes","Justificados"]],
-              body: [[totAnticip, totPuntual, totTarde, totAusente, totJustif]],
+              head: [["Puntuales","Tardanzas","Ausentes","Justificados"]],
+              body: [[totPuntual, totTarde, totAusente, totJustif]],
               styles: { fontSize:11, halign:"center", cellPadding:4 },
               headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
               bodyStyles: { fillColor:C_CREMA, textColor:C_MARRON, fontStyle:"bold", fontSize:13 }
             });
+
             y = doc.lastAutoTable.finalY + 6;
 
-            // Gráfico de barras
-            doc.setFontSize(9); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
+            doc.setFontSize(9);
+            doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
             doc.setFont("helvetica","bold");
             doc.text("Asistencia diaria — " + mesNombre, 14, y+4);
             y += 6;
             doc.addImage(imgBarras, "PNG", 14, y, 182, 75);
             y += 80;
 
-            // Gráfico torta
             doc.text("Distribución general del mes", 14, y+4);
             y += 6;
             doc.addImage(imgTorta, "PNG", 55, y, 100, 80);
             y += 86;
 
-            // Tabla detalle por día
             doc.addPage();
             y = 15;
-            doc.setFontSize(10); doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
+            doc.setFontSize(10);
+            doc.setTextColor(C_MARRON[0],C_MARRON[1],C_MARRON[2]);
             doc.setFont("helvetica","bold");
             doc.text("Detalle por día — " + mesNombre, 14, y);
             y += 4;
 
             doc.autoTable({
               startY: y,
-              head: [["Fecha","Anticipados","Puntuales","Tardanzas","Ausentes","Justificados"]],
+              head: [["Fecha","Puntuales","Tardanzas","Ausentes","Justificados"]],
               body: dias.map(function(d){
-                return [d.fecha, d.anticipados||0, d.puntuales||0,
-                        d.tardanzas||0, d.ausentes||0, d.justificados||0];
+                return [
+                  d.fecha,
+                  d.puntuales||0,
+                  d.tardanzas||0,
+                  d.ausentes||0,
+                  d.justificados||0
+                ];
               }),
               styles: { fontSize:8, cellPadding:2, halign:"center" },
               headStyles: { fillColor:C_MARRON, textColor:[255,255,255], fontStyle:"bold" },
@@ -1414,7 +1417,10 @@ function exportarPDFMensual() {
         });
       });
     })
-    .catch(function(){ ocultarMsgPDF(); alert("Error al generar PDF"); });
+    .catch(function(){
+      ocultarMsgPDF();
+      alert("Error al generar PDF");
+    });
 }
 
 // ══════════════════════════════════════════════════════════════════
