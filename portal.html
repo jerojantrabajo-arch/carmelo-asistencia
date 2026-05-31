@@ -62,6 +62,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
 
 /* Cards resumen */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:10px}
 .stat-card{border-radius:10px;padding:12px;text-align:center}
 .stat-card .num{font-size:26px;font-weight:bold}
@@ -1195,8 +1196,54 @@ function cargarTendencia() {
 
       window._datosTendencia = d;
 
-      var html =
-        "<table class='tabla'>" +
+// ===== RESUMEN =====
+var mejor = null;
+var peor = null;
+var suma = 0;
+var cantidad = 0;
+
+meses.forEach(function(m){
+
+  if (m.pct <= 0) return;
+
+  if (!mejor || m.pct > mejor.pct) mejor = m;
+  if (!peor  || m.pct < peor.pct)  peor  = m;
+
+  suma += m.pct;
+  cantidad++;
+
+});
+
+var promedio = cantidad > 0
+  ? Math.round(suma / cantidad)
+  : 0;
+
+var html =
+  "<div class='grid-3' style='margin-bottom:10px'>" +
+
+    "<div class='stat-card c-verde'>" +
+      "<div class='num'>" + (mejor ? mejor.pct : 0) + "%</div>" +
+      "<div class='lbl'>Mejor mes" +
+      (mejor ? "<br>" + mejor.nombre : "") +
+      "</div>" +
+    "</div>" +
+
+    "<div class='stat-card c-rojo'>" +
+      "<div class='num'>" + (peor ? peor.pct : 0) + "%</div>" +
+      "<div class='lbl'>Menor mes" +
+      (peor ? "<br>" + peor.nombre : "") +
+      "</div>" +
+    "</div>" +
+
+    "<div class='stat-card c-azul'>" +
+      "<div class='num'>" + promedio + "%</div>" +
+      "<div class='lbl'>Promedio anual</div>" +
+    "</div>" +
+
+  "</div>";
+
+html +=
+  "<table class='tabla'>" +
         "<thead><tr>" +
         "<th>Mes</th>" +
         "<th>Presentes</th>" +
