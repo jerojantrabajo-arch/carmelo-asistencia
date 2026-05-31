@@ -1021,7 +1021,6 @@ function cargarReporteGrado() {
   )
   .then(function(r){ return r.json(); })
   .then(function(d){
-    console.log("REPORTE POR GRADO:", d);
     document.getElementById("grado-loading").style.display = "none";
     var lista = d.grados || [];
     if (lista.length === 0) {
@@ -1040,20 +1039,38 @@ function cargarReporteGrado() {
       "<th>Aus.</th>" +
       "<th>Justif.</th>" +
       "<th>%</th>" +
+      "<th>Estado</th>" +
       "</tr>" +
       "</thead><tbody>";
     lista.forEach(function(g){
-      html +=
-        "<tr>" +
-        "<td>" + g.grado + "</td>" +
-        "<td>" + g.totalAlumnos + "</td>" +
-        "<td>" + g.presentes + "</td>" +
-        "<td>" + g.tardanzas + "</td>" +
-        "<td>" + g.ausentes + "</td>" +
-        "<td>" + g.justificados + "</td>" +
-        "<td><b>" + g.pct + "%</b></td>" +
-        "</tr>";
-    });
+        var estado = "";
+        var color  = "";      
+        if (g.pct >= 90) {
+          estado = "🟢 EXCELENTE";
+          color = "#1E6B2E";
+        } else if (g.pct >= 80) {
+          estado = "🔵 BUENO";
+          color = "#0C447C";
+        } else if (g.pct >= 70) {
+          estado = "🟡 REGULAR";
+          color = "#F57F17";
+        } else {
+          estado = "🔴 CRÍTICO";
+          color = "#B71C1C";
+        }
+      
+        html +=
+          "<tr>" +
+          "<td>" + g.grado + "</td>" +
+          "<td>" + g.totalAlumnos + "</td>" +
+          "<td>" + g.presentes + "</td>" +
+          "<td>" + g.tardanzas + "</td>" +
+          "<td>" + g.ausentes + "</td>" +
+          "<td>" + g.justificados + "</td>" +
+          "<td><b>" + g.pct + "%</b></td>" +
+          "<td style='font-weight:bold;color:" + color + "'>" + estado + "</td>" +
+          "</tr>";
+      });
     html += "</tbody></table>";
     document.getElementById("grado-resultado").innerHTML = html;
   })
