@@ -482,40 +482,39 @@ function solicitarReenvioPIN() {
 
   btn.style.pointerEvents = "none";
   btn.style.color = "#6c757d";
-  status.textContent = "⏳ Solicitando reenvío...";
-  status.style.color = "#6c757d";
 
-  var urlPeticion = AS_URL + "?accion=reenviarPinTelegram";
+  status.textContent = "⏳ Enviando PIN a Telegram...";
+  status.style.color = "#0C447C";
 
-  window.respuestaReenvioPIN = function(data) {
-    if (data && data.ok) {
-      status.textContent = "✅ ¡PIN reenviado a Telegram!";
-      status.style.color = "#1E6B2E";
-    } else {
-      status.textContent = "❌ Error en el servidor.";
-      status.style.color = "#DC3545";
-    }
+  fetch(AS_URL + "?accion=reenviarPinTelegram")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
 
-    btn.style.pointerEvents = "auto";
-    btn.style.color = "#007BFF";
+      if (d.ok) {
+        status.textContent = "✅ PIN enviado a Telegram";
+        status.style.color = "#1E6B2E";
+      } else {
+        status.textContent = "❌ No se pudo enviar el PIN";
+        status.style.color = "#B71C1C";
+      }
 
-    setTimeout(function() {
-      status.textContent = "";
-    }, 12000);
-  };
+      setTimeout(function(){
+        status.textContent = "";
+        btn.style.pointerEvents = "auto";
+        btn.style.color = "#007BFF";
+      }, 12000);
 
-  var script = document.createElement("script");
-  script.src = urlPeticion + "&callback=respuestaReenvioPIN";
-  console.log("URL JSONP PIN:", script.src);
+    })
+    .catch(function(error){
 
-  script.onerror = function() {
-    status.textContent = "❌ Sin conexión con el servidor.";
-    status.style.color = "#DC3545";
-    btn.style.pointerEvents = "auto";
-    btn.style.color = "#007BFF";
-  };
+      console.error("ERROR PIN:", error);
 
-  document.body.appendChild(script);
+      status.textContent = "❌ Sin conexión al enviar PIN";
+      status.style.color = "#B71C1C";
+
+      btn.style.pointerEvents = "auto";
+      btn.style.color = "#007BFF";
+    });
 }
 
   
