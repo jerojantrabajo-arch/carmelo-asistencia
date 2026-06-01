@@ -475,20 +475,30 @@ function validarPin() {
 }
 
 function solicitarReenvioPIN() {
+  var btn = document.getElementById("btn-reenviar-pin");
   var status = document.getElementById("msg-pin-status");
+
+  if (!btn || !status) return;
+
+  btn.style.pointerEvents = "none";
+  btn.style.color = "#6c757d";
+
   status.textContent = "⏳ Enviando PIN a Telegram...";
   status.style.color = "#0C447C";
+
   var iframe = document.createElement("iframe");
   iframe.style.display = "none";
-  iframe.src =
-    AS_URL +
-    "?accion=reenviarPinTelegram&t=" +
-    Date.now();
+  iframe.src = AS_URL + "?accion=reenviarPinTelegram&t=" + Date.now();
+
   document.body.appendChild(iframe);
+
   setTimeout(function() {
-    status.textContent = "✅ PIN enviado a Telegram";
+    status.textContent = "✅ Solicitud enviada a Telegram";
     status.style.color = "#1E6B2E";
-  }, 1500);
+
+    btn.style.pointerEvents = "auto";
+    btn.style.color = "#007BFF";
+  }, 2000);
 }
 
   
