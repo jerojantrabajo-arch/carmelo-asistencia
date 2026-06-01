@@ -125,15 +125,17 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
       onkeydown="if(event.key==='Enter')validarPin()">
     <button class="btn-pin" onclick="validarPin()">Ingresar</button>
     
-    <div style="text-align: center; margin-top: 15px;">
-      <a id="btn-reenviar-pin"
-         href="https://script.google.com/macros/s/AKfycbwPVWzR0iPNWZMLQ2Lxa5YDjY39pYi3FesDDdawF_M3g0hlBzDeeX3qYPEMVcl7SRAlCA/exec?accion=reenviarPinTelegram"
-         target="_blank"
+    <div class="pin-link" style="text-align:center;margin-top:15px;">
+      <a href="#" onclick="enviarPinTelegram();return false;"
          style="color:#007BFF;text-decoration:underline;font-size:13px;font-weight:bold;cursor:pointer;display:inline-block;padding:5px;">
         ¿No llegó el PIN? Reenviar a Telegram
       </a>
-      <p id="msg-pin-status" style="font-size: 12px; margin-top: 5px; font-weight: bold; min-height: 15px; margin-bottom: 0;"></p>
     </div>
+    
+    <p id="pin-error"
+       style="font-size:12px;margin-top:5px;font-weight:bold;min-height:15px;margin-bottom:0;">
+    </p>
+    
     <div id="pin-error"></div>
   </div>
 </div>
@@ -475,6 +477,58 @@ function validarPin() {
     });
 }
 
+function enviarPinTelegram() {
+  var link = document.querySelector(".pin-link a");
+  var msg = document.getElementById("pin-error");
+
+  if (link) {
+    link.style.pointerEvents = "none";
+    link.style.opacity = "0.6";
+  }
+
+  if (msg) {
+    msg.style.color = "#0C447C";
+    msg.textContent = "Enviando PIN a Telegram...";
+  }
+
+  fetch(AS_URL + "?accion=reenviarPinTelegram")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+
+      if (d.ok) {
+        msg.style.color = "#1E6B2E";
+        msg.textContent = "✅ PIN enviado a Telegram";
+      } else {
+        msg.style.color = "#B71C1C";
+        msg.textContent = "No se pudo enviar el PIN";
+      }
+
+      setTimeout(function(){
+        if (link) {
+          link.style.pointerEvents = "auto";
+          link.style.opacity = "1";
+        }
+      }, 60000);
+
+    })
+    .catch(function(error){
+
+      console.error("ERROR PIN:", error);
+
+      if (msg) {
+        msg.style.color = "#B71C1C";
+        msg.textContent = "Sin conexión al enviar PIN";
+      }
+
+      if (link) {
+        link.style.pointerEvents = "auto";
+        link.style.opacity = "1";
+      }
+
+    });
+}
+
+  
 function solicitarReenvioPIN() {
   var btn = document.getElementById("btn-reenviar-pin");
   var status = document.getElementById("msg-pin-status");
