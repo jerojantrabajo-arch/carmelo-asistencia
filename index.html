@@ -136,7 +136,6 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
        style="font-size:12px;margin-top:5px;font-weight:bold;min-height:15px;margin-bottom:0;">
     </p>
     
-    <div id="pin-error"></div>
   </div>
 </div>
 
@@ -491,102 +490,47 @@ function enviarPinTelegram() {
     msg.textContent = "Enviando PIN a Telegram...";
   }
 
-  fetch(AS_URL + "?accion=reenviarPinTelegram")
-    .then(function(r){ return r.json(); })
-    .then(function(d){
+  var callbackName = "callbackPin_" + Date.now();
 
-      if (d.ok) {
-        msg.style.color = "#1E6B2E";
-        msg.textContent = "✅ PIN enviado a Telegram";
-      } else {
-        msg.style.color = "#B71C1C";
-        msg.textContent = "No se pudo enviar el PIN";
-      }
+  window[callbackName] = function(d) {
+    if (d && d.ok) {
+      msg.style.color = "#1E6B2E";
+      msg.textContent = "✅ PIN enviado a Telegram";
+    } else {
+      msg.style.color = "#B71C1C";
+      msg.textContent = "No se pudo enviar el PIN";
+    }
 
-      setTimeout(function(){
-        if (link) {
-          link.style.pointerEvents = "auto";
-          link.style.opacity = "1";
-        }
-      }, 60000);
+    if (link) {
+      link.style.pointerEvents = "auto";
+      link.style.opacity = "1";
+    }
 
-    })
-    .catch(function(error){
+    delete window[callbackName];
+    script.remove();
+  };
 
-      console.error("ERROR PIN:", error);
+  var script = document.createElement("script");
+  script.src = AS_URL + "?accion=reenviarPinTelegram&callback=" + callbackName;
 
-      if (msg) {
-        msg.style.color = "#B71C1C";
-        msg.textContent = "Sin conexión al enviar PIN";
-      }
+  script.onerror = function() {
+    if (msg) {
+      msg.style.color = "#B71C1C";
+      msg.textContent = "Sin conexión al enviar PIN";
+    }
 
-      if (link) {
-        link.style.pointerEvents = "auto";
-        link.style.opacity = "1";
-      }
+    if (link) {
+      link.style.pointerEvents = "auto";
+      link.style.opacity = "1";
+    }
 
-    });
+    delete window[callbackName];
+    script.remove();
+  };
+
+  document.body.appendChild(script);
 }
-
   
-function solicitarReenvioPIN() {
-  var btn = document.getElementById("btn-reenviar-pin");
-  var status = document.getElementById("msg-pin-status");
-
-  if (btn) {
-    btn.style.pointerEvents = "none";
-    btn.style.opacity = "0.6";
-  }
-
-  if (status) {
-    status.style.color = "#0C447C";
-    status.textContent = "Enviando PIN a Telegram...";
-  }
-
-  fetch(AS_URL + "?accion=reenviarPinTelegram")
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-
-      if (d.ok) {
-        status.style.color = "#1E6B2E";
-        status.textContent = "✅ PIN enviado a Telegram";
-      } else {
-        status.style.color = "#B71C1C";
-        status.textContent = "No se pudo enviar el PIN";
-      }
-
-      setTimeout(function(){
-        if (btn) {
-          btn.style.pointerEvents = "auto";
-          btn.style.opacity = "1";
-        }
-      }, 60000);
-
-    })
-    .catch(function(error){
-
-      console.error("ERROR PIN INDEX:", error);
-
-      if (status) {
-        status.style.color = "#B71C1C";
-        status.textContent = "Sin conexión al enviar PIN";
-      }
-
-      if (btn) {
-        btn.style.pointerEvents = "auto";
-        btn.style.opacity = "1";
-      }
-
-    });
-}
-
-  setTimeout(function() {
-    status.textContent = "✅ Solicitud abierta. Verifique Telegram.";
-    status.style.color = "#1E6B2E";
-    btn.style.pointerEvents = "auto";
-    btn.style.color = "#007BFF";
-  }, 1500);
-}
 
   
 function cerrarSesionKiosco() {
