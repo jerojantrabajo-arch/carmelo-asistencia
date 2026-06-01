@@ -576,6 +576,51 @@ function validarPin() {
     });
 }
 
+function enviarPinTelegram() {
+  var link = document.querySelector(".pin-link a");
+  var msg = document.getElementById("login-error");
+
+  if (link) {
+    link.style.pointerEvents = "none";
+    link.style.opacity = "0.6";
+  }
+
+  if (msg) {
+    msg.style.color = "#0C447C";
+    msg.textContent = "Enviando PIN a Telegram...";
+  }
+
+  fetch(AS_URL + "?accion=reenviarPinTelegram")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.ok) {
+        msg.style.color = "#0C447C";
+        msg.textContent = "✅ PIN enviado a Telegram";
+      } else {
+        msg.style.color = "#B71C1C";
+        msg.textContent = "No se pudo enviar el PIN";
+      }
+
+      setTimeout(function(){
+        if (link) {
+          link.style.pointerEvents = "auto";
+          link.style.opacity = "1";
+        }
+      }, 60000);
+    })
+    .catch(function(){
+      if (msg) {
+        msg.style.color = "#B71C1C";
+        msg.textContent = "Sin conexión al enviar PIN";
+      }
+
+      if (link) {
+        link.style.pointerEvents = "auto";
+        link.style.opacity = "1";
+      }
+    });
+}
+  
 function mostrarPortal() {
   document.getElementById("login").style.display  = "none";
   document.getElementById("portal").style.display = "flex";
@@ -1466,7 +1511,7 @@ function cargarDashboardEjecutivo() {
             "<div class='lbl'>Presentes hoy</div>" +
           "</div>" +
 
-          "<div class='stat-card c-naranja'>" +
+          "<div class='stat-card c-amarillo'>" +
             "<div class='num'>" + (hoy.tardanzas || 0) + "</div>" +
             "<div class='lbl'>Tardanzas hoy</div>" +
           "</div>" +
@@ -1518,7 +1563,7 @@ function cargarDashboardEjecutivo() {
             "</div>" +
           "</div>" +
         
-          "<div class='stat-card c-naranja'>" +
+          "<div class='stat-card c-amarillo'>" +
             "<div class='num'>" + tardanzasAcum + "</div>" +
             "<div class='lbl'>Tardanzas acumuladas</div>" +
           "</div>" +
