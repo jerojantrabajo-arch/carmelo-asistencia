@@ -158,11 +158,16 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       onkeydown="if(event.key==='Enter')validarPin()">
     <button class="btn-login" onclick="validarPin()">Ingresar</button>
 
-      <div class="pin-link">
-        <a href="#" onclick="enviarPinTelegram();return false;">
-          ¿No llegó el PIN? Reenviar a Telegram
-        </a>
-      </div>
+      <div style="text-align:center;margin-top:15px;">
+          <span id="btn-reenviar-pin-portal"
+                onclick="solicitarReenvioPINPortal()"
+                style="color:#007BFF;text-decoration:underline;font-size:13px;font-weight:bold;cursor:pointer;display:inline-block;padding:5px;">
+            ¿No llegó el PIN? Reenviar a Telegram
+          </span>
+        
+          <p id="msg-pin-status-portal"
+             style="font-size:12px;margin-top:5px;font-weight:bold;min-height:15px;margin-bottom:0;"></p>
+        </div>
     
     <div id="login-error"></div>
   </div>
@@ -576,6 +581,51 @@ function validarPin() {
     });
 }
 
+function solicitarReenvioPINPortal() {
+  var btn = document.getElementById("btn-reenviar-pin-portal");
+  var msg = document.getElementById("msg-pin-status-portal");
+
+  if (btn) {
+    btn.style.pointerEvents = "none";
+    btn.style.opacity = "0.6";
+  }
+
+  if (msg) {
+    msg.style.color = "#0C447C";
+    msg.textContent = "Enviando PIN a Telegram...";
+  }
+
+  fetch(AS_URL + "?accion=reenviarPinTelegram")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.ok) {
+        msg.style.color = "#1E6B2E";
+        msg.textContent = "✅ PIN enviado correctamente";
+      } else {
+        msg.style.color = "#B71C1C";
+        msg.textContent = "❌ No se pudo enviar el PIN";
+      }
+
+      setTimeout(function(){
+        if (btn) {
+          btn.style.pointerEvents = "auto";
+          btn.style.opacity = "1";
+        }
+      }, 60000);
+    })
+    .catch(function(){
+      if (msg) {
+        msg.style.color = "#B71C1C";
+        msg.textContent = "❌ Error de conexión";
+      }
+
+      if (btn) {
+        btn.style.pointerEvents = "auto";
+        btn.style.opacity = "1";
+      }
+    });
+}
+  
 function enviarPinTelegram() {
   var link = document.querySelector(".pin-link a");
   var msg = document.getElementById("login-error");
