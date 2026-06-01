@@ -506,6 +506,7 @@ function solicitarReenvioPIN() {
 
   var script = document.createElement("script");
   script.src = urlPeticion + "&callback=respuestaReenvioPIN";
+  console.log("URL JSONP PIN:", script.src);
 
   script.onerror = function() {
     status.textContent = "❌ Sin conexión con el servidor.";
