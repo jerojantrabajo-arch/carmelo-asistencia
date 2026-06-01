@@ -477,55 +477,47 @@ function validarPin() {
 function solicitarReenvioPIN() {
   var btn = document.getElementById("btn-reenviar-pin");
   var status = document.getElementById("msg-pin-status");
-  
+
   if (!btn || !status) return;
 
   btn.style.pointerEvents = "none";
-  btn.style.color = "#6c757d"; 
+  btn.style.color = "#6c757d";
   status.textContent = "⏳ Solicitando reenvío...";
   status.style.color = "#6c757d";
 
   var urlPeticion = AS_URL + "?accion=reenviarPinTelegram";
 
   window.respuestaReenvioPIN = function(data) {
-  if (data.ok) {
-    status.textContent = "✅ ¡PIN reenviado a Telegram!";
-    status.style.color = "#1E6B2E";
-  } else {
-    status.textContent = "❌ Error en el servidor. Intenta de nuevo.";
-    status.style.color = "#DC3545";
-  }
-
-  btn.style.pointerEvents = "auto";
-  btn.style.color = "#007BFF";
-
-  setTimeout(function() {
-    status.textContent = "";
-  }, 12000);
-};
-
-var script = document.createElement("script");
-script.src = urlPeticion + "&callback=respuestaReenvioPIN";
-
-script.onerror = function() {
-  status.textContent = "❌ Sin conexión con el servidor.";
-  status.style.color = "#DC3545";
-  btn.style.pointerEvents = "auto";
-  btn.style.color = "#007BFF";
-};
-
-document.body.appendChild(script);
-  .catch(function(error) {
-    console.error("ERROR REENVIO PIN:", error);
-
-    status.textContent = "❌ Sin conexión con el servidor.";
-    status.style.color = "#DC3545";
+    if (data && data.ok) {
+      status.textContent = "✅ ¡PIN reenviado a Telegram!";
+      status.style.color = "#1E6B2E";
+    } else {
+      status.textContent = "❌ Error en el servidor.";
+      status.style.color = "#DC3545";
+    }
 
     btn.style.pointerEvents = "auto";
     btn.style.color = "#007BFF";
-  });
+
+    setTimeout(function() {
+      status.textContent = "";
+    }, 12000);
+  };
+
+  var script = document.createElement("script");
+  script.src = urlPeticion + "&callback=respuestaReenvioPIN";
+
+  script.onerror = function() {
+    status.textContent = "❌ Sin conexión con el servidor.";
+    status.style.color = "#DC3545";
+    btn.style.pointerEvents = "auto";
+    btn.style.color = "#007BFF";
+  };
+
+  document.body.appendChild(script);
 }
 
+  
 function cerrarSesionKiosco() {
   try {
     localStorage.removeItem(PIN_KEY);
