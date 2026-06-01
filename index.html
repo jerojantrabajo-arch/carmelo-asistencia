@@ -485,14 +485,14 @@ function solicitarReenvioPIN() {
   status.textContent = "⏳ Solicitando reenvío...";
   status.style.color = "#6c757d";
 
-  var urlPeticion = AS_URL + "?accion=reenviarPIN";
+  var urlPeticion = AS_URL + "?accion=reenviarPinTelegram";
 
   fetch(urlPeticion)
     .then(function(response) { 
       return response.json(); 
     })
     .then(function(data) {
-      if (data.success) {
+      if (data.ok) {
         status.textContent = "✅ ¡PIN reenviado a Telegram!";
         status.style.color = "#1E6B2E";
       } else {
