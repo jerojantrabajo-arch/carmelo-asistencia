@@ -483,22 +483,20 @@ function solicitarReenvioPIN() {
   btn.style.pointerEvents = "none";
   btn.style.color = "#6c757d";
 
-  status.textContent = "⏳ Enviando PIN a Telegram...";
+  status.textContent = "⏳ Abriendo solicitud...";
   status.style.color = "#0C447C";
 
-  var iframe = document.createElement("iframe");
-  iframe.style.display = "none";
-  iframe.src = AS_URL + "?accion=reenviarPinTelegram&t=" + Date.now();
-
-  document.body.appendChild(iframe);
+  window.open(
+    AS_URL + "?accion=reenviarPinTelegram&t=" + Date.now(),
+    "_blank"
+  );
 
   setTimeout(function() {
-    status.textContent = "✅ Solicitud enviada a Telegram";
+    status.textContent = "✅ Solicitud abierta. Verifique Telegram.";
     status.style.color = "#1E6B2E";
-
     btn.style.pointerEvents = "auto";
     btn.style.color = "#007BFF";
-  }, 2000);
+  }, 1500);
 }
 
   
