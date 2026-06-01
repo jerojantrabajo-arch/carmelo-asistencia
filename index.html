@@ -507,9 +507,14 @@ function solicitarReenvioPIN() {
     })
     .catch(function(error){
 
-      console.error("ERROR PIN:", error);
-
-      status.textContent = "❌ Sin conexión al enviar PIN";
+              console.error("ERROR PIN COMPLETO:", error);
+            
+              alert(
+                "ERROR:\n" +
+                JSON.stringify(error, Object.getOwnPropertyNames(error))
+              );
+            
+              status.textContent = "❌ Sin conexión al enviar PIN";
       status.style.color = "#B71C1C";
 
       btn.style.pointerEvents = "auto";
