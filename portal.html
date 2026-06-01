@@ -761,13 +761,19 @@ function renderHoy() {
 function cargarDetalle() {
   document.getElementById("detalle-loading").style.display = "block";
   document.getElementById("lista-detalle").innerHTML = "";
+  
   fetch(AS_URL + "?accion=dashboard")
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      datosDet = d.todos || [];
-      document.getElementById("detalle-loading").style.display = "none";
-      renderDetalle();
-    })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+
+    console.log("DETALLE:", d);
+
+    datosDet = d.todos || [];
+
+    document.getElementById("detalle-loading").style.display = "none";
+    renderDetalle();
+  })
+    
     .catch(function(){
       document.getElementById("detalle-loading").textContent = "Error al cargar";
     });
