@@ -763,17 +763,16 @@ function cargarDetalle() {
   document.getElementById("lista-detalle").innerHTML = "";
   
   fetch(AS_URL + "?accion=dashboard")
-  .then(function(r){ return r.json(); })
-  .then(function(d){
+    .then(function(r){ return r.json(); })
+    .then(function(d){
 
-    console.log("DETALLE:", d);
+      console.log("DETALLE:", d);
 
-    datosDet = d.todos || [];
+      datosDet = d.todos || d.registros || d.alumnos || [];
 
-    document.getElementById("detalle-loading").style.display = "none";
-    renderDetalle();
-  })
-    
+      document.getElementById("detalle-loading").style.display = "none";
+      renderDetalle();
+    })
     .catch(function(){
       document.getElementById("detalle-loading").textContent = "Error al cargar";
     });
