@@ -239,12 +239,22 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
     <div class="seccion" id="sec-detalle">
       <input class="buscador" id="buscador" placeholder="🔍 Buscar alumno..." oninput="filtrarDetalle()">
       <div class="mini-tabs">
-        <button class="mini-tab active" onclick="filtrarEstado('TODOS')">Todos</button>
-        <button class="mini-tab" onclick="filtrarEstado('PRESENTE')">✅ Presentes</button>
-        <button class="mini-tab" onclick="filtrarEstado('AUSENTE')">❌ Ausentes</button>
-        <button class="mini-tab" onclick="filtrarEstado('TARDE')">⏰ Tarde</button>
-        <button class="mini-tab" onclick="filtrarEstado('JUSTIFICADO')">📝 Justif.</button>
-      </div>
+          <button class="mini-tab active" onclick="filtrarEstado('TODOS')">
+            Todos (<span id="c-total">0</span>)
+          </button>
+          <button class="mini-tab" onclick="filtrarEstado('PRESENTE')">
+            ✅ Presentes (<span id="c-presentes">0</span>)
+          </button>
+          <button class="mini-tab" onclick="filtrarEstado('AUSENTE')">
+            ❌ Ausentes (<span id="c-ausentes">0</span>)
+          </button>
+          <button class="mini-tab" onclick="filtrarEstado('TARDE')">
+            ⏰ Tarde (<span id="c-tarde">0</span>)
+          </button>
+          <button class="mini-tab" onclick="filtrarEstado('JUSTIFICADO')">
+            📝 Justif. (<span id="c-justif">0</span>)
+          </button>
+        </div>
       <div id="detalle-loading" class="loading">⏳ Cargando...</div>
       <div class="alum-lista" id="lista-detalle" style="max-height:500px"></div>
     </div>
@@ -770,6 +780,8 @@ function cargarDetalle() {
 
       datosDet = d.todos || d.registros || d.alumnos || [];
 
+      actualizarContadoresDetalle();
+
       document.getElementById("detalle-loading").style.display = "none";
       renderDetalle();
     })
@@ -786,6 +798,34 @@ function filtrarEstado(estado) {
 }
 
 function filtrarDetalle() { renderDetalle(); }
+
+function actualizarContadoresDetalle() {
+  var total = datosDet.length;
+
+  var presentes = datosDet.filter(function(a){
+    return a.estado === "PUNTUAL" ||
+           a.estado === "TARDE" ||
+           a.estado === "JUSTIFICADO";
+  }).length;
+
+  var ausentes = datosDet.filter(function(a){
+    return a.estado === "AUSENTE";
+  }).length;
+
+  var tarde = datosDet.filter(function(a){
+    return a.estado === "TARDE";
+  }).length;
+
+  var justif = datosDet.filter(function(a){
+    return a.estado === "JUSTIFICADO";
+  }).length;
+
+  document.getElementById("c-total").textContent = total;
+  document.getElementById("c-presentes").textContent = presentes;
+  document.getElementById("c-ausentes").textContent = ausentes;
+  document.getElementById("c-tarde").textContent = tarde;
+  document.getElementById("c-justif").textContent = justif;
+}
 
 function renderDetalle() {
   var busq = (document.getElementById("buscador").value || "").toUpperCase();
