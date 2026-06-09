@@ -293,6 +293,10 @@ function procesarCola() {
     if (data.ok || data.duplicado) {
       colaEnvio.shift();
       guardarColaEnDisco();
+    
+      if (colaEnvio.length === 0) {
+        localStorage.removeItem("copia_seguridad_cola");
+      }
     } else {
       item.intentos++;
       item.ultimoError = data.mensaje || "Error";
@@ -332,14 +336,18 @@ function guardarColaEnDisco() {
 
 function cargarColaDesdeDisco() {
   var guardado = localStorage.getItem("copia_seguridad_cola");
+
   if (guardado) {
     try {
       var datosRecuperados = JSON.parse(guardado);
+
       if (datosRecuperados && datosRecuperados.length > 0) {
-        colaEnvio = datosRecuperados.concat(colaEnvio); 
-        console.log("🔄 ¡Éxito! Se recuperaron " + datosRecuperados.length + " alumnos pendientes.");
+        colaEnvio = datosRecuperados.concat(colaEnvio);
+
+        console.log("COLA RECUPERADA:", colaEnvio);
+
         actualizarBarraCola();
-        procesarCola(); 
+        procesarCola();
       }
     } catch(e) {
       console.error("Error al recuperar datos del disco:", e);
