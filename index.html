@@ -25,16 +25,86 @@
 body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;display:flex;flex-direction:column}
 
 /* ── PANTALLA PIN ── */
-#pantalla-pin{min-height:100vh;background:var(--marron);display:flex;align-items:center;justify-content:center;padding:20px}
-.pin-card{background:var(--crema);border-radius:16px;padding:32px 24px;width:100%;max-width:320px;text-align:center;border:3px solid var(--naranja)}
-.pin-logo{font-size:48px;margin-bottom:12px}
-.pin-card h1{color:var(--marron);font-size:18px;font-weight:bold;margin-bottom:4px}
-.pin-card p{color:var(--marron-clr);font-size:12px;margin-bottom:24px}
-.pin-card input{width:100%;padding:14px;font-size:28px;text-align:center;border:2px solid var(--naranja-clr);border-radius:10px;letter-spacing:10px;font-family:Arial,monospace;background:white;color:var(--marron);font-weight:bold;margin-bottom:14px}
-.pin-card input:focus{outline:none;border-color:var(--marron)}
-.btn-pin{width:100%;padding:13px;background:var(--marron);color:white;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;margin-bottom:10px;font-family:Arial}
-.btn-pin:active{background:var(--naranja)}
-#pin-error{color:var(--rojo);font-size:13px;min-height:20px}
+#pantalla-pin{
+  min-height:100vh;
+  background:var(--marron);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.pin-card{
+  background:var(--crema);
+  border-radius:16px;
+  padding:32px 24px;
+  width:100%;
+  max-width:320px;
+  text-align:center;
+  border:3px solid var(--naranja);
+}
+
+.pin-logo{
+  font-size:48px;
+  margin-bottom:12px;
+}
+
+.pin-card h1{
+  color:var(--marron);
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:4px;
+}
+
+.pin-card p{
+  color:var(--marron-clr);
+  font-size:12px;
+  margin-bottom:24px;
+}
+
+.pin-card input{
+  width:100%;
+  padding:14px;
+  font-size:28px;
+  text-align:center;
+  border:2px solid var(--naranja-clr);
+  border-radius:10px;
+  letter-spacing:10px;
+  font-family:Arial,monospace;
+  background:white;
+  color:var(--marron);
+  font-weight:bold;
+  margin-bottom:14px;
+}
+
+.pin-card input:focus{
+  outline:none;
+  border-color:var(--marron);
+}
+
+.btn-pin{
+  width:100%;
+  padding:13px;
+  background:var(--marron);
+  color:white;
+  border:none;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-bottom:10px;
+  font-family:Arial;
+}
+
+.btn-pin:active{
+  background:var(--naranja);
+}
+
+#pin-error{
+  color:var(--rojo);
+  font-size:13px;
+  min-height:20px;
+}
 
 /* ── KIOSCO ── */
 #kiosco{display:none;flex-direction:column;min-height:100vh}
