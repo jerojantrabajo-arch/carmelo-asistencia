@@ -233,7 +233,12 @@ var enviandoCola = false;
 
 // ── COLA CON ÉXITO OPTIMISTA (Velocidad Turbo) ──────────────────────
 function agregarCola(id) {
-  colaEnvio.push({ id: id, intentos: 0, ts: Date.now() });
+  colaEnvio.push({
+      id: id,
+      intentos: 0,
+      ts: Date.now(),
+      fechaHoraEscaneo: new Date().toISOString()
+    });
   actualizarBarraCola();
   procesarCola();
 
@@ -273,7 +278,9 @@ function procesarCola() {
   fetch(
     AS_URL +
     "?accion=registrar&id=" + encodeURIComponent(item.id) +
-    "&motivo=NORMAL&dispositivo=" + encodeURIComponent(DISPOSITIVO)
+    "&motivo=NORMAL" +
+    "&dispositivo=" + encodeURIComponent(DISPOSITIVO) +
+    "&ts=" + encodeURIComponent(item.fechaHoraEscaneo || new Date().toISOString())
   )
   .then(function(r){
     return r.json();
