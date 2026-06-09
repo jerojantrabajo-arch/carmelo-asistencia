@@ -40,7 +40,19 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
 #kiosco{display:none;flex-direction:column;min-height:100vh}
 .header{background:var(--marron-osc);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .header-left{display:flex;align-items:center;gap:10px}
-.header-logo{width:40px;height:40px;background:var(--naranja);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.header-logo{
+  width:60px;
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.header-logo img{
+  width:100%;
+  height:auto;
+  display:block;
+}
 .header-info h1{color:var(--crema);font-size:14px;font-weight:bold;line-height:1.2}
 .header-info p{color:var(--naranja-clr);font-size:11px}
 .btn-logout{background:transparent;border:1px solid var(--marron-clr);color:var(--naranja-clr);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:bold;}
@@ -139,17 +151,19 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
   </div>
 </div>
 
-<div id="kiosco">
-  <div class="header">
-    <div class="header-left">
-      <div class="header-logo">🏫</div>
-      <div class="header-info">
-        <h1>El Carmelo de María</h1>
-        <p>Sistema de Asistencia v3.3 — Modo Kiosco</p>
-      </div>
+<div class="header">
+  <div class="header-left">
+    <div class="header-logo">
+      <img src="logo-colegio.png" alt="Logo Colegio">
     </div>
-    <button class="btn-logout" onclick="cerrarSesionKiosco()">🔒 Bloquear</button>
+    <div class="header-info">
+      <h1>El Carmelo de María</h1>
+      <p>Sistema de Asistencia v3.3 — Modo Kiosco</p>
+    </div>
   </div>
+
+  <button class="btn-logout" onclick="cerrarSesionKiosco()">🔒 Bloquear</button>
+</div>
 
   <div class="main">
     <div class="disp-bar" id="disp-bar">Dispositivo: --</div>
