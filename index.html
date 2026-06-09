@@ -272,7 +272,10 @@ function procesarCola() {
   enviandoCola = true;
 
   var item = colaEnvio[0];
-
+  
+  console.log("ITEM COLA:", item);
+  console.log("FECHA ESCANEO:", item.fechaHoraEscaneo);
+  
   guardarColaEnDisco();
 
   fetch(
