@@ -41,14 +41,22 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
 .header{background:var(--marron-osc);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .header-left{display:flex;align-items:center;gap:10px}
 .header-logo{
+  width:75px;
+  height:75px;
   background:#fff;
   border-radius:12px;
   padding:4px;
   display:flex;
   align-items:center;
   justify-content:center;
-  width:70px;
-  height:70px;
+  flex-shrink:0;
+  box-shadow:0 2px 6px rgba(0,0,0,.15);
+}
+
+.header-logo img{
+  width:100%;
+  height:auto;
+  display:block;
 }
 .header-info h1{color:var(--crema);font-size:14px;font-weight:bold;line-height:1.2}
 .header-info p{color:var(--naranja-clr);font-size:11px}
