@@ -207,17 +207,20 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
 </head>
 <body>
 
-<div class="pin-card">
+<div id="pantalla-pin">
+  <div class="pin-card">
 
-  <div class="pin-logo">
-    <img src="logo-colegio.png" alt="Logo Colegio">
-  </div>
+    <div class="pin-logo">
+      <img src="logo-colegio.png" alt="Logo Colegio">
+    </div>
 
-  <h1>El Carmelo de María</h1>
-  <p>Sistema de Asistencia — Acceso restringido</p>
+    <h1>El Carmelo de María</h1>
+    <p>Sistema de Asistencia — Acceso restringido</p>
+
     <input type="password" id="pin-input" maxlength="4"
       placeholder="••••" inputmode="numeric"
       onkeydown="if(event.key==='Enter')validarPin()">
+
     <button class="btn-pin" onclick="validarPin()">Ingresar</button>
     
     <div class="pin-link" style="text-align:center;margin-top:15px;">
