@@ -256,33 +256,60 @@ function agregarCola(id) {
 }
 
 function procesarCola() {
+
   if (enviandoCola || colaEnvio.length === 0) return;
+
+  if (!navigator.onLine) {
+    actualizarBarraCola();
+    return;
+  }
+
   enviandoCola = true;
+
   var item = colaEnvio[0];
 
   guardarColaEnDisco();
 
-  fetch(AS_URL + "?accion=registrar&id=" + encodeURIComponent(item.id) +
-        "&motivo=NORMAL&dispositivo=" + encodeURIComponent(DISPOSITIVO))
-    .then(function(r){ return r.json(); })
-    .then(function(data){
+  fetch(
+    AS_URL +
+    "?accion=registrar&id=" + encodeURIComponent(item.id) +
+    "&motivo=NORMAL&dispositivo=" + encodeURIComponent(DISPOSITIVO)
+  )
+  .then(function(r){
+    return r.json();
+  })
+  .then(function(data){
+
+    if (data.ok || data.duplicado) {
       colaEnvio.shift();
-      guardarColaEnDisco(); 
-      
-      enviandoCola = false;
-      actualizarBarraCola();
-      if (colaEnvio.length > 0) setTimeout(procesarCola, 300);
-    })
-    .catch(function(){
+      guardarColaEnDisco();
+    } else {
       item.intentos++;
-      if (item.intentos >= 10) {
-        colaEnvio.shift();
-        guardarColaEnDisco();
-      }
-      enviandoCola = false;
-      actualizarBarraCola();
-      setTimeout(procesarCola, 5000);
-    });
+      item.ultimoError = data.mensaje || "Error";
+      guardarColaEnDisco();
+    }
+
+    enviandoCola = false;
+
+    actualizarBarraCola();
+
+    if (colaEnvio.length > 0) {
+      setTimeout(procesarCola, 2000);
+    }
+  })
+  .catch(function(){
+
+    item.intentos++;
+    item.ultimoError = "Sin conexión";
+
+    guardarColaEnDisco();
+
+    enviandoCola = false;
+
+    actualizarBarraCola();
+
+    setTimeout(procesarCola, 5000);
+  });
 }
 
 function guardarColaEnDisco() {
@@ -313,11 +340,19 @@ function cargarColaDesdeDisco() {
 function actualizarBarraCola() {
   var bar = document.getElementById("cola-bar");
   if (!bar) return;
+
   if (colaEnvio.length === 0) {
     bar.className = "cola-bar oculta";
+    bar.textContent = "";
+    return;
+  }
+
+  bar.className = "cola-bar";
+
+  if (!navigator.onLine) {
+    bar.textContent = "📴 Sin internet — " + colaEnvio.length + " registro(s) guardado(s)";
   } else {
-    bar.className = "cola-bar";
-    bar.textContent = "⏳ " + colaEnvio.length + " registro(s) sincronizando...";
+    bar.textContent = "⏳ Sincronizando " + colaEnvio.length + " registro(s)...";
   }
 }
 
@@ -442,6 +477,17 @@ window.onload = function() {
   document.getElementById("pantalla-pin").style.display = "flex";
   document.getElementById("pin-input").focus();
 };
+
+// ===== MODO OFFLINE =====
+
+window.addEventListener("online", function() {
+  actualizarBarraCola();
+  procesarCola();
+});
+
+window.addEventListener("offline", function() {
+  actualizarBarraCola();
+});
 
 function validarPin() {
   initAudio();
