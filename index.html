@@ -248,7 +248,24 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh;disp
       <p>Sistema de Asistencia v3.3 — Modo Kiosco</p>
     </div>
   </div>
-  <button class="btn-logout" onclick="cerrarSesionKiosco()">🔒 Bloquear</button>
+
+  <div style="display:flex;gap:8px;">
+    <button class="btn-logout" onclick="cerrarSesionKiosco()">
+      🔒 Bloquear
+    </button>
+
+    <button onclick="abrirPortal()"
+            style="
+              background:#0C447C;
+              color:white;
+              border:none;
+              border-radius:8px;
+              padding:8px 12px;
+              cursor:pointer;
+              font-weight:bold;">
+      📊 Portal
+    </button>
+  </div>
 </div>
 
   <div class="main">
@@ -1015,6 +1032,13 @@ function limpiarTodo() {
   document.getElementById("c-t").textContent = 0;
   document.getElementById("lista-historial").innerHTML = '<div class="h-vacio">Sin registros aún</div>';
   resetear();
+}
+  
+function abrirPortal() {
+  window.open(
+    "https://jerojantrabajo-arch.github.io/carmelo-asistencia/portal.html",
+    "_blank"
+  );
 }
 </script>
 </body>
