@@ -1924,8 +1924,17 @@ function pdfHeader(doc, titulo, subtitulo) {
   doc.setFillColor(C_MARRON[0], C_MARRON[1], C_MARRON[2]);
   doc.rect(0, 0, 210, 22, "F");
   if (logoPDF) {
-    doc.addImage(logoPDF, "PNG", 10, 3, 16, 16);
-  }
+      doc.setFillColor(255,255,255);
+      doc.circle(18, 11, 9, "F");    
+      doc.addImage(
+        logoPDF,
+        "PNG",
+        10,
+        3,
+        16,
+        16
+      );
+    }
   doc.setTextColor(255,248,240);
   doc.setFontSize(13);
   doc.setFont("helvetica","bold");
