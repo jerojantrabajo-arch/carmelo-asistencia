@@ -1852,6 +1852,7 @@ function cargarJustificaciones() {
 // ══════════════════════════════════════════════════════════════════
 
 var PDF_LOADED = false;
+var logoPDF = null;
 
 function cargarLibreriasPDF(callback) {
   if (PDF_LOADED) { callback(); return; }
@@ -1869,7 +1870,7 @@ function cargarLibreriasPDF(callback) {
       s3.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js";
       s3.onload = function() {
         PDF_LOADED = true;
-        callback();
+        cargarLogoPDF(callback);
       };
       document.head.appendChild(s3);
     };
@@ -1889,10 +1890,42 @@ var C_ROJO    = [183, 28, 28];
 var C_AZUL    = [ 12, 68,124];
 var C_AMARILLO= [245,127, 23];
 
+function cargarLogoPDF(callback) {
+  if (logoPDF) {
+    callback();
+    return;
+  }
+
+  var img = new Image();
+  img.crossOrigin = "anonymous";
+
+  img.onload = function() {
+    var canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+
+    logoPDF = canvas.toDataURL("image/png");
+    callback();
+  };
+
+  img.onerror = function() {
+    logoPDF = null;
+    callback();
+  };
+
+  img.src = "logo-colegio.png";
+}
+  
 function pdfHeader(doc, titulo, subtitulo) {
   // Fondo marrón header
   doc.setFillColor(C_MARRON[0], C_MARRON[1], C_MARRON[2]);
   doc.rect(0, 0, 210, 22, "F");
+  if (logoPDF) {
+    doc.addImage(logoPDF, "PNG", 10, 3, 16, 16);
+  }
   doc.setTextColor(255,248,240);
   doc.setFontSize(13);
   doc.setFont("helvetica","bold");
