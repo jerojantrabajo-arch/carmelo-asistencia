@@ -308,6 +308,7 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
       <button class="btn-accion" onclick="cargarReportes()">🔍 Buscar reportes</button>
       <div id="reportes-loading" class="loading" style="display:none">⏳ Cargando...</div>
       <div id="lista-reportes"></div>
+      <div id="detalle-dia-fecha" style="margin-top:10px"></div>
       <button class="btn-accion btn-naranja" onclick="exportarPDFPorFechas(window._diasReportes||[])" style="margin-top:6px">📄 Exportar PDF</button>
     </div>
 
@@ -624,6 +625,7 @@ function validarPin() {
     });
 }
 
+  
 function solicitarReenvioPINPortal() {
   var btn = document.getElementById("btn-reenviar-pin-portal");
   var msg = document.getElementById("msg-pin-status-portal");
@@ -919,22 +921,93 @@ function cargarReportes() {
 }
 
 function renderReportes(dias) {
+
   if (dias.length === 0) {
-    document.getElementById("lista-reportes").innerHTML = "<div class='vacio'>Sin registros en ese período</div>";
+    document.getElementById("lista-reportes").innerHTML =
+      "<div class='vacio'>Sin registros en ese período</div>";
     return;
   }
-  document.getElementById("lista-reportes").innerHTML = dias.map(function(d){
-    return "<div class='rep-dia'>" +
-      "<div class='rep-dia-fecha'>📅 " + d.fecha + " — " + d.diaNombre + "</div>" +
-      "<div class='rep-dia-stats'>" +
-      "<span class='rep-dia-stat b-puntual'>✅ " + d.presentes + " presentes</span>" +
-      "<span class='rep-dia-stat b-ausente'>❌ " + d.ausentes + " ausentes</span>" +
-      "<span class='rep-dia-stat b-tarde'>⏰ " + d.tardanzas + " tardanzas</span>" +
-      "<span class='rep-dia-stat b-justif'>📝 Justificados: " + (d.justificados||0) + "</span>" +
-      "</div></div>";
-  }).join("");
+
+  document.getElementById("lista-reportes").innerHTML =
+    dias.map(function(d){
+
+      return "<div class='rep-dia'>" +
+
+        "<div class='rep-dia-fecha'>📅 " +
+        d.fecha + " — " + d.diaNombre +
+        "</div>" +
+
+        "<div class='rep-dia-stats'>" +
+          "<span class='rep-dia-stat b-puntual'>✅ " +
+          d.presentes + " presentes</span>" +
+
+          "<span class='rep-dia-stat b-ausente'>❌ " +
+          d.ausentes + " ausentes</span>" +
+
+          "<span class='rep-dia-stat b-tarde'>⏰ " +
+          d.tardanzas + " tardanzas</span>" +
+
+          "<span class='rep-dia-stat b-justif'>📝 Justificados: " +
+          (d.justificados || 0) +
+          "</span>" +
+        "</div>" +
+
+        "<button class='btn-accion' " +
+        "style='margin-top:8px;font-size:11px;padding:6px' " +
+        "onclick='verDetalleDia(\"" + d.fecha + "\")'>" +
+        "📋 Ver detalle del día" +
+        "</button>" +
+
+      "</div>";
+
+    }).join("");
 }
 
+function verDetalleDia(fecha){
+  document.getElementById("detalle-dia-fecha").innerHTML =
+    "<div class='loading'>⏳ Cargando detalle...</div>";
+
+  fetch(AS_URL + "?accion=detalleDiaFecha&fecha=" + encodeURIComponent(fecha))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var registros = d.registros || [];
+
+      if (registros.length === 0) {
+        document.getElementById("detalle-dia-fecha").innerHTML =
+          "<div class='vacio'>Sin registros</div>";
+        return;
+      }
+
+      var html = "<div class='sec-title'>📋 Detalle del día " + fecha + "</div>";
+      html += "<table class='tabla'><thead><tr>" +
+              "<th>Hora</th><th>Alumno</th><th>Grado</th><th>Estado</th>" +
+              "</tr></thead><tbody>";
+
+      registros.forEach(function(r){
+        var badge =
+          r.estado === "AUSENTE" ? "b-ausente" :
+          r.estado === "TARDE" ? "b-tarde" :
+          r.estado === "JUSTIFICADO" ? "b-justif" :
+          "b-puntual";
+
+        html += "<tr>" +
+                "<td>" + (r.hora || "") + "</td>" +
+                "<td>" + r.nombre + "</td>" +
+                "<td>" + r.grado + "</td>" +
+                "<td><span class='badge " + badge + "'>" + r.estado + "</span></td>" +
+                "</tr>";
+      });
+
+      html += "</tbody></table>";
+      document.getElementById("detalle-dia-fecha").innerHTML = html;
+    })
+    .catch(function(){
+      document.getElementById("detalle-dia-fecha").innerHTML =
+        "<div class='vacio'>Error al cargar detalle</div>";
+    });
+}
+
+  
 // ── SECCIÓN TARDANZAS ─────────────────────────────────────────────
 function cargarTardanzas() {
   fetch(AS_URL + "?accion=historialTardanzas")
