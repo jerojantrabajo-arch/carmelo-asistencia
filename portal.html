@@ -570,6 +570,7 @@ var PIN_KEY  = "portal_pin_" + new Date().toLocaleDateString("es-PE");
 var tabActual = "hoy";
 var chartTendencia = null;
 var chartEjecutivo = null;
+var detalleDiaActual = null;
 
 // Datos en memoria
 var datosHoy    = null;
@@ -971,6 +972,11 @@ function verDetalleDia(fecha){
     .then(function(r){ return r.json(); })
     .then(function(d){
       var registros = d.registros || [];
+      
+      detalleDiaActual = {
+        fecha: fecha,
+        registros: registros
+      };
 
       if (registros.length === 0) {
         document.getElementById("detalle-dia-fecha").innerHTML =
@@ -1031,7 +1037,13 @@ function verDetalleDia(fecha){
         "<div class='stat-card c-marron' style='margin-bottom:10px'>" +
           "<div class='num'>" + registros.length + "</div>" +
           "<div class='lbl'>Total de registros</div>" +
-        "</div>";
+        "</div>" +
+        
+        "<button class='btn-accion btn-naranja' " +
+        "onclick='exportarPDFDetalleDia()'>" +
+        "📄 Exportar detalle PDF" +
+        "</button>";
+      
       html += "<table class='tabla'><thead><tr>" +
               "<th>Hora</th><th>Alumno</th><th>Grado</th><th>Estado</th>" +
               "</tr></thead><tbody>";
@@ -2265,6 +2277,7 @@ function exportarPDFGrado() {
 }
 
   
+  
 function pdfFooter(doc) {
   var pages = doc.internal.getNumberOfPages();
   for (var i = 1; i <= pages; i++) {
@@ -2383,6 +2396,124 @@ function exportarPDFDia() {
   });
 }
 
+function exportarPDFDetalleDia() {
+  if (!detalleDiaActual || !detalleDiaActual.registros || detalleDiaActual.registros.length === 0) {
+    alert("Primero carga el detalle de un día");
+    return;
+  }
+
+  cargarLibreriasPDF(function() {
+    var doc = new jspdf.jsPDF("p", "mm", "a4");
+
+    var fecha = detalleDiaActual.fecha;
+    var registros = detalleDiaActual.registros;
+
+    var puntuales = registros.filter(function(r){ return r.estado === "PUNTUAL"; }).length;
+    var tardanzas = registros.filter(function(r){ return r.estado === "TARDE"; }).length;
+    var ausentes = registros.filter(function(r){ return r.estado === "AUSENTE"; }).length;
+    var justificados = registros.filter(function(r){ return r.estado === "JUSTIFICADO"; }).length;
+
+    var presentes = puntuales + tardanzas + justificados;
+    var total = puntuales + tardanzas + ausentes + justificados;
+    var pct = total > 0 ? Math.round((presentes / total) * 100) : 0;
+
+    var partes = fecha.split("/");
+    var fObj = new Date(
+      parseInt(partes[2], 10),
+      parseInt(partes[1], 10) - 1,
+      parseInt(partes[0], 10)
+    );
+
+    var diaNombre = fObj.toLocaleDateString("es-PE", { weekday: "long" });
+    diaNombre = diaNombre.charAt(0).toUpperCase() + diaNombre.slice(1);
+
+    var y = pdfHeader(
+      doc,
+      "REPORTE DETALLADO DIARIO",
+      "Fecha: " + fecha + " — " + diaNombre
+    );
+
+    doc.setFillColor(C_CREMA[0], C_CREMA[1], C_CREMA[2]);
+    doc.rect(14, y, 182, 28, "F");
+    doc.setDrawColor(C_NARANJA[0], C_NARANJA[1], C_NARANJA[2]);
+    doc.rect(14, y, 182, 28, "S");
+
+    var cols = ["Total", "Puntuales", "Tardanzas", "Ausentes", "Justif.", "% Asist."];
+    var vals = [total, puntuales, tardanzas, ausentes, justificados, pct + "%"];
+    var colW = 182 / 6;
+
+    cols.forEach(function(c, i) {
+      doc.setFontSize(8);
+      doc.setTextColor(80, 80, 80);
+      doc.setFont("helvetica", "normal");
+      doc.text(c, 14 + i * colW + colW / 2, y + 8, { align: "center" });
+
+      doc.setFontSize(14);
+      doc.setTextColor(C_MARRON[0], C_MARRON[1], C_MARRON[2]);
+      doc.setFont("helvetica", "bold");
+      doc.text(String(vals[i]), 14 + i * colW + colW / 2, y + 20, { align: "center" });
+    });
+
+    y += 34;
+
+    doc.autoTable({
+      startY: y,
+      head: [["#", "Hora", "Alumno", "Grado", "Estado"]],
+      body: registros.map(function(r, i) {
+        return [
+          i + 1,
+          r.hora || "",
+          r.nombre || "",
+          r.grado || "",
+          r.estado || ""
+        ];
+      }),
+      styles: {
+        fontSize: 7,
+        cellPadding: 2
+      },
+      headStyles: {
+        fillColor: C_MARRON,
+        textColor: [255, 255, 255],
+        fontStyle: "bold"
+      },
+      alternateRowStyles: {
+        fillColor: C_CREMA
+      },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        1: { cellWidth: 22 },
+        2: { cellWidth: 95 },
+        3: { cellWidth: 22 },
+        4: { cellWidth: 30 }
+      },
+      didParseCell: function(data) {
+        if (data.section === "body" && data.column.index === 4) {
+          var est = String(data.cell.raw).toUpperCase();
+
+          if (est === "AUSENTE") {
+            data.cell.styles.textColor = C_ROJO;
+            data.cell.styles.fontStyle = "bold";
+          } else if (est === "TARDE") {
+            data.cell.styles.textColor = C_AMARILLO;
+            data.cell.styles.fontStyle = "bold";
+          } else if (est === "JUSTIFICADO") {
+            data.cell.styles.textColor = C_AZUL;
+            data.cell.styles.fontStyle = "bold";
+          } else {
+            data.cell.styles.textColor = C_VERDE;
+            data.cell.styles.fontStyle = "bold";
+          }
+        }
+      }
+    });
+
+    pdfFooter(doc);
+
+    doc.save("Detalle_Dia_" + fecha.replace(/\//g, "-") + ".pdf");
+  });
+}
+  
 function exportarPDFRanking() {
   var lista = window._rankingTardanzas || [];
 
