@@ -994,8 +994,32 @@ function verDetalleDia(fecha){
         return r.estado === "JUSTIFICADO";
       }).length;
       
+      var fechaParts = fecha.split("/");
+      var fechaObj = new Date(
+        parseInt(fechaParts[2], 10),
+        parseInt(fechaParts[1], 10) - 1,
+        parseInt(fechaParts[0], 10)
+      );
+      
+      var diaNombre = fechaObj.toLocaleDateString("es-PE", {
+        weekday: "long"
+      });
+      
+      diaNombre = diaNombre.charAt(0).toUpperCase() + diaNombre.slice(1);
+      
+      var presentesCalc = puntuales + tardanzas + justificados;
+      var totalCalc = puntuales + tardanzas + ausentes + justificados;
+      var asistenciaPct = totalCalc > 0
+        ? Math.round((presentesCalc / totalCalc) * 100)
+        : 0;
+      
       var html = 
-        "<div class='sec-title'>📋 Detalle del día " + fecha + "</div>" +
+        "<div class='sec-title'>📋 Detalle del día " + fecha + " — " + diaNombre + "</div>" +
+      
+        "<div class='stat-card c-marron' style='margin-bottom:10px'>" +
+          "<div class='num'>" + asistenciaPct + "%</div>" +
+          "<div class='lbl'>Asistencia del día</div>" +
+        "</div>" +
       
         "<div class='grid-4' style='margin-bottom:10px'>" +
           "<div class='stat-card c-verde'><div class='num'>" + puntuales + "</div><div class='lbl'>Puntuales</div></div>" +
