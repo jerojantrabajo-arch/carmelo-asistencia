@@ -411,25 +411,17 @@ function procesarCola() {
     "&dispositivo=" + encodeURIComponent(DISPOSITIVO || "Tablet 1") +
     "&ts=" + encodeURIComponent(item.fechaHoraEscaneo || new Date().toISOString());
 
-  console.log("ITEM COLA:", item);
-  console.log("URL ENVIADA:", url);
-
   fetch(url)
     .then(function(r) {
-      console.log("STATUS FETCH:", r.status);
       return r.text();
     })
     .then(function(txt) {
-      console.log("RESPUESTA TEXTO:", txt);
-
       var data;
       try {
         data = JSON.parse(txt);
       } catch(e) {
         throw new Error("La respuesta no es JSON: " + txt);
       }
-
-      console.log("RESPUESTA JSON:", data);
 
       if (data.ok || data.duplicado) {
         colaEnvio.shift();
