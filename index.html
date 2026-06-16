@@ -403,58 +403,67 @@ function procesarCola() {
   enviandoCola = true;
 
   var item = colaEnvio[0];
-  
-  console.log("ITEM COLA:", item);
-  console.log("FECHA ESCANEO:", item.fechaHoraEscaneo);
-  
-  guardarColaEnDisco();
 
-  fetch(
+  var url =
     AS_URL +
-    "?accion=registrar&id=" + encodeURIComponent(item.id) +
+    "?accion=registrar&id=" + encodeURIComponent(item.id || "") +
     "&motivo=NORMAL" +
-    "&dispositivo=" + encodeURIComponent(DISPOSITIVO) +
-    "&ts=" + encodeURIComponent(item.fechaHoraEscaneo || new Date().toISOString())
-  )
-  .then(function(r){
-    return r.json();
-  })
-  .then(function(data){
+    "&dispositivo=" + encodeURIComponent(DISPOSITIVO || "Tablet 1") +
+    "&ts=" + encodeURIComponent(item.fechaHoraEscaneo || new Date().toISOString());
 
-    if (data.ok || data.duplicado) {
-      colaEnvio.shift();
-      guardarColaEnDisco();
-    
-      if (colaEnvio.length === 0) {
-        localStorage.removeItem("copia_seguridad_cola");
+  console.log("ITEM COLA:", item);
+  console.log("URL ENVIADA:", url);
+
+  fetch(url)
+    .then(function(r) {
+      console.log("STATUS FETCH:", r.status);
+      return r.text();
+    })
+    .then(function(txt) {
+      console.log("RESPUESTA TEXTO:", txt);
+
+      var data;
+      try {
+        data = JSON.parse(txt);
+      } catch(e) {
+        throw new Error("La respuesta no es JSON: " + txt);
       }
-    } else {
-      item.intentos++;
-      item.ultimoError = data.mensaje || "Error";
+
+      console.log("RESPUESTA JSON:", data);
+
+      if (data.ok || data.duplicado) {
+        colaEnvio.shift();
+        guardarColaEnDisco();
+
+        if (colaEnvio.length === 0) {
+          localStorage.removeItem("copia_seguridad_cola");
+        }
+      } else {
+        item.intentos = (item.intentos || 0) + 1;
+        item.ultimoError = data.mensaje || "Error desconocido";
+        guardarColaEnDisco();
+      }
+
+      enviandoCola = false;
+      actualizarBarraCola();
+
+      if (colaEnvio.length > 0) {
+        setTimeout(procesarCola, 2000);
+      }
+    })
+    .catch(function(e) {
+      console.error("ERROR FETCH REAL:", e);
+
+      item.intentos = (item.intentos || 0) + 1;
+      item.ultimoError = e.message || "Error de conexión";
+
       guardarColaEnDisco();
-    }
 
-    enviandoCola = false;
+      enviandoCola = false;
+      actualizarBarraCola();
 
-    actualizarBarraCola();
-
-    if (colaEnvio.length > 0) {
-      setTimeout(procesarCola, 2000);
-    }
-  })
-  .catch(function(){
-
-    item.intentos++;
-    item.ultimoError = "Sin conexión";
-
-    guardarColaEnDisco();
-
-    enviandoCola = false;
-
-    actualizarBarraCola();
-
-    setTimeout(procesarCola, 5000);
-  });
+      setTimeout(procesarCola, 5000);
+    });
 }
 
 function guardarColaEnDisco() {
