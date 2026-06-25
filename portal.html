@@ -383,9 +383,15 @@ body{font-family:Arial,sans-serif;background:var(--marron);min-height:100vh}
           Módulo SIATI integrado al Portal Administrativo.
         </p>
     
-        <button class="btn-accion" onclick="alert('SIATI listo para integrar en la siguiente fase')">
-          🧠 Probar módulo SIATI
+        <button class="btn-accion" onclick="cargarSIATIDirectorV1()">
+          🏫 Cargar Dashboard Director SIATI
         </button>
+        
+        <div id="siati-loading" class="loading" style="display:none">
+          ⏳ Cargando Dashboard Director SIATI...
+        </div>
+        
+        <div id="siati-resultado"></div>
       </div>
     </div>
 
@@ -1261,6 +1267,81 @@ function dseEliminar(idx) {
     .catch(function(){});
 }
 
+// ── SIATI - FASE 10.30.2 ─────────────────────────────────────────
+function cargarSIATIDirectorV1() {
+  document.getElementById("siati-loading").style.display = "block";
+  document.getElementById("siati-resultado").innerHTML = "";
+
+  fetch(AS_URL + "?accion=siatiDashboardDirector")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById("siati-loading").style.display = "none";
+      console.log("SIATI DIRECTOR:", d);
+
+      if (!d || d.ok === false) {
+        document.getElementById("siati-resultado").innerHTML =
+          "<div class='vacio'>⚠️ No se pudo cargar SIATI Director</div>";
+        return;
+      }
+
+      renderSIATIDirectorV1(d);
+    })
+    .catch(function(e){
+      console.error("ERROR SIATI DIRECTOR:", e);
+      document.getElementById("siati-loading").style.display = "none";
+      document.getElementById("siati-resultado").innerHTML =
+        "<div class='vacio'>❌ Error de conexión SIATI</div>";
+    });
+}
+
+function renderSIATIDirectorV1(d) {
+  var resumen = d.resumen || d;
+  var prioritarios = d.prioritarios || [];
+
+  var html = "";
+
+  html += "<div class='grid-4' style='margin-top:10px'>";
+  html += "<div class='stat-card c-rojo'><div class='num'>" + (resumen.criticos || 0) + "</div><div class='lbl'>Críticos</div></div>";
+  html += "<div class='stat-card c-amarillo'><div class='num'>" + (resumen.altos || 0) + "</div><div class='lbl'>Altos</div></div>";
+  html += "<div class='stat-card c-azul'><div class='num'>" + (resumen.medios || 0) + "</div><div class='lbl'>Medios</div></div>";
+  html += "<div class='stat-card c-verde'><div class='num'>" + (resumen.bajos || 0) + "</div><div class='lbl'>Bajos</div></div>";
+  html += "</div>";
+
+  html += "<div class='stat-card c-marron' style='margin-bottom:10px'>";
+  html += "<div class='num'>" + (resumen.total || 0) + "</div>";
+  html += "<div class='lbl'>Total estudiantes evaluados</div>";
+  html += "</div>";
+
+  html += "<div class='sec-title' style='margin-top:10px'>🚨 Estudiantes prioritarios SIATI</div>";
+
+  if (!prioritarios || prioritarios.length === 0) {
+    html += "<div class='vacio'>✅ No hay estudiantes críticos en este momento.</div>";
+  } else {
+    html += "<table class='tabla'>";
+    html += "<thead><tr>";
+    html += "<th>#</th>";
+    html += "<th>Alumno</th>";
+    html += "<th>Grado</th>";
+    html += "<th>Índice</th>";
+    html += "<th>Riesgo</th>";
+    html += "</tr></thead><tbody>";
+
+    prioritarios.slice(0, 10).forEach(function(a, i){
+      html += "<tr>";
+      html += "<td>" + (i + 1) + "</td>";
+      html += "<td>" + (a.alumno || a.nombre || a.nombreAlumno || "-") + "</td>";
+      html += "<td>" + (a.grado || "-") + "</td>";
+      html += "<td><b>" + (a.indiceSIATI || a.indice || a.puntaje || "-") + "</b></td>";
+      html += "<td>" + (a.riesgo || "-") + "</td>";
+      html += "</tr>";
+    });
+
+    html += "</tbody></table>";
+  }
+
+  document.getElementById("siati-resultado").innerHTML = html;
+}  
+  
 // ── SECCIÓN KIOSCO ────────────────────────────────────────────────
 function abrirKiosco(num) {
   window.open("https://jerojantrabajo-arch.github.io/carmelo-asistencia/?dispositivo=" + num, "_blank");
